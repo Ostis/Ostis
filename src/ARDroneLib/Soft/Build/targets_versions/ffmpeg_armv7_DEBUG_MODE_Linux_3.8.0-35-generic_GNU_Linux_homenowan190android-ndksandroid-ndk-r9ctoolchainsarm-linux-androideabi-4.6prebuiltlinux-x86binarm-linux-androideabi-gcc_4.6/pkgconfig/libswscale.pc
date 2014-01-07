@@ -1,0 +1,14 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=/home/nowan190/git/Ostis/src/ARDroneLib/FFMPEG/ffmpeg/../../Soft/Build/targets_versions//ffmpeg_armv7_DEBUG_MODE_Linux_3.8.0-35-generic_GNU_Linux_homenowan190android-ndksandroid-ndk-r9ctoolchainsarm-linux-androideabi-4.6prebuiltlinux-x86binarm-linux-androideabi-gcc_4.6
+includedir=/home/nowan190/git/Ostis/src/ARDroneLib/FFMPEG/ffmpeg/../Includes
+
+Name: libswscale
+Description: FFmpeg image rescaling library
+Version: 2.0.0
+Requires: 
+Requires.private: libavutil = 51.9.1
+Conflicts:
+Libs: -L${libdir} -lswscale 
+Libs.private: -lm
+Cflags: -I${includedir}

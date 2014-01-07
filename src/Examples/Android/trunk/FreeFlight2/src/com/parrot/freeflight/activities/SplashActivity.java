@@ -34,7 +34,7 @@ public class SplashActivity
         extends ParrotActivity
         implements Runnable
 {
-    public static final int SPLASH_TIME = 4000;
+    public static final int SPLASH_TIME = 5000;
     public final static String VIDEO_FILE_NAME = "arfreeflight";
     
     private static final String TAG = SplashActivity.class.getSimpleName();

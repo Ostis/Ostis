@@ -41,6 +41,9 @@ else
     TARGET=$1
 fi
 
+# Remove crunch folder that shouldn't be generated
+rm -fR $(find . -type d -name crunch|xargs)
+
 # Launch the build with ant tool
 ant $TARGET -DARDRONE_TARGET_OS=$ARDRONE_TARGET_OS -DARDRONE_LIB_PATH=$ARDRONE_LIB_PATH_FULL -DANDROID_NDK_PATH=$ANDROID_NDK_PATH_FULL -Dsdk.dir=$ANDROID_SDK_PATH_FULL -Dbuild.packaging.debug=$TARGET -DGCC=$GCC
 
