@@ -1109,7 +1109,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name android:baseViewId
+          @attr name com.parrot.freeflight:baseViewId
         */
         public static final int ImageStickView_baseViewId = 0;
         /** Attributes that can be used with a ImageStickView_Layout.
@@ -1142,7 +1142,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:layout_anchorBottom
+          @attr name com.parrot.freeflight:layout_anchorBottom
         */
         public static final int ImageStickView_Layout_layout_anchorBottom = 3;
         /**
@@ -1156,7 +1156,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:layout_anchorLeft
+          @attr name com.parrot.freeflight:layout_anchorLeft
         */
         public static final int ImageStickView_Layout_layout_anchorLeft = 1;
         /**
@@ -1170,7 +1170,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:layout_anchorRight
+          @attr name com.parrot.freeflight:layout_anchorRight
         */
         public static final int ImageStickView_Layout_layout_anchorRight = 2;
         /**
@@ -1184,7 +1184,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:layout_anchorTop
+          @attr name com.parrot.freeflight:layout_anchorTop
         */
         public static final int ImageStickView_Layout_layout_anchorTop = 0;
         /** Attributes that can be used with a ParrotSeekBar.
@@ -1224,7 +1224,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:lowerBoundText
+          @attr name com.parrot.freeflight:lowerBoundText
         */
         public static final int ParrotSeekBar_lowerBoundText = 5;
         /**
@@ -1240,7 +1240,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:lowerValuePaddingLeft
+          @attr name com.parrot.freeflight:lowerValuePaddingLeft
         */
         public static final int ParrotSeekBar_lowerValuePaddingLeft = 2;
         /**
@@ -1255,7 +1255,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:textColor
+          @attr name com.parrot.freeflight:textColor
         */
         public static final int ParrotSeekBar_textColor = 0;
         /**
@@ -1271,7 +1271,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:textPaddingTop
+          @attr name com.parrot.freeflight:textPaddingTop
         */
         public static final int ParrotSeekBar_textPaddingTop = 6;
         /**
@@ -1287,7 +1287,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:textSize
+          @attr name com.parrot.freeflight:textSize
         */
         public static final int ParrotSeekBar_textSize = 1;
         /**
@@ -1301,7 +1301,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:upperBoundText
+          @attr name com.parrot.freeflight:upperBoundText
         */
         public static final int ParrotSeekBar_upperBoundText = 4;
         /**
@@ -1317,7 +1317,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:upperValuePaddingRight
+          @attr name com.parrot.freeflight:upperValuePaddingRight
         */
         public static final int ParrotSeekBar_upperValuePaddingRight = 3;
         /** Attributes that can be used with a ViewPagerIndicator.
@@ -1354,7 +1354,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:activeColor
+          @attr name com.parrot.freeflight:activeColor
         */
         public static final int ViewPagerIndicator_activeColor = 2;
         /**
@@ -1369,7 +1369,7 @@ containing a value of this type.
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:color
+          @attr name com.parrot.freeflight:color
         */
         public static final int ViewPagerIndicator_color = 1;
         /**
@@ -1385,7 +1385,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:gap
+          @attr name com.parrot.freeflight:gap
         */
         public static final int ViewPagerIndicator_gap = 4;
         /**
@@ -1401,7 +1401,7 @@ in (inches), mm (millimeters).
 theme attribute (in the form
 "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
 containing a value of this type.
-          @attr name android:radius
+          @attr name com.parrot.freeflight:radius
         */
         public static final int ViewPagerIndicator_radius = 3;
         /**
@@ -1411,7 +1411,7 @@ containing a value of this type.
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
-          @attr name android:viewPagerIndicatorStyle
+          @attr name com.parrot.freeflight:viewPagerIndicatorStyle
         */
         public static final int ViewPagerIndicator_viewPagerIndicatorStyle = 0;
     };

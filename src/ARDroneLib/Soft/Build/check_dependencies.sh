@@ -37,7 +37,7 @@ else
 	TARGET_DIR=./targets_versions
 fi
 
-SDK_PATH=`echo $0 | sed "C:/Users/Nicolas/Desktop/ARDrone_SDK_2_0_1/ARDroneLib/Soft/Build/check_dependencies.sh::"`
+SDK_PATH=`echo $0 | sed "s:/Soft/Build/check_dependencies.sh::"`
 
 if [ "$1" != "iphone" ] ; then
     if [ "$3" = "cleanAll" ] ; then
