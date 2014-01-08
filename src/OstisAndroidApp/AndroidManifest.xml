@@ -7,12 +7,15 @@
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="16" />
+        
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
         <activity
             android:name="fr.ece.ostis.MainActivity"
             android:label="@string/app_name" >
@@ -24,7 +27,7 @@
         </activity>
 
         <service
-            android:name="fr.ece.ostis.MyService"
+            android:name="fr.ece.ostis.VoiceRecognitionService"
             android:enabled="true"
             android:exported="true" >
         </service>
