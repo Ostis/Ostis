@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<!-- Default (english) string values for the application -->
+<!-- French string values for the application -->
 
 <resources>
 
     <!-- General -->
-    <string name="app_name">Ostis</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="hello_world">Bonjour le monde !</string>
     
     <!-- Home activity -->
-    <string name="home_menu_fly">Fly</string>
+    <string name="home_menu_fly">Piloter</string>
     <string name="home_menu_medias">Gallerie</string>
     <string name="home_menu_commands">Commandes</string>
     <string name="home_menu_about">A propos</string>
-
+    
 </resources>
