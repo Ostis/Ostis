@@ -7,11 +7,6 @@ import fr.ece.ostis.lang.Language;
 
 public class ActionManager {
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-	
 	private ArrayList<Action> actionList;
 	private VRComparator vrComparator;
 	
