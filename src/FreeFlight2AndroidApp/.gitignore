@@ -45,6 +45,7 @@ proguard/
 .metadata
 bin/**
 tmp/**
+obj/**
 tmp/**/*
 *.tmp
 *.bak
