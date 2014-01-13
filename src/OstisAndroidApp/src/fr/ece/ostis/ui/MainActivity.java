@@ -3,6 +3,7 @@ package fr.ece.ostis.ui;
 import fr.ece.ostis.R;
 import fr.ece.ostis.voice.VoiceRecognitionService;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -27,10 +28,36 @@ public class MainActivity extends Activity{
 	
 	// Variables
 	protected boolean _ServiceIsBound;
-	protected Messenger _ServiceMessenger;
+	protected Messenger _MessengerRemote = null;
+	protected Messenger _MessengerLocal = new Messenger(new IncomingHandler());
 	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	/**
+	 * 
+	 * @author Nicolas Schurando
+	 * @version 2014-01-13
+	 */
+    class IncomingHandler extends Handler{
+    	
+    	/**
+    	 * 
+    	 */
+        @Override public void handleMessage(Message _Message) {
+            switch (_Message.what) {
+            case VoiceRecognitionService.MSG_FINISHED_WITH_RESULTS:
+                Log.d("MainActivity", "Recus");
+                break;
+            default:
+                super.handleMessage(_Message);
+            }
+        }
+        
+    }
+	
+	
+	/**
+	 * 
+	 */
+	@Override protected void onCreate(Bundle savedInstanceState) {
 		
 		// Super
 		super.onCreate(savedInstanceState);
@@ -51,7 +78,7 @@ public class MainActivity extends Activity{
 		        _Message.what = VoiceRecognitionService.MSG_START_LISTENING; 
 
 		        try{
-		            _ServiceMessenger.send(_Message);
+		        	_MessengerRemote.send(_Message);
 		        }catch (RemoteException e){
 		            e.printStackTrace();
 		        }
@@ -59,8 +86,11 @@ public class MainActivity extends Activity{
 		});
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	
+	/**
+	 * 
+	 */
+	@Override public boolean onCreateOptionsMenu(Menu menu) {
 		
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -70,8 +100,11 @@ public class MainActivity extends Activity{
 		
 	}
 	
-	@Override
-	protected void onStart(){
+	
+	/**
+	 * 
+	 */
+	@Override protected void onStart(){
 		
 		// Super
 	    super.onStart();
@@ -81,8 +114,11 @@ public class MainActivity extends Activity{
 	    
 	}
 
-	@Override
-	protected void onStop(){
+	
+	/**
+	 * 
+	 */
+	@Override protected void onStop(){
 
 	    // Unbind from voice recognition service
         doUnbindService();
@@ -92,40 +128,63 @@ public class MainActivity extends Activity{
    
 	}
 	
-    @Override
-    protected void onDestroy(){
+	/**
+	 * 
+	 */
+    @Override protected void onDestroy(){
     	
     	// Super
         super.onDestroy();
 
     }
     
-	private final ServiceConnection _ServiceConnection = new ServiceConnection(){
+    /**
+     * 
+     */
+    private final ServiceConnection _ServiceConnection = new ServiceConnection(){
 		
-	    @Override
-	    public void onServiceConnected(ComponentName name, IBinder service){
+    	
+    	/**
+    	 * 
+    	 */
+	    @Override public void onServiceConnected(ComponentName name, IBinder service){
 
-	        _ServiceMessenger = new Messenger(service);
-	        Message _Message = new Message();
-	        _Message.what = VoiceRecognitionService.MSG_START_LISTENING; 
-
+	        _MessengerRemote = new Messenger(service);
+	        Message _Message = Message.obtain(null, VoiceRecognitionService.MSG_REGISTER_CLIENT);
+	        _Message.replyTo = _MessengerLocal;
 	        try{
-	            _ServiceMessenger.send(_Message);
+	        	_MessengerRemote.send(_Message);
 	        }catch (RemoteException e){
+	        	
+	        	// Log
 	            e.printStackTrace();
+	            
+                // In this case the service has crashed before we could even do anything with it
+	            // Nothing
+	            
 	        }
 	    }
 
-	    @Override
-	    public void onServiceDisconnected(ComponentName name){
+	    
+	    /**
+	     * 
+	     */
+	    @Override public void onServiceDisconnected(ComponentName name){
 	    	
+	    	// Log
 	        Log.d("MainActivity", "onServiceDisconnected");
-	        _ServiceMessenger = null;
+	        
+	        // Delete messenger
+	        _MessengerLocal = null;
 	        
 	    }
 
 	};
 
+	
+	/**
+	 * 
+	 */
     protected void doStartService(){
     	
     	// Start service via intent
@@ -134,6 +193,10 @@ public class MainActivity extends Activity{
     	
     }
 
+    
+    /**
+     * 
+     */
 	protected void doBindService(){
     	
     	if(_ServiceIsBound != true){
@@ -147,7 +210,11 @@ public class MainActivity extends Activity{
     	}
     	
     }
+	
 
+	/**
+	 * 
+	 */
 	protected void doUnbindService(){
     	
     	if(_ServiceIsBound != false){
