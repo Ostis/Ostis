@@ -33,23 +33,23 @@ public class SpeechRecognitionService extends Service{
 	/**
 	 *  Audio and speech recognition related variables.
 	 */
-	protected AudioManager _AudioManager; 
-	protected SpeechRecognizer _SpeechRecognizer;
-	protected Intent _SpeechRecognizerIntent;
-	protected boolean _IsListening;
-	protected volatile boolean _IsCountDownOn;
+	protected AudioManager mAudioManager; 
+	protected SpeechRecognizer mSpeechRecognizer;
+	protected Intent mSpeechRecognizerIntent;
+	protected boolean mIsListening;
+	protected volatile boolean mIsCountDownOn;
 	
 	
 	/**
 	 * List of client messengers.
 	 */
-	protected ArrayList<Messenger> _Clients = new ArrayList<Messenger>();
+	protected ArrayList<Messenger> mClientMessengers = new ArrayList<Messenger>();
 	
 	
 	/**
 	 * Target we publish for clients to send messages to IncomingHandler.
 	 */
-	final Messenger _Messenger = new Messenger(new IncomingHandler(this));
+	final Messenger mServiceMessenger = new Messenger(new IncomingHandler(this));
 	
 	
 	/**
@@ -75,14 +75,14 @@ public class SpeechRecognitionService extends Service{
 		Log.d("SpeechRecognitionService", "onCreate");
 		
 		// Retrieve audio manager
-		_AudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		
 		// Retrieve speech recognizer
-		_SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-		_SpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
-		_SpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-		_SpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		_SpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+		mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+		mSpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
+		mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+		mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+		mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
 		
 	}
 	
@@ -96,8 +96,8 @@ public class SpeechRecognitionService extends Service{
 		Log.d("SpeechRecognitionService", "onDestroy");
 
 		// Cleanup
-		if (_IsCountDownOn) _NoSpeechCountDown.cancel();
-		if (_SpeechRecognizer != null) _SpeechRecognizer.destroy();
+		if (mIsCountDownOn) mNoSpeechCountDown.cancel();
+		if (mSpeechRecognizer != null) mSpeechRecognizer.destroy();
 		
 		// Super
 		super.onDestroy();
@@ -114,37 +114,37 @@ public class SpeechRecognitionService extends Service{
 		
 		
 		// Retrieving the speech recognition service reference
-		private final WeakReference<SpeechRecognitionService> _ServiceReference; 
-		IncomingHandler(SpeechRecognitionService service) {
-			_ServiceReference = new WeakReference<SpeechRecognitionService>(service);
+		private final WeakReference<SpeechRecognitionService> mServiceReference; 
+		IncomingHandler(SpeechRecognitionService service){
+			mServiceReference = new WeakReference<SpeechRecognitionService>(service);
 		}
 		
 		
 		/**
 		 * TODO
-		 * @param _Message
+		 * @param message
 		 */
-		@Override public void handleMessage(Message _Message){
+		@Override public void handleMessage(Message message){
 			
 			// Log
-			Log.d("SpeechRecognitionService", "handleMessage | what = " + String.valueOf(_Message.what));
+			Log.d("SpeechRecognitionService", "handleMessage | what = " + String.valueOf(message.what));
 
 			// Retrieve the service instance
-			SpeechRecognitionService _Service = _ServiceReference.get();
+			SpeechRecognitionService service = mServiceReference.get();
 			
 			// React according to the type of object of the message
-			switch(_Message.what){
+			switch(message.what){
 
 				// Register a new client
 				case MSG_REGISTER_CLIENT:
 					Log.d("SpeechRecognitionService", "handleMessage -> New client registered");
-					_Service._Clients.add(_Message.replyTo);
+					service.mClientMessengers.add(message.replyTo);
 					break;
 					
 				// Unregister a client
 				case MSG_UNREGISTER_CLIENT:
 					Log.d("SpeechRecognitionService", "handleMessage -> Removing existing client");
-					_Service._Clients.remove(_Message.replyTo);
+					service.mClientMessengers.remove(message.replyTo);
 					break;
 			
 				// Start listening in background
@@ -152,24 +152,24 @@ public class SpeechRecognitionService extends Service{
 				
 					// Workaround to turn off beep sound
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
-						_Service._AudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
+						service.mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
 					}
 					
 					// Start listening
-					if (!_Service._IsListening){
+					if (!service.mIsListening){
 						Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening (auto)");
-						_Service._SpeechRecognizer.cancel();
+						service.mSpeechRecognizer.cancel();
 						Log.d("SpeechRecognitionService", "handleMessage -> Starting listening");
-						_Service._SpeechRecognizer.startListening(_Service._SpeechRecognizerIntent);
-						_Service._IsListening = true;
+						service.mSpeechRecognizer.startListening(service.mSpeechRecognizerIntent);
+						service.mIsListening = true;
 					}
 					
 					break;
 
 				 case MSG_CANCEL_LISTENING:
 					Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening");
-					_Service._SpeechRecognizer.cancel();
-					_Service._IsListening = false;
+					service.mSpeechRecognizer.cancel();
+					service.mIsListening = false;
 					break;
 			}
 			
@@ -181,7 +181,7 @@ public class SpeechRecognitionService extends Service{
 	/**
 	 * Count down timer for Jelly Bean work around.
 	 */
-	protected CountDownTimer _NoSpeechCountDown = new CountDownTimer(5000, 5000){
+	protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000){
 
 		@Override public void onTick(long millisUntilFinished){
 			
@@ -196,17 +196,17 @@ public class SpeechRecognitionService extends Service{
 			Log.d("SpeechRecognitionService/CountDownTimer", "onFinish");
 			
 			// Reset flag
-			_IsCountDownOn = false;
+			mIsCountDownOn = false;
 			
 			try{
 				
 				// Cancel current listening
-				Message _Message = Message.obtain(null, MSG_CANCEL_LISTENING);
-				_Messenger.send(_Message);
+				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
+				mServiceMessenger.send(message);
 				
 				// Launch new listening
-				_Message = Message.obtain(null, MSG_START_LISTENING);
-				_Messenger.send(_Message);
+				message = Message.obtain(null, MSG_START_LISTENING);
+				mServiceMessenger.send(message);
 				
 			}catch(RemoteException e){
 				e.printStackTrace();
@@ -234,9 +234,9 @@ public class SpeechRecognitionService extends Service{
 			Log.d("SpeechRecognitionService", "onBeginningOfSpeech");
 			
 			// Speech input will be processed, so there is no need for count down anymore
-			if (_IsCountDownOn){
-				_IsCountDownOn = false;
-				if(_NoSpeechCountDown != null) _NoSpeechCountDown.cancel();
+			if (mIsCountDownOn){
+				mIsCountDownOn = false;
+				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
 			}
 			
 		}
@@ -245,9 +245,9 @@ public class SpeechRecognitionService extends Service{
 		/**
 		 * Called whenever more sound has been received. We could use it
 		 * to provide audio feedback to the user, but we don't want that.
-		 * @param _Buffer a buffer containing a sequence of big-endian 16-bit integers representing a single channel audio stream.
+		 * @param buffer a buffer containing a sequence of big-endian 16-bit integers representing a single channel audio stream.
 		 */
-		@Override public void onBufferReceived(byte[] _Buffer){ }
+		@Override public void onBufferReceived(byte[] buffer){ }
 
 		
 		/**
@@ -282,19 +282,19 @@ public class SpeechRecognitionService extends Service{
 			}
 			
 			// Stop the countdown timer
-			if (_IsCountDownOn){
-				_IsCountDownOn = false;
-				if(_NoSpeechCountDown != null) _NoSpeechCountDown.cancel();
+			if (mIsCountDownOn){
+				mIsCountDownOn = false;
+				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
 			}
 			
 			// Set the not listening flag
-			_IsListening = false;
+			mIsListening = false;
 			
 			try{
 				
 				// Start listening again
-				Message _Message = Message.obtain(null, MSG_START_LISTENING);
-				_Messenger.send(_Message);
+				Message message = Message.obtain(null, MSG_START_LISTENING);
+				mServiceMessenger.send(message);
 				
 			}catch (RemoteException e){
 				e.printStackTrace();
@@ -306,18 +306,18 @@ public class SpeechRecognitionService extends Service{
 		
 		/**
 		 * Currently not in use, reserved by Android for adding future events.
-		 * @param _EventType the type of the occurred event.
-		 * @param _Params a Bundle containing the passed parameters.
+		 * @param eventType the type of the occurred event.
+		 * @param params a Bundle containing the passed parameters.
 		 */
-		@Override public void onEvent(int _EventType, Bundle _Params){ }
+		@Override public void onEvent(int eventType, Bundle params){ }
 
 		
 		/**
 		 * Called when partial recognition results are available. We will not be using
 		 * this feature since Google almost always ignores requests for partial results.
-		 * @param _PartialResults
+		 * @param partialResults
 		 */
-		@Override public void onPartialResults(Bundle _PartialResults){
+		@Override public void onPartialResults(Bundle partialResults){
 			
 			// Log
 			Log.d("SpeechRecognitionService", "onPartialResults");
@@ -327,15 +327,15 @@ public class SpeechRecognitionService extends Service{
 		
 		/**
 		 * Called when the endpointer is ready for the user to start speaking.
-		 * @param _Params
+		 * @param params
 		 */
-		@Override public void onReadyForSpeech(Bundle _Params){
+		@Override public void onReadyForSpeech(Bundle params){
 			
 			
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
-				_IsCountDownOn = true;
-				_NoSpeechCountDown.start();
-				_AudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
+				mIsCountDownOn = true;
+				mNoSpeechCountDown.start();
+				mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
 			}
 			
 			// Log
@@ -346,54 +346,49 @@ public class SpeechRecognitionService extends Service{
 		
 		/**
 		 * TODO
-		 * @param _Results
+		 * @param results
 		 */
-		@Override public void onResults(Bundle _Results){
+		@Override public void onResults(Bundle results){
 			
 			// Log
 			Log.d("SpeechRecognitionService", "onResults");
 			
 			// Extract results
-			ArrayList<String> _Sentences = _Results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-			float[] _Scores = _Results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+			ArrayList<String> sentences = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+			float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
 
 			// Log
-			for (int i = 0; i < _Sentences.size(); i++){
-				Log.d("SpeechRecognitionService", "onResults | " + _Sentences.get(i) + " (" + String.valueOf(_Scores[i])+")");
+			for (int i = 0; i < sentences.size(); i++){
+				Log.d("SpeechRecognitionService", "onResults | " + sentences.get(i) + " (" + String.valueOf(scores[i])+")");
 			}
 			
 			// Set the not listening flag
-			_IsListening = false;
+			mIsListening = false;
 			
 			try{
 				
 				// Start listening again
-				Message _Message = Message.obtain(null, MSG_START_LISTENING);
-				_Messenger.send(_Message);
+				Message message = Message.obtain(null, MSG_START_LISTENING);
+				mServiceMessenger.send(message);
 				
 			}catch (RemoteException e){
 				e.printStackTrace();
 			}
 			
 			// Send results to clients
-			Bundle _MessageBundle = new Bundle();
-			_MessageBundle.putStringArrayList("SpeechRecognitionResult", _Sentences);
-			for(int _ClientsIterator = _Clients.size() - 1; _ClientsIterator >= 0; _ClientsIterator--) {
+			Bundle messageBundle = new Bundle();
+			Message message = Message.obtain(null, MSG_FINISHED_WITH_RESULTS);
+			messageBundle.putStringArrayList("SpeechRecognitionResult", sentences);
+			message.setData(messageBundle);
+			for(int clientsIterator = mClientMessengers.size() - 1; clientsIterator >= 0; clientsIterator--){
+				
+				// Try to send the message to the client. If an exception is raised, it means that the client is dead. So we should
+				// remove it from the list. We are going through the list from back to front so this is safe to do inside the loop.
 				try{
-					
-					// Prepare a message and send it
-					Message _Message = Message.obtain(null, MSG_FINISHED_WITH_RESULTS);
-					_Message.setData(_MessageBundle);
-					_Clients.get(_ClientsIterator).send(_Message);
-					
-				}catch(RemoteException _Exception){
-					
-					// Log
-					_Exception.printStackTrace();
-					
-	                // The client is dead. Remove it from the list. We are going through the list from back to front so this is safe to do inside the loop.
-					_Clients.remove(_ClientsIterator);
-					
+					mClientMessengers.get(clientsIterator).send(message);
+				}catch(RemoteException e){
+					e.printStackTrace();
+	                mClientMessengers.remove(clientsIterator);
 				}
 			}
 			
@@ -414,9 +409,9 @@ public class SpeechRecognitionService extends Service{
 	 * for sending messages to the service.
 	 */
 	@Override
-	public IBinder onBind(Intent _intent){
+	public IBinder onBind(Intent intent){
 		Log.d("SpeechRecognitionService", "onBind");
-		return _Messenger.getBinder();
+		return mServiceMessenger.getBinder();
 	}
 	
 }

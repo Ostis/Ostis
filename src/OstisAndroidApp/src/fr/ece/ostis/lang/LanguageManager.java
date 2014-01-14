@@ -17,7 +17,7 @@ public class LanguageManager {
 	/**
 	 * The list of supported locales.
 	 */
-    protected static final List<Locale> _SupportedLocales = Arrays.asList(Locale.ENGLISH, Locale.FRENCH);
+    protected static final List<Locale> mSupportedLocales = Arrays.asList(Locale.ENGLISH, Locale.FRENCH);
     
     
     /**
@@ -38,7 +38,7 @@ public class LanguageManager {
      */
     public Locale getCurrentLocale(){
     	if(mCurrentLocale == null) mCurrentLocale = Locale.getDefault();
-    	if(!_SupportedLocales.contains(mCurrentLocale)) mCurrentLocale = mDefaultLocale;
+    	if(!mSupportedLocales.contains(mCurrentLocale)) mCurrentLocale = mDefaultLocale;
     	return mCurrentLocale;
     }
 
