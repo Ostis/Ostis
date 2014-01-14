@@ -2,6 +2,8 @@ package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
+
 
 /**
  * TODO
@@ -13,30 +15,31 @@ public class ComposedAction extends Action{
 	/**
 	 * TODO
 	 */
-	private ArrayList<Action> _ActionList;
+	private ArrayList<Action> mActionList;
 	
 	
 	/**
-	 * TODO
-	 * @param _Name
-	 * @param _Language
-	 * @param _VocalCommand
+	 * 
+	 * @param id
+	 * @param name
+	 * @param vocalCommands
 	 */
-	public ComposedAction(String _Name, String _Language, String _VocalCommand){
-		super(_Name, _Language, _VocalCommand);
-		_ActionList = new ArrayList<Action>();
+	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands){
+		super(id, name, vocalCommands);
+		mActionList = new ArrayList<Action>();
 	}
-
+	
 	
 	/**
-	 * TODO
-	 * @param _Name
-	 * @param _Language
-	 * @param _VocalCommands
+	 * 
+	 * @param id
+	 * @param name
+	 * @param vocalCommands
+	 * @param actions
 	 */
-	public ComposedAction(String _Name, String _Language, HashMap<String, String> _VocalCommands){
-		super(_Name, _VocalCommands);
-		_ActionList = new ArrayList<Action>();
+	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands, ArrayList<Action> actions){
+		super(id, name, vocalCommands);
+		mActionList = actions;
 	}
 	
 	
@@ -45,35 +48,35 @@ public class ComposedAction extends Action{
 	 * @return
 	 */
 	public ArrayList<Action> getActions(){
-		return _ActionList;
+		return mActionList;
 	}
 	
 	
 	/**
 	 * TODO
-	 * @param _Action
+	 * @param position
+	 * @param action
 	 */
-	public void appendAction(Action _Action){
-		_ActionList.add(_Action);
+	public void addAction(Action action, int position){
+		mActionList.add(position, action);
 	}
 	
 	
 	/**
 	 * TODO
-	 * @param _Position
-	 * @param _Action
+	 * @param action
 	 */
-	public void addAction(int _Position, Action _Action){
-		_ActionList.add(_Position, _Action);
+	public void appendAction(Action action){
+		mActionList.add(action);
 	}
 	
 	
 	/**
 	 * TODO
-	 * @param _Action
+	 * @param action
 	 */
-	public void removeAction(Action _Action){
-		_ActionList.remove(_Action);
+	public void removeAction(Action action){
+		mActionList.remove(action);
 	}
 	
 	
@@ -81,8 +84,8 @@ public class ComposedAction extends Action{
 	 * TODO
 	 */
 	@Override public void run(){
-		for (Action a : _ActionList)
-			a.run();	
+		for (Action action : mActionList)
+			action.run();
 	}
 	
 }

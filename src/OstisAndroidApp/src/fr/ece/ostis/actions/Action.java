@@ -1,6 +1,7 @@
 package fr.ece.ostis.actions;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
  * TODO
@@ -9,76 +10,72 @@ import java.util.HashMap;
  */
 public abstract class Action{
 	
-	/**
-	 * TODO
-	 */
-	private String _Name;
-	
 	
 	/**
-	 * TODO
+	 * TODO Docu
 	 */
-	private HashMap<String, String> _VocalCommands = null;
+	protected int mId;
+	protected String mName;
+	private HashMap<Locale, String> mVocalCommands = null;
 	
 	
 	/**
-	 * TODO
-	 * @param _Name
-	 * @param _VocalCommands
+	 * TODO Docu
+	 * @param id
+	 * @param name
+	 * @param vocalCommands
 	 */
-	public Action(String _Name, HashMap<String, String> _VocalCommands){
-		this._Name = _Name;
-		this._VocalCommands = _VocalCommands;
+	public Action(int id, String name, HashMap<Locale, String> vocalCommands){
+		this.mId = id;
+		this.mName = name;
+		this.mVocalCommands = vocalCommands;
 	}
-	
-	
-	/**
-	 * TODO
-	 * @param _Name
-	 * @param _VocalCommand
-	 */
-	public Action(String _Name, String _Language, String _VocalCommand){
-		this._Name = _Name;
-		this._VocalCommands = new HashMap<String, String>();
-		this._VocalCommands.put(_Language, _VocalCommand);
+
+
+	public int getId() {
+		return mId;
 	}
+
+
+	public void setId(int id) {
+		this.mId = id;
+	}	
 	
 	
 	/**
-	 * TODO
+	 * TODO Docu
 	 * @return
 	 */
 	public String getName(){
-		return _Name; 
+		return mName; 
+	}
+	
+	/**
+	 * TODO Docu
+	 * @param _Name
+	 */
+	public void setName(String _Name){
+		this.mName = _Name;
+	}
+	
+	
+	/**
+	 * TODO Docu
+	 * @param locale
+	 * @return
+	 */
+	public String getVocalCommand(Locale locale){ 
+		return mVocalCommands.get(locale);
 	}
 	
 	
 	/**
 	 * TODO
-	 * @param _Name
+	 * @param language
+	 * @param vocalCommand
 	 */
-	public void setName(String _Name){
-		this._Name = _Name;
-	}
-	
-	
-	/**
-	 * 
-	 * @param _Language
-	 * @return
-	 */
-	public String getVocalCommand(String _Language){ 
-		return _VocalCommands.get(_Language);
-	}
-	
-	
-	/**
-	 * 
-	 * @param _Language
-	 * @param _VocalCommand
-	 */
-	public void setVocalCommand(String _Language, String _VocalCommand){ 
-		_VocalCommands.put(_Language, _VocalCommand);
+	public void setVocalCommand(Locale locale, String vocalCommand){ 
+		mVocalCommands.put(locale, vocalCommand);
 	}
 	
 	
@@ -93,6 +90,6 @@ public abstract class Action{
 	 * @return A string containing the name of the action.
 	 */
 	@Override public String toString(){
-		return _Name;
-	}	
+		return mName;
+	}
 }

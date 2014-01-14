@@ -1,8 +1,10 @@
 package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
-import fr.ece.ostis.lang.Language;
+import android.content.Context;
+
 import fr.ece.ostis.speech.SpeechComparator;
 
 
@@ -11,33 +13,27 @@ import fr.ece.ostis.speech.SpeechComparator;
  * @author Paul Bouillon
  * @version 2014-01-14
  */
-public class ActionManager {
+public class ActionManager{
 	
 	
 	/**
 	 * TODO
 	 */
-	private ArrayList<Action> _ActionList;
-	
-	
-	/**
-	 * TODO
-	 */
-	private SpeechComparator _SpeechComparator;
+	private ArrayList<Action> mActionList;
+	private SpeechComparator mSpeechComparator;
+	private Locale mLocale = null;
+	protected Context mContext = null;
 	
 	
 	/**
 	 * 
+	 * @param context
 	 */
-	private String _Language = null; // TODO Implement, and change.
-	
-	
-	/**
-	 * TODO
-	 */
-	public ActionManager(){
-		_ActionList = new ArrayList<Action>();
-		_SpeechComparator = new SpeechComparator(Language.Value);
+	public ActionManager(Locale locale, Context context){
+		mLocale = locale;
+		mContext = context;
+		mActionList = new ArrayList<Action>();
+		mSpeechComparator = new SpeechComparator(mLocale);
 	}
 	
 	
@@ -46,7 +42,7 @@ public class ActionManager {
 	 * @return
 	 */
 	public ArrayList<Action> getActions(){
-		return _ActionList;
+		return mActionList;
 	}
 	
 	
@@ -55,7 +51,7 @@ public class ActionManager {
 	 * @param action
 	 */
 	public void addAction(Action action){
-		_ActionList.add(action);
+		mActionList.add(action);
 	}
 	
 	
@@ -64,7 +60,7 @@ public class ActionManager {
 	 * @param action
 	 */
 	public void removeAction(Action action){
-		_ActionList.remove(action);
+		mActionList.remove(action);
 	}
 	
 	
@@ -86,17 +82,50 @@ public class ActionManager {
 	
 	/**
 	 * TODO
-	 * @param _Command
+	 * @param command
 	 */
-	public void runCommand(String _Command){
+	public void runCommand(String command){
 		
-		for (Action _Action : _ActionList){
-			if (_SpeechComparator.areSimilar(_Command, _Action.getVocalCommand(_Language))){
-				_Action.run();
+		for (Action action : mActionList){
+			if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
+				action.run();
 				return;
 			}
 		}
 		
+	}
+
+	
+	/**
+	 * TODO
+	 */
+	public void saveComposedActions(){
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	public void loadComposedActions(){
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param id
+	 * @return
+	 */
+	public Action getActionById(int id){
+		
+		for (Action action : mActionList){
+			if (action.getId() == id){
+				return action;
+			}
+		}
+		
+		return null; // TODO Maybe throw custom excetion ?
 	}
 	
 }
