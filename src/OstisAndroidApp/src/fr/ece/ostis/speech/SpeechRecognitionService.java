@@ -49,7 +49,7 @@ public class SpeechRecognitionService extends Service{
 	/**
 	 * Target we publish for clients to send messages to IncomingHandler.
 	 */
-	final Messenger mServiceMessenger = new Messenger(new IncomingHandler(this));
+	final Messenger mServiceMessenger = new Messenger(new IncomingMessageFromClientHandler(this));
 	
 	
 	/**
@@ -110,12 +110,12 @@ public class SpeechRecognitionService extends Service{
 	 * @author Nicolas Schurando
 	 * @version 2014-01-13
 	 */
-	protected static class IncomingHandler extends Handler{
+	protected static class IncomingMessageFromClientHandler extends Handler{
 		
 		
 		// Retrieving the speech recognition service reference
 		private final WeakReference<SpeechRecognitionService> mServiceReference; 
-		IncomingHandler(SpeechRecognitionService service){
+		IncomingMessageFromClientHandler(SpeechRecognitionService service){
 			mServiceReference = new WeakReference<SpeechRecognitionService>(service);
 		}
 		

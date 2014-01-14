@@ -15,30 +15,25 @@ public abstract class Action{
 	 * TODO Docu
 	 */
 	protected int mId;
-	protected String mName;
-	private HashMap<Locale, String> mVocalCommands = null;
-	
-	
+	protected String mName; // TODO Change names for different languages ?
+	protected HashMap<Locale, String> mVocalCommands = null;
+
+
 	/**
-	 * TODO Docu
-	 * @param id
-	 * @param name
-	 * @param vocalCommands
+	 * TODO
+	 * @return
 	 */
-	public Action(int id, String name, HashMap<Locale, String> vocalCommands){
-		this.mId = id;
-		this.mName = name;
-		this.mVocalCommands = vocalCommands;
-	}
-
-
-	public int getId() {
+	public int getId(){
 		return mId;
 	}
 
 
-	public void setId(int id) {
-		this.mId = id;
+	/**
+	 * TODO
+	 * @param id
+	 */
+	public void setId(int id){
+		mId = id;
 	}	
 	
 	
@@ -52,10 +47,10 @@ public abstract class Action{
 	
 	/**
 	 * TODO Docu
-	 * @param _Name
+	 * @param name
 	 */
-	public void setName(String _Name){
-		this.mName = _Name;
+	public void setName(String name){
+		mName = name;
 	}
 	
 	
@@ -80,7 +75,7 @@ public abstract class Action{
 	
 	
 	/**
-	 * TODO
+	 * Executes the given action.
 	 */
 	public abstract void run();
 	

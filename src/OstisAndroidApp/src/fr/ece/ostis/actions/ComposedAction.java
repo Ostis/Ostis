@@ -10,7 +10,7 @@ import java.util.Locale;
  * @author Paul Bouillon
  * @version 2014-01-14
  */
-public class ComposedAction extends Action{
+public abstract class ComposedAction extends Action{
 	
 	/**
 	 * TODO
@@ -19,26 +19,30 @@ public class ComposedAction extends Action{
 	
 	
 	/**
-	 * 
+	 * TODO Docu
 	 * @param id
 	 * @param name
 	 * @param vocalCommands
 	 */
 	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands){
-		super(id, name, vocalCommands);
+		mId = id;
+		mName = name;
+		mVocalCommands = vocalCommands;
 		mActionList = new ArrayList<Action>();
 	}
 	
 	
 	/**
-	 * 
+	 * TODO Docu
 	 * @param id
 	 * @param name
 	 * @param vocalCommands
 	 * @param actions
 	 */
 	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands, ArrayList<Action> actions){
-		super(id, name, vocalCommands);
+		mId = id;
+		mName = name;
+		mVocalCommands = vocalCommands;
 		mActionList = actions;
 	}
 	
