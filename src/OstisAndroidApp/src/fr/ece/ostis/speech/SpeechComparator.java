@@ -1,88 +1,104 @@
-package fr.ece.ostis.actions;
+package fr.ece.ostis.speech;
+
+import java.util.Locale;
 
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.language.Soundex;
 
-import fr.ece.ostis.lang.Language;
 
-public class VRComparator {
+/**
+ * TODO
+ * @author Paul Bouillon
+ * @version 2014-01-14
+ */
+public class SpeechComparator {
 
-	private int language;
 	
+	/**
+	 * TODO
+	 */
+	private Locale mLocale;
 	private static Soundex soundex;
 	private static char[] FR_MAPPING = "01230970072455012683090808".toCharArray();
 	
-	//constructor: argument (Language.FRENCH or Language.ENGLISH)
-	public VRComparator(int lang)
-	{
-		language = lang;
-		if (language == Language.FRENCH) soundex = new Soundex(FR_MAPPING);
+	
+	/**
+	 * TODO
+	 * @param locale
+	 */
+	public SpeechComparator(Locale locale){
+		mLocale = locale;
+		if (mLocale == Locale.FRENCH) soundex = new Soundex(FR_MAPPING);
 		else soundex = new Soundex();
 	}
 	
-	//return true if both strings show similarities
-	public boolean areSimilar(String chaineVR, String chaineDB)
-	{
-		if (language == Language.FRENCH)
-		{
-			try {
+
+	/**
+	 * Returns true if both strings show similarities.
+	 * @param chaineVR
+	 * @param chaineDB
+	 * @return
+	 */
+	public boolean areSimilar(String chaineVR, String chaineDB){
+		
+		try{
+			if(mLocale == Locale.FRENCH){
 				return soundex.difference(genererPhonetic(chaineVR), genererPhonetic(chaineDB)) == 4;
-			} catch (EncoderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} 
-		else {
-			try {
+			}else{
 				return soundex.difference(chaineVR, chaineDB) == 4;
-			} catch (EncoderException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+		}catch(EncoderException exception){
+			exception.printStackTrace();
 		}
+		
 		return false;
+		
 	}
 	
-	private static String genererPhonetic(String str) {
-		/**
-		 * @author E. Bergï¿½
-		 * @translated from PHP to Java by Christophe Schutz
-		 * http://www.roudoudou.com/php/Phonetic.java
-		 */
+	
+	/**
+	 * TODO
+	 * http://www.roudoudou.com/php/Phonetic.java
+	 * @author E. Bergé
+	 * @translated from PHP to Java by Christophe Schutz
+	 * @param str
+	 * @return
+	 */
+	private String genererPhonetic(String str) {
 		
-		String[][] conversion = {{"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"},
-				 {"ï¿½","A"}, {"ï¿½","A"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"},
-				 {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"},
-				 {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"}, {"ï¿½","ï¿½"},
-				 {"ï¿½","ï¿½"}, {"ï¿½","S"}};
+		String[][] conversion = {{"é","É"}, {"è","È"}, {"ë","Ë"}, {"ê","Ê"}, {"á","Á"}, {"â","Â"}, {"à","À"},
+				 {"Ä","A"}, {"Â","A"}, {"å","Å"}, {"ã","Ã"}, {"æ","Æ"}, {"ï","Ï"}, {"î","Î"},
+				 {"ì","Ì"}, {"í","Í"}, {"ô","Ô"}, {"ö","Ö"}, {"ò","Ò"}, {"ó","Ó"}, {"õ","Õ"},
+				 {"ø","Ø"}, {"œ","Œ"}, {"ú","Ú"}, {"ù","Ù"}, {"û","Û"}, {"ü","Ü"}, {"ç","Ç"},
+				 {"ñ","Ñ"}, {"ß","S"}};
 		String soundex = str;
 		for (int i = 0; i<conversion.length; i++) {
 			soundex = soundex.replaceAll(conversion[i][0], conversion[i][1]);
 		}
 
 		
-		conversion = new String[][]{{"ï¿½", "E"}, {"ï¿½", "E"}, {"ï¿½", "E"}, {"ï¿½", "E"}, {"ï¿½", "A"}, {"ï¿½", "A"}, {"ï¿½", "A"}, {"ï¿½", "A"}, {"ï¿½", "A"},
-				 {"ï¿½", "A"}, {"ï¿½", "E"}, {"ï¿½", "I"}, {"ï¿½", "I"}, {"ï¿½", "I"}, {"ï¿½", "I"}, {"ï¿½", "O"}, {"ï¿½", "O"}, {"ï¿½", "O"},
-				 {"ï¿½", "O"}, {"ï¿½", "O"}, {"ï¿½", "O"}, {"ï¿½", "OEU"}, {"ï¿½", "U"}, {"ï¿½", "U"}, {"ï¿½", "U"}, {"ï¿½", "U"}, {"ï¿½", "N"},
-				 {"ï¿½", "S"}, {"ï¿½", "E"}};
+		conversion = new String[][]{{"É", "E"}, {"È", "E"}, {"Ë", "E"}, {"Ê", "E"}, {"Á", "A"}, {"À", "A"}, {"Ä", "A"}, {"Â", "A"}, {"Å", "A"},
+				 {"Ã", "A"}, {"Æ", "E"}, {"Ï", "I"}, {"Î", "I"}, {"Ì", "I"}, {"Í", "I"}, {"Ô", "O"}, {"Ö", "O"}, {"Ò", "O"},
+				 {"Ó", "O"}, {"Õ", "O"}, {"Ø", "O"}, {"Œ", "OEU"}, {"Ú", "U"}, {"Ù", "U"}, {"Û", "U"}, {"Ü", "U"}, {"Ñ", "N"},
+				 {"Ç", "S"}, {"¿", "E"}};
 
 		for (int i = 0; i<conversion.length; i++) {
 			soundex = soundex.replaceAll(conversion[i][0], conversion[i][1]);
 		}
-		//$sIn = utf8_decode($sIn);						// Selon votre implï¿½mentation, vous aurez besoin de dï¿½coder ce qui arrive pour les caractï¿½res spï¿½ciaux
+		//$sIn = utf8_decode($sIn);						// Selon votre implémentation, vous aurez besoin de décoder ce qui arrive pour les caractères spéciaux
 		
 
-		soundex = soundex.toUpperCase();
+		soundex = soundex.toUpperCase(mLocale);
 		soundex = soundex.replaceAll("[^A-Z]","");
 
-		String soundexBack = soundex;// on sauve le code (utilisï¿½ pour les mots trï¿½s courts)
+		String soundexBack = soundex;// on sauve le code (utilisé pour les mots très courts)
 
-		soundex = soundex.replaceAll( "O[O]+", "OU"); 	// prï¿½ traitement OO... -> OU
-		soundex = soundex.replaceAll( "SAOU", "SOU"); 	// prï¿½ traitement SAOU -> SOU
-		soundex = soundex.replaceAll( "OES", "OS"); 	// prï¿½ traitement OES -> OS
-		soundex = soundex.replaceAll( "CCH", "K"); 		// prï¿½ traitement CCH -> K
+		soundex = soundex.replaceAll( "O[O]+", "OU"); 	// pré traitement OO... -> OU
+		soundex = soundex.replaceAll( "SAOU", "SOU"); 	// pré traitement SAOU -> SOU
+		soundex = soundex.replaceAll( "OES", "OS"); 	// pré traitement OES -> OS
+		soundex = soundex.replaceAll( "CCH", "K"); 		// pré traitement CCH -> K
 		soundex = soundex.replaceAll( "CC([IYE])", "KS$1"); // CCI CCY CCE
-		soundex = soundex.replaceAll( "(.)\\1", "$1"); 	// supression des rï¿½pï¿½titions
+		soundex = soundex.replaceAll( "(.)\\1", "$1"); 	// supression des répétitions
 		// quelques cas particuliers
 		if (soundex.equals("CD")) return(soundex);
 		if (soundex.equals("BD")) return(soundex);
@@ -102,18 +118,18 @@ public class VRComparator {
 		if (soundex.equals("RIZ")) return("RI");
 		if (soundex.equals("RAZ")) return("RA");
 
-		// prï¿½-traitements
+		// pré-traitements
 		soundex = soundex.replaceAll( "OIN[GT]$", "OIN");									// terminaisons OING -> OIN
 		soundex = soundex.replaceAll( "E[RS]$", "E"); 										// supression des terminaisons infinitifs et participes pluriels
-		soundex = soundex.replaceAll( "(C|CH)OEU", "KE"); 									// prï¿½ traitement OEU -> EU
-		soundex = soundex.replaceAll( "MOEU", "ME"); 										// prï¿½ traitement OEU -> EU
-		soundex = soundex.replaceAll( "OE([UI]+)([BCDFGHJKLMNPQRSTVWXZ])", "E$1$2"); 		// prï¿½ traitement OEU OEI -> E
-		soundex = soundex.replaceAll( "^GEN[TS]$", "JAN");									// prï¿½ traitement GEN -> JAN
-		soundex = soundex.replaceAll( "CUEI", "KEI"); 										// prï¿½ traitement accueil
-		soundex = soundex.replaceAll( "([^AEIOUYC])AE([BCDFGHJKLMNPQRSTVWXZ])", "$1E$2"); 	// prï¿½ traitement AE -> E
-		soundex = soundex.replaceAll( "AE([QS])", "E$1"); 									// prï¿½ traitement AE -> E
-		soundex = soundex.replaceAll( "AIE([BCDFGJKLMNPQRSTVWXZ])", "AI$1");				// prï¿½-traitement AIE(consonne) -> AI
-		soundex = soundex.replaceAll( "ANIEM", "ANIM"); 									// prï¿½ traitement NIEM -> NIM
+		soundex = soundex.replaceAll( "(C|CH)OEU", "KE"); 									// pré traitement OEU -> EU
+		soundex = soundex.replaceAll( "MOEU", "ME"); 										// pré traitement OEU -> EU
+		soundex = soundex.replaceAll( "OE([UI]+)([BCDFGHJKLMNPQRSTVWXZ])", "E$1$2"); 		// pré traitement OEU OEI -> E
+		soundex = soundex.replaceAll( "^GEN[TS]$", "JAN");									// pré traitement GEN -> JAN
+		soundex = soundex.replaceAll( "CUEI", "KEI"); 										// pré traitement accueil
+		soundex = soundex.replaceAll( "([^AEIOUYC])AE([BCDFGHJKLMNPQRSTVWXZ])", "$1E$2"); 	// pré traitement AE -> E
+		soundex = soundex.replaceAll( "AE([QS])", "E$1"); 									// pré traitement AE -> E
+		soundex = soundex.replaceAll( "AIE([BCDFGJKLMNPQRSTVWXZ])", "AI$1");				// pré-traitement AIE(consonne) -> AI
+		soundex = soundex.replaceAll( "ANIEM", "ANIM"); 									// pré traitement NIEM -> NIM
 		soundex = soundex.replaceAll( "(DRA|TRO|IRO)P$", "$1"); 							// P terminal muet
 		soundex = soundex.replaceAll( "(LOM)B$", "$1"); 									// B terminal muet
 		soundex = soundex.replaceAll( "(RON|POR)C$", "$1"); 								// C terminal muet
@@ -148,10 +164,10 @@ public class VRComparator {
 
 		
 		// Sons en K
-		soundex = soundex.replaceAll( "^ECHO$", "EKO"); 	// cas particulier ï¿½cho
-		soundex = soundex.replaceAll( "^ECEUR", "EKEUR"); 	// cas particulier ï¿½cï¿½urï¿½
-		// Cholï¿½ra Chï¿½ur mais pas chocolat!
-		soundex = soundex.replaceAll( "^CH(OG+|OL+|OR+|EU+|ARIS|M+|IRO|ONDR)", "K$1"); 				//En dï¿½but de mot
+		soundex = soundex.replaceAll( "^ECHO$", "EKO"); 	// cas particulier écho
+		soundex = soundex.replaceAll( "^ECEUR", "EKEUR"); 	// cas particulier écœuré
+		// Choléra Chœur mais pas chocolat!
+		soundex = soundex.replaceAll( "^CH(OG+|OL+|OR+|EU+|ARIS|M+|IRO|ONDR)", "K$1"); 				//En début de mot
 		soundex = soundex.replaceAll( "(YN|RI)CH(OG+|OL+|OC+|OP+|OM+|ARIS|M+|IRO|ONDR)", "$1K$2"); 	//Ou devant une consonne
 		soundex = soundex.replaceAll( "CHS", "CH");
 		soundex = soundex.replaceAll( "CH(AIQ)", "K$1");
@@ -210,7 +226,7 @@ public class VRComparator {
 		}
 		
 		soundex = soundex.replaceAll( "(.+)ANTI(AL|O)", "$1ANSI$2"); // sauf antialcoolique, antialbumine, antialarmer, ...
-		soundex = soundex.replaceAll( "(.+)INUTI([^V])", "$1INUSI$2"); // sauf inutilitï¿½, inutilement, diminutive, ...
+		soundex = soundex.replaceAll( "(.+)INUTI([^V])", "$1INUSI$2"); // sauf inutilité, inutilement, diminutive, ...
 		soundex = soundex.replaceAll( "([^O])UTIEN", "$1USIEN"); // sauf soutien, ...
 		soundex = soundex.replaceAll( "([^DE])RATI[E]$", "$1RASI$2"); // sauf xxxxxcratique, ...
 		// TIEN TION -> SIEN SION v3.1
@@ -234,7 +250,7 @@ public class VRComparator {
 		soundex = soundex.replaceAll( "AIN$", "IN");
 		soundex = soundex.replaceAll( "AIN([BTDK])", "IN$1");
 		// UN -> IN
-		soundex = soundex.replaceAll( "([^O])UND", "$1IND"); // aucun mot franï¿½ais ne commence par UND!
+		soundex = soundex.replaceAll( "([^O])UND", "$1IND"); // aucun mot français ne commence par UND!
 		soundex = soundex.replaceAll( "([JTVLFMRPSBD])UN([^IAE])", "$1IN$2");
 		soundex = soundex.replaceAll( "([JTVLFMRPSBD])UN$", "$1IN");
 		soundex = soundex.replaceAll( "RFUM$", "RFIN");
@@ -251,7 +267,7 @@ public class VRComparator {
 		soundex = soundex.replaceAll( "(.+[JTVLFMRPSBD])EN([JLFDSTG])", "$1AN$2");
 		// EI -> AI
 		soundex = soundex.replaceAll( "([VSBSTNRLPM])E[IY]([ACDFRJLGZ])", "$1AI$2");
-		// Histoire d'ï¿½
+		// Histoire d'Ô
 		
 		conversion = new String[][]{{"EAU", "O"}, {"EU", "E"}, {"Y", "I"}, {"EOI", "OI"}, {"JEA", "JA"}, {"OIEM", "OIM"}, {"OUANJ", "OUENJ"}, {"OUA", "OI"}, {"OUENJ", "OUANJ"}};
 		for (int i = 0; i<conversion.length; i++) {
@@ -265,16 +281,16 @@ public class VRComparator {
 		soundex = soundex.replaceAll( "KIND", "KOND");				// retouche KIND -> KOND
 		soundex = soundex.replaceAll( "KUM(N|P)", "KON$1");			// retouche KUMN KUMP
 		soundex = soundex.replaceAll( "LKOU", "LKO");				// retouche LKOU -> LKO
-		soundex = soundex.replaceAll( "EDBE", "EBE");				// retouche EDBE pied-bï¿½uf
+		soundex = soundex.replaceAll( "EDBE", "EBE");				// retouche EDBE pied-bœuf
 		soundex = soundex.replaceAll( "ARCM", "ARKM");				// retouche SCH -> CH
 		soundex = soundex.replaceAll( "SCH", "CH");					// retouche SCH -> CH
-		soundex = soundex.replaceAll( "^OINI", "ONI");				// retouche dï¿½but OINI -> ONI
+		soundex = soundex.replaceAll( "^OINI", "ONI");				// retouche début OINI -> ONI
 		soundex = soundex.replaceAll( "([^NDCGRHKO])APT", "$1AT");	// retouche APT -> AT
 		soundex = soundex.replaceAll( "([L]|KON)PT", "$1T");		// retouche LPT -> LT
 		soundex = soundex.replaceAll( "OTB", "OB");					// retouche OTB -> OB (hautbois)
 		soundex = soundex.replaceAll( "IXA", "ISA");				// retouche IXA -> ISA
 		soundex = soundex.replaceAll( "TG", "G");					// retouche TG -> G
-		soundex = soundex.replaceAll( "^TZ", "TS");					// retouche dï¿½but TZ -> TS
+		soundex = soundex.replaceAll( "^TZ", "TS");					// retouche début TZ -> TS
 		soundex = soundex.replaceAll( "PTIE", "TIE");				// retouche PTIE -> TIE
 		soundex = soundex.replaceAll( "GT", "T");					// retouche GT -> T
 		soundex = soundex.replaceAll( "ANKIEM", "ANKILEM");			// retouche tranquillement
@@ -289,8 +305,8 @@ public class VRComparator {
 		soundex = soundex.replaceAll( "USIL$", "USI"); 				// terminaisons USIL -> USI
 		soundex = soundex.replaceAll( "X$|[TD]S$|[DS]$", "");		// terminaisons TS DS LS X T D S...  v2.0
 		soundex = soundex.replaceAll( "([^KL]+)T$", "$1");			// sauf KT LT terminal
-		soundex = soundex.replaceAll( "^[H]", "");					// H pseudo muet en dï¿½but de mot, je sais, ce n'est pas une terminaison
-		String soundexBack2 = soundex;												// on sauve le code (utilisï¿½ pour les mots trï¿½s courts)
+		soundex = soundex.replaceAll( "^[H]", "");					// H pseudo muet en début de mot, je sais, ce n'est pas une terminaison
+		String soundexBack2 = soundex;												// on sauve le code (utilisé pour les mots très courts)
 		soundex = soundex.replaceAll( "TIL$", "TI");				// terminaisons TIL -> TI
 		soundex = soundex.replaceAll( "LC$", "LK");					// terminaisons LC -> LK
 		soundex = soundex.replaceAll( "L[E]?[S]?$", "L");			// terminaisons LE LES -> L
@@ -315,31 +331,31 @@ public class VRComparator {
 		soundex = soundex.replaceAll( "AING$", "IN");				// terminaisons AING -> IN
 		soundex = soundex.replaceAll( "([EISOARN])C$", "$1K");		// terminaisons C -> K
 		soundex = soundex.replaceAll( "([ABD-MO-Z]+)[EH]+$", "$1");	// terminaisons E ou H sauf pour C et N
-		soundex = soundex.replaceAll( "EN$", "AN");					// terminaisons EN -> AN (difficile ï¿½ faire avant sans avoir des soucis) Et encore, c'est pas top!
+		soundex = soundex.replaceAll( "EN$", "AN");					// terminaisons EN -> AN (difficile à faire avant sans avoir des soucis) Et encore, c'est pas top!
 		soundex = soundex.replaceAll( "(NJ)EN$", "$1AN");			// terminaisons EN -> AN
 		soundex = soundex.replaceAll( "^PAIEM", "PAIM"); 			// PAIE -> PAI
 		//soundex = soundex.replaceAll( "([^NTB])EF$", "");			// F muet en fin de mot
-		soundex = soundex.replaceAll( "(.)\\1", "$1"); 				// supression des rï¿½pï¿½titions (suite ï¿½ certains remplacements)
+		soundex = soundex.replaceAll( "(.)\\1", "$1"); 				// supression des répétitions (suite à certains remplacements)
 
 		// cas particuliers, bah au final, je n'en ai qu'un ici
 		soundex = soundex.replaceAll( "FUEL", "FIOUL"); 		
 
-		// Ce sera le seul code retournï¿½ ï¿½ une seule lettre!
+		// Ce sera le seul code retourné à une seule lettre!
 		if (soundex.equals("O")) return(soundex); 								
 
 		// seconde chance sur les mots courts qui ont souffert de la simplification
 		if (soundex.length()<2) 
 		{
-			// Sigles ou abrï¿½viations
+			// Sigles ou abréviations
 			if (soundexBack.matches("[BCDFGHJKLMNPQRSTVWXYZ][BCDFGHJKLMNPQRSTVWXYZ][BCDFGHJKLMNPQRSTVWXYZ][BCDFGHJKLMNPQRSTVWXYZ]*")) 
 				return(soundexBack);
 
 			if (soundexBack.matches(("[RFMLVSPJDF][AEIOU]")))
 			{
 				if (soundexBack.length()==3) 
-					return(soundexBack.substring(0,2));// mots de trois lettres supposï¿½s simples
+					return(soundexBack.substring(0,2));// mots de trois lettres supposés simples
 				if (soundexBack.length()==4) 
-					return(soundexBack.substring(0,3));// mots de quatre lettres supposï¿½s simples
+					return(soundexBack.substring(0,3));// mots de quatre lettres supposés simples
 			}
 
 			if (soundexBack2.length()>1) return soundexBack2;
@@ -350,4 +366,5 @@ public class VRComparator {
 		else
 			return "";
 	}
+
 }

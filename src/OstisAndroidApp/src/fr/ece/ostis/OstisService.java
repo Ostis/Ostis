@@ -1,6 +1,6 @@
 package fr.ece.ostis;
 
-import fr.ece.ostis.voice.VoiceRecognitionService;
+import fr.ece.ostis.speech.SpeechRecognitionService;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -116,7 +116,7 @@ public class OstisService extends Service{
 	        // We want to monitor the service for as long as we are
 	        // connected to it.
 	        try {
-	            Message msg = Message.obtain(null, VoiceRecognitionService.MSG_REGISTER_CLIENT);
+	            Message msg = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
 	            msg.replyTo = mMessenger;
 	            mService.send(msg);
 
@@ -145,7 +145,7 @@ public class OstisService extends Service{
 	    // Establish a connection with the service.  We use an explicit
 	    // class name because there is no reason to be able to let other
 	    // applications replace our component.
-		_Context.bindService(new Intent(_Context, VoiceRecognitionService.class), mConnection, Context.BIND_AUTO_CREATE);
+		_Context.bindService(new Intent(_Context, SpeechRecognitionService.class), mConnection, Context.BIND_AUTO_CREATE);
 	    mIsBound = true;
 	    Log.d("VRClient", "Binding.");
 	}
@@ -156,7 +156,7 @@ public class OstisService extends Service{
 	        // it, then now is the time to unregister.
 	        if (mService != null){
 	            try {
-	                Message msg = Message.obtain(null, VoiceRecognitionService.MSG_UNREGISTER_CLIENT);
+	                Message msg = Message.obtain(null, SpeechRecognitionService.MSG_UNREGISTER_CLIENT);
 	                msg.replyTo = mMessenger;
 	                mService.send(msg);
 	            } catch (RemoteException e){

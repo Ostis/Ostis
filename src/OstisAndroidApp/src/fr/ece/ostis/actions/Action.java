@@ -1,32 +1,95 @@
 package fr.ece.ostis.actions;
 
-import fr.ece.ostis.lang.Language;
+import java.util.HashMap;
+import java.util.Locale;
+
+/**
+ * TODO
+ * @author Paul Bouillon
+ * @version 2014-01-14
+ */
+public abstract class Action{
+	
+	
+	/**
+	 * TODO Docu
+	 */
+	protected int mId;
+	protected String mName;
+	private HashMap<Locale, String> mVocalCommands = null;
+	
+	
+	/**
+	 * TODO Docu
+	 * @param id
+	 * @param name
+	 * @param vocalCommands
+	 */
+	public Action(int id, String name, HashMap<Locale, String> vocalCommands){
+		this.mId = id;
+		this.mName = name;
+		this.mVocalCommands = vocalCommands;
+	}
 
 
-public abstract class Action {
+	public int getId() {
+		return mId;
+	}
+
+
+	public void setId(int id) {
+		this.mId = id;
+	}	
 	
-	private String name;
-	private String[] vocalCommand;
 	
-	public Action(String name, String vocalCom) {
-		this.name = name;
-		vocalCommand[Language.Value] = vocalCom;
+	/**
+	 * TODO Docu
+	 * @return
+	 */
+	public String getName(){
+		return mName; 
 	}
 	
-	public String getName() { return name; }
-	public void setName(String nom) { name = nom; }
-	
-	public String getVocalCommand() { 
-		return vocalCommand[Language.Value]; 
-	}
-	public void setVocalCommand(String vocalCom) { 
-		vocalCommand[Language.Value] = vocalCom; 
+	/**
+	 * TODO Docu
+	 * @param _Name
+	 */
+	public void setName(String _Name){
+		this.mName = _Name;
 	}
 	
+	
+	/**
+	 * TODO Docu
+	 * @param locale
+	 * @return
+	 */
+	public String getVocalCommand(Locale locale){ 
+		return mVocalCommands.get(locale);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param language
+	 * @param vocalCommand
+	 */
+	public void setVocalCommand(Locale locale, String vocalCommand){ 
+		mVocalCommands.put(locale, vocalCommand);
+	}
+	
+	
+	/**
+	 * TODO
+	 */
 	public abstract void run();
 	
-	@Override
-	public String toString() {
-		return name;
-	}	
+	
+	/**
+	 * TODO
+	 * @return A string containing the name of the action.
+	 */
+	@Override public String toString(){
+		return mName;
+	}
 }
