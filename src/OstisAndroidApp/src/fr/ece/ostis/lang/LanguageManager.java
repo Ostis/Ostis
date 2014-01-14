@@ -1,60 +1,45 @@
 package fr.ece.ostis.lang;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
-import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 
-
-
+/**
+ * Class used for managing languages in the application. Future uses might 
+ * include changing on the fly the current language in the application.
+ * @author Nicolas Schurando
+ * @version 2014-01-14
+ */
 public class LanguageManager {
-	
-	/*public static final int NUMBER = 2;
-	
-	public static final int FRENCH = 0;
-    public static final int ENGLISH = 1;
-    
-    public static final int DEFAULT = ENGLISH;
-    public static int Value = DEFAULT;
-    */
+
 	
 	/**
-	 * TODO
+	 * The list of supported locales.
 	 */
-    protected static final Locale[] _SupportedLocales = {Locale.ENGLISH, Locale.FRENCH};
+    protected static final List<Locale> _SupportedLocales = Arrays.asList(Locale.ENGLISH, Locale.FRENCH);
     
+    
+    /**
+     * The default locale to be used if the locale of the system is not part of the supported ones.
+     */
+    protected static final Locale mDefaultLocale = Locale.ENGLISH;
+    
+    
+    /**
+     * Used to store the dertermined current locale.
+     */
+	protected Locale mCurrentLocale = null;
+    
+	
     /**
      * TODO
+     * @return The locale to be used for the application.
      */
-    private Context _Context = null;
-    
-    
-    /**
-     * TODO
-     * @return
-     */
-    public String getSystemLanguage(){
-		return null;
+    public Locale getCurrentLocale(){
+    	if(mCurrentLocale == null) mCurrentLocale = Locale.getDefault();
+    	if(!_SupportedLocales.contains(mCurrentLocale)) mCurrentLocale = mDefaultLocale;
+    	return mCurrentLocale;
     }
-    
-    
-    /**
-     * 
-     */
-    public void useSystemLanguage(){
-    	
-    	
-    }
-    
-    
-    public void useLanguage(String _Language){
-    	
-        Locale _Locale = new Locale(_Language);
-        Resources _Resources = _Context.getResources();
-        Configuration _Configuration = _Resources.getConfiguration();
-        _Configuration.locale = _Locale;
-        _Resources.updateConfiguration(_Configuration, _Resources.getDisplayMetrics());
-    	
-    }
+
 }
