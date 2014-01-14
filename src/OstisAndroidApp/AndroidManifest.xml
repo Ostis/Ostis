@@ -19,7 +19,7 @@
         <activity
             android:name="fr.ece.ostis.ui.MainActivity"
             android:label="@string/app_name"
-            android:windowSoftInputMode="stateAlwaysHidden" >
+            android:windowSoftInputMode="stateAlwaysHidden" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,7 +28,7 @@
         </activity>
 
         <service
-            android:name="fr.ece.ostis.voice.VoiceRecognitionService"
+            android:name="fr.ece.ostis.speech.SpeechRecognitionService"
             android:enabled="true"
             android:exported="true" >
         </service>
