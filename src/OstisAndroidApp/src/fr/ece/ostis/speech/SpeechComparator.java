@@ -1,11 +1,11 @@
-package fr.ece.ostis.actions;
+package fr.ece.ostis.speech;
 
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.language.Soundex;
 
 import fr.ece.ostis.lang.Language;
 
-public class VRComparator {
+public class SpeechComparator {
 
 	private int language;
 	
@@ -13,7 +13,7 @@ public class VRComparator {
 	private static char[] FR_MAPPING = "01230970072455012683090808".toCharArray();
 	
 	//constructor: argument (Language.FRENCH or Language.ENGLISH)
-	public VRComparator(int lang)
+	public SpeechComparator(int lang)
 	{
 		language = lang;
 		if (language == Language.FRENCH) soundex = new Soundex(FR_MAPPING);

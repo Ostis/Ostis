@@ -1,31 +1,88 @@
 package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-
-public  class ComposedAction extends Action{
-	private ArrayList<Action> actionList;
+/**
+ * TODO
+ * @author Paul Bouillon
+ * @version 2014-01-14
+ */
+public class ComposedAction extends Action{
 	
-	public ComposedAction(String name, String vocalCommand) {
-		super(name, vocalCommand);
-		actionList = new ArrayList<Action>();
+	/**
+	 * TODO
+	 */
+	private ArrayList<Action> _ActionList;
+	
+	
+	/**
+	 * TODO
+	 * @param _Name
+	 * @param _Language
+	 * @param _VocalCommand
+	 */
+	public ComposedAction(String _Name, String _Language, String _VocalCommand){
+		super(_Name, _Language, _VocalCommand);
+		_ActionList = new ArrayList<Action>();
 	}
 
-	public ArrayList<Action> getActions() {
-		return actionList;
+	
+	/**
+	 * TODO
+	 * @param _Name
+	 * @param _Language
+	 * @param _VocalCommands
+	 */
+	public ComposedAction(String _Name, String _Language, HashMap<String, String> _VocalCommands){
+		super(_Name, _VocalCommands);
+		_ActionList = new ArrayList<Action>();
 	}
 	
-	public void addAction(Action action){
-		actionList.add(action);
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public ArrayList<Action> getActions(){
+		return _ActionList;
 	}
 	
-	public void removeAction(Action action){
-		actionList.remove(action);
+	
+	/**
+	 * TODO
+	 * @param _Action
+	 */
+	public void appendAction(Action _Action){
+		_ActionList.add(_Action);
 	}
 	
-	@Override
-	public void run() {
-		for (Action a : actionList)
+	
+	/**
+	 * TODO
+	 * @param _Position
+	 * @param _Action
+	 */
+	public void addAction(int _Position, Action _Action){
+		_ActionList.add(_Position, _Action);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param _Action
+	 */
+	public void removeAction(Action _Action){
+		_ActionList.remove(_Action);
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	@Override public void run(){
+		for (Action a : _ActionList)
 			a.run();	
-	}	
+	}
+	
 }

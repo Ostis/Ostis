@@ -3,48 +3,100 @@ package fr.ece.ostis.actions;
 import java.util.ArrayList;
 
 import fr.ece.ostis.lang.Language;
+import fr.ece.ostis.speech.SpeechComparator;
 
 
+/**
+ * TODO
+ * @author Paul Bouillon
+ * @version 2014-01-14
+ */
 public class ActionManager {
 	
-	private ArrayList<Action> actionList;
-	private VRComparator vrComparator;
 	
+	/**
+	 * TODO
+	 */
+	private ArrayList<Action> _ActionList;
+	
+	
+	/**
+	 * TODO
+	 */
+	private SpeechComparator _SpeechComparator;
+	
+	
+	/**
+	 * 
+	 */
+	private String _Language = null; // TODO Implement, and change.
+	
+	
+	/**
+	 * TODO
+	 */
 	public ActionManager(){
-		actionList = new ArrayList<Action>();
-		vrComparator = new VRComparator(Language.Value);
+		_ActionList = new ArrayList<Action>();
+		_SpeechComparator = new SpeechComparator(Language.Value);
 	}
 	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
 	public ArrayList<Action> getActions(){
-		return actionList;
+		return _ActionList;
 	}
 	
+	
+	/**
+	 * TODO
+	 * @param action
+	 */
 	public void addAction(Action action){
-		actionList.add(action);
+		_ActionList.add(action);
 	}
 	
+	
+	/**
+	 * TODO
+	 * @param action
+	 */
 	public void removeAction(Action action){
-		actionList.remove(action);
+		_ActionList.remove(action);
 	}
 	
+	
+	/**
+	 * TODO
+	 */
 	public void saveActions() {
 		
 	}
 	
+	
+	/**
+	 * TODO
+	 */
 	public void loadActions() {
 		
 	}
 	
-	public void runCommand(String command)
-	{
-		for (Action a : actionList)
-		{
-			if (vrComparator.areSimilar(command, a.getVocalCommand()))
-			{
-				a.run();
+	
+	/**
+	 * TODO
+	 * @param _Command
+	 */
+	public void runCommand(String _Command){
+		
+		for (Action _Action : _ActionList){
+			if (_SpeechComparator.areSimilar(_Command, _Action.getVocalCommand(_Language))){
+				_Action.run();
 				return;
 			}
 		}
+		
 	}
 	
 }

@@ -1,4 +1,4 @@
-package fr.ece.ostis.voice;
+package fr.ece.ostis.speech;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import android.util.Log;
  * @author Nicolas Schurando
  * @version 2014-01-13
  */
-public class VoiceRecognitionService extends Service{
+public class SpeechRecognitionService extends Service{
 	
 	
 	/**
@@ -72,14 +72,14 @@ public class VoiceRecognitionService extends Service{
 		super.onCreate();
 		
 		// Log
-		Log.d("VoiceRecognitionService", "onCreate");
+		Log.d("SpeechRecognitionService", "onCreate");
 		
 		// Retrieve audio manager
 		_AudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		
 		// Retrieve speech recognizer
 		_SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-		_SpeechRecognizer.setRecognitionListener(new VoiceRecognitionListener());
+		_SpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
 		_SpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		_SpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 		_SpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
@@ -93,7 +93,7 @@ public class VoiceRecognitionService extends Service{
 	@Override public void onDestroy(){
 		
 		// Log
-		Log.d("VoiceRecognitionService", "onDestroy");
+		Log.d("SpeechRecognitionService", "onDestroy");
 
 		// Cleanup
 		if (_IsCountDownOn) _NoSpeechCountDown.cancel();
@@ -113,10 +113,10 @@ public class VoiceRecognitionService extends Service{
 	protected static class IncomingHandler extends Handler{
 		
 		
-		// Retrieving the voice recognition service reference
-		private final WeakReference<VoiceRecognitionService> _ServiceReference; 
-		IncomingHandler(VoiceRecognitionService service) {
-			_ServiceReference = new WeakReference<VoiceRecognitionService>(service);
+		// Retrieving the speech recognition service reference
+		private final WeakReference<SpeechRecognitionService> _ServiceReference; 
+		IncomingHandler(SpeechRecognitionService service) {
+			_ServiceReference = new WeakReference<SpeechRecognitionService>(service);
 		}
 		
 		
@@ -127,23 +127,23 @@ public class VoiceRecognitionService extends Service{
 		@Override public void handleMessage(Message _Message){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "handleMessage | what = " + String.valueOf(_Message.what));
+			Log.d("SpeechRecognitionService", "handleMessage | what = " + String.valueOf(_Message.what));
 
 			// Retrieve the service instance
-			VoiceRecognitionService _Service = _ServiceReference.get();
+			SpeechRecognitionService _Service = _ServiceReference.get();
 			
 			// React according to the type of object of the message
 			switch(_Message.what){
 
 				// Register a new client
 				case MSG_REGISTER_CLIENT:
-					Log.d("VoiceRecognitionService", "handleMessage -> New client registered");
+					Log.d("SpeechRecognitionService", "handleMessage -> New client registered");
 					_Service._Clients.add(_Message.replyTo);
 					break;
 					
 				// Unregister a client
 				case MSG_UNREGISTER_CLIENT:
-					Log.d("VoiceRecognitionService", "handleMessage -> Removing existing client");
+					Log.d("SpeechRecognitionService", "handleMessage -> Removing existing client");
 					_Service._Clients.remove(_Message.replyTo);
 					break;
 			
@@ -157,9 +157,9 @@ public class VoiceRecognitionService extends Service{
 					
 					// Start listening
 					if (!_Service._IsListening){
-						Log.d("VoiceRecognitionService", "handleMessage -> Canceling listening (auto)");
+						Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening (auto)");
 						_Service._SpeechRecognizer.cancel();
-						Log.d("VoiceRecognitionService", "handleMessage -> Starting listening");
+						Log.d("SpeechRecognitionService", "handleMessage -> Starting listening");
 						_Service._SpeechRecognizer.startListening(_Service._SpeechRecognizerIntent);
 						_Service._IsListening = true;
 					}
@@ -167,7 +167,7 @@ public class VoiceRecognitionService extends Service{
 					break;
 
 				 case MSG_CANCEL_LISTENING:
-					Log.d("VoiceRecognitionService", "handleMessage -> Canceling listening");
+					Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening");
 					_Service._SpeechRecognizer.cancel();
 					_Service._IsListening = false;
 					break;
@@ -186,14 +186,14 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onTick(long millisUntilFinished){
 			
 			// Log
-			Log.d("VoiceRecognitionService/CountDownTimer", "onTick");
+			Log.d("SpeechRecognitionService/CountDownTimer", "onTick");
 
 		}
 
 		@Override public void onFinish(){
 			
 			// Log
-			Log.d("VoiceRecognitionService/CountDownTimer", "onFinish");
+			Log.d("SpeechRecognitionService/CountDownTimer", "onFinish");
 			
 			// Reset flag
 			_IsCountDownOn = false;
@@ -222,7 +222,7 @@ public class VoiceRecognitionService extends Service{
 	 * @author Nicolas Schurando
 	 * @version 2014-01-13
 	 */
-	protected class VoiceRecognitionListener implements RecognitionListener{
+	protected class SpeechRecognitionListener implements RecognitionListener{
 
 		
 		/**
@@ -231,7 +231,7 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onBeginningOfSpeech(){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onBeginningOfSpeech");
+			Log.d("SpeechRecognitionService", "onBeginningOfSpeech");
 			
 			// Speech input will be processed, so there is no need for count down anymore
 			if (_IsCountDownOn){
@@ -256,7 +256,7 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onEndOfSpeech(){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onEndOfSpeech");
+			Log.d("SpeechRecognitionService", "onEndOfSpeech");
 			
 		}
 
@@ -268,17 +268,17 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onError(int error){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onError | error = " + String.valueOf(error));
+			Log.d("SpeechRecognitionService", "onError | error = " + String.valueOf(error));
 			switch(error){
-				case SpeechRecognizer.ERROR_AUDIO: Log.e("VoiceRecognitionService/onError", "Audio recording error."); break;
-				case SpeechRecognizer.ERROR_CLIENT: Log.e("VoiceRecognitionService/onError", "Other client side errors."); break;
-				case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: Log.e("VoiceRecognitionService/onError", "Insufficient permissions"); break;
-				case SpeechRecognizer.ERROR_NETWORK: Log.e("VoiceRecognitionService/onError", "Other network related errors."); break;
-				case SpeechRecognizer.ERROR_NETWORK_TIMEOUT: Log.e("VoiceRecognitionService/onError", "Network operation timed out."); break;
-				case SpeechRecognizer.ERROR_NO_MATCH: Log.e("VoiceRecognitionService/onError", "No recognition result matched."); break;
-				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: Log.e("VoiceRecognitionService/onError", "RecognitionService busy."); break;
-				case SpeechRecognizer.ERROR_SERVER: Log.e("VoiceRecognitionService/onError", "Server sends error status."); break;
-				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: Log.e("VoiceRecognitionService/onError", "No speech input"); break;
+				case SpeechRecognizer.ERROR_AUDIO: Log.e("SpeechRecognitionService/onError", "Audio recording error."); break;
+				case SpeechRecognizer.ERROR_CLIENT: Log.e("SpeechRecognitionService/onError", "Other client side errors."); break;
+				case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: Log.e("SpeechRecognitionService/onError", "Insufficient permissions"); break;
+				case SpeechRecognizer.ERROR_NETWORK: Log.e("SpeechRecognitionService/onError", "Other network related errors."); break;
+				case SpeechRecognizer.ERROR_NETWORK_TIMEOUT: Log.e("SpeechRecognitionService/onError", "Network operation timed out."); break;
+				case SpeechRecognizer.ERROR_NO_MATCH: Log.e("SpeechRecognitionService/onError", "No recognition result matched."); break;
+				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: Log.e("SpeechRecognitionService/onError", "RecognitionService busy."); break;
+				case SpeechRecognizer.ERROR_SERVER: Log.e("SpeechRecognitionService/onError", "Server sends error status."); break;
+				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: Log.e("SpeechRecognitionService/onError", "No speech input"); break;
 			}
 			
 			// Stop the countdown timer
@@ -320,7 +320,7 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onPartialResults(Bundle _PartialResults){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onPartialResults");
+			Log.d("SpeechRecognitionService", "onPartialResults");
 			
 		}
 		
@@ -339,7 +339,7 @@ public class VoiceRecognitionService extends Service{
 			}
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onReadyForSpeech");
+			Log.d("SpeechRecognitionService", "onReadyForSpeech");
 			
 		}
 		
@@ -351,7 +351,7 @@ public class VoiceRecognitionService extends Service{
 		@Override public void onResults(Bundle _Results){
 			
 			// Log
-			Log.d("VoiceRecognitionService", "onResults");
+			Log.d("SpeechRecognitionService", "onResults");
 			
 			// Extract results
 			ArrayList<String> _Sentences = _Results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -359,7 +359,7 @@ public class VoiceRecognitionService extends Service{
 
 			// Log
 			for (int i = 0; i < _Sentences.size(); i++){
-				Log.d("VoiceRecognitionService", "onResults | " + _Sentences.get(i) + " (" + String.valueOf(_Scores[i])+")");
+				Log.d("SpeechRecognitionService", "onResults | " + _Sentences.get(i) + " (" + String.valueOf(_Scores[i])+")");
 			}
 			
 			// Set the not listening flag
@@ -377,7 +377,7 @@ public class VoiceRecognitionService extends Service{
 			
 			// Send results to clients
 			Bundle _MessageBundle = new Bundle();
-			_MessageBundle.putStringArrayList("VoiceRecognitionResult", _Sentences);
+			_MessageBundle.putStringArrayList("SpeechRecognitionResult", _Sentences);
 			for(int _ClientsIterator = _Clients.size() - 1; _ClientsIterator >= 0; _ClientsIterator--) {
 				try{
 					
@@ -415,7 +415,7 @@ public class VoiceRecognitionService extends Service{
 	 */
 	@Override
 	public IBinder onBind(Intent _intent){
-		Log.d("VoiceRecognitionService", "onBind");
+		Log.d("SpeechRecognitionService", "onBind");
 		return _Messenger.getBinder();
 	}
 	

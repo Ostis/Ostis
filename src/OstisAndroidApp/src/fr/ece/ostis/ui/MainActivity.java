@@ -3,7 +3,7 @@ package fr.ece.ostis.ui;
 import java.util.ArrayList;
 
 import fr.ece.ostis.R;
-import fr.ece.ostis.voice.VoiceRecognitionService;
+import fr.ece.ostis.speech.SpeechRecognitionService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,7 +46,7 @@ public class MainActivity extends Activity{
     	 */
         @Override public void handleMessage(Message _Message) {
             switch (_Message.what) {
-            case VoiceRecognitionService.MSG_FINISHED_WITH_RESULTS:
+            case SpeechRecognitionService.MSG_FINISHED_WITH_RESULTS:
             	
             	// Log
                 Log.d("MainActivity", "Recus");
@@ -90,7 +90,7 @@ public class MainActivity extends Activity{
 			@Override
 			public void onClick(View v) {
 		        Message _Message = new Message();
-		        _Message.what = VoiceRecognitionService.MSG_START_LISTENING; 
+		        _Message.what = SpeechRecognitionService.MSG_START_LISTENING; 
 
 		        try{
 		        	_MessengerRemote.send(_Message);
@@ -165,7 +165,7 @@ public class MainActivity extends Activity{
 	    @Override public void onServiceConnected(ComponentName name, IBinder service){
 
 	        _MessengerRemote = new Messenger(service);
-	        Message _Message = Message.obtain(null, VoiceRecognitionService.MSG_REGISTER_CLIENT);
+	        Message _Message = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
 	        _Message.replyTo = _MessengerLocal;
 	        try{
 	        	_MessengerRemote.send(_Message);
@@ -203,7 +203,7 @@ public class MainActivity extends Activity{
     protected void doStartService(){
     	
     	// Start service via intent
-    	Intent _ServiceIntent = new Intent(MainActivity.this, VoiceRecognitionService.class);
+    	Intent _ServiceIntent = new Intent(MainActivity.this, SpeechRecognitionService.class);
 	    startService(_ServiceIntent);
     	
     }
@@ -217,7 +217,7 @@ public class MainActivity extends Activity{
     	if(_ServiceIsBound != true){
 	    	
 	    	// Bind to service
-		    bindService(new Intent(this, VoiceRecognitionService.class), _ServiceConnection, Context.BIND_AUTO_CREATE);
+		    bindService(new Intent(this, SpeechRecognitionService.class), _ServiceConnection, Context.BIND_AUTO_CREATE);
 		    
 		    // Set flag
 		    _ServiceIsBound = true;

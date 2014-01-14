@@ -28,7 +28,7 @@
         </activity>
 
         <service
-            android:name="fr.ece.ostis.voice.VoiceRecognitionService"
+            android:name="fr.ece.ostis.speech.SpeechRecognitionService"
             android:enabled="true"
             android:exported="true" >
         </service>
