@@ -1,5 +1,7 @@
 package fr.ece.ostis.ui;
 
+import java.util.ArrayList;
+
 import fr.ece.ostis.R;
 import fr.ece.ostis.voice.VoiceRecognitionService;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * TODO
@@ -44,7 +47,19 @@ public class MainActivity extends Activity{
         @Override public void handleMessage(Message _Message) {
             switch (_Message.what) {
             case VoiceRecognitionService.MSG_FINISHED_WITH_RESULTS:
+            	
+            	// Log
                 Log.d("MainActivity", "Recus");
+                
+                // Debug : Display on ui
+                TextView _TVDebug = (TextView) findViewById(R.id.textViewDebug);
+                ArrayList<String> _Sentences = _Message.getData().getStringArrayList("VoiceRecognitionResult");
+                if(_Sentences != null){
+	    			for (int i = 0; i < _Sentences.size(); i++){
+	                    _TVDebug.setText( _TVDebug.getText() + "\r\n" + _Sentences.get(i));
+	    			}
+                }
+    			
                 break;
             default:
                 super.handleMessage(_Message);

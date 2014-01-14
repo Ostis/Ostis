@@ -376,11 +376,14 @@ public class VoiceRecognitionService extends Service{
 			}
 			
 			// Send results to clients
+			Bundle _MessageBundle = new Bundle();
+			_MessageBundle.putStringArrayList("VoiceRecognitionResult", _Sentences);
 			for(int _ClientsIterator = _Clients.size() - 1; _ClientsIterator >= 0; _ClientsIterator--) {
 				try{
 					
 					// Prepare a message and send it
-					Message _Message = Message.obtain(null, MSG_FINISHED_WITH_RESULTS, _Sentences);
+					Message _Message = Message.obtain(null, MSG_FINISHED_WITH_RESULTS);
+					_Message.setData(_MessageBundle);
 					_Clients.get(_ClientsIterator).send(_Message);
 					
 				}catch(RemoteException _Exception){
