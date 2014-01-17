@@ -17,10 +17,8 @@ public class ActionLiftoff extends BaseAction {
 	 * Public constructor which sets the values for this base action.
 	 */
 	public ActionLiftoff(){
-
-		mId = 0001;
-		mName = "Decollage";
-		mVocalCommands.put(Locale.FRENCH, "décolle");
+		super(0001, "Decollage");
+		mVocalCommands.put(Locale.FRENCH, "dï¿½colle");
 		mVocalCommands.put(Locale.ENGLISH, "lit-off");
 		
 	}

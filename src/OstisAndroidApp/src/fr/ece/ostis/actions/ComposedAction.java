@@ -24,10 +24,8 @@ public abstract class ComposedAction extends Action{
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands){
-		mId = id;
-		mName = name;
-		mVocalCommands = vocalCommands;
+	public ComposedAction(int id, String name){
+		super(id, name);
 		mActionList = new ArrayList<Action>();
 	}
 	
@@ -39,10 +37,8 @@ public abstract class ComposedAction extends Action{
 	 * @param vocalCommands
 	 * @param actions
 	 */
-	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands, ArrayList<Action> actions){
-		mId = id;
-		mName = name;
-		mVocalCommands = vocalCommands;
+	public ComposedAction(int id, String name, ArrayList<Action> actions){
+		super(id, name);
 		mActionList = actions;
 	}
 	

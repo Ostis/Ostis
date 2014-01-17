@@ -2,9 +2,12 @@ package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Map;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
-
 import fr.ece.ostis.speech.SpeechComparator;
 
 
@@ -66,22 +69,6 @@ public class ActionManager{
 	
 	/**
 	 * TODO
-	 */
-	public void saveActions() {
-		
-	}
-	
-	
-	/**
-	 * TODO
-	 */
-	public void loadActions() {
-		
-	}
-	
-	
-	/**
-	 * TODO
 	 * @param command
 	 */
 	public void runCommand(String command){
@@ -99,8 +86,29 @@ public class ActionManager{
 	/**
 	 * TODO
 	 */
-	public void saveComposedActions(){
-		
+	public boolean saveComposedActions(){
+		try {
+			JSONObject jsonActions = new JSONObject();
+			int numberOfActions = 0;
+			for (Action action : mActionList){
+				if (action instanceof ComposedAction){
+					ComposedAction composedAction = (ComposedAction)action;
+					JSONObject jsonObject = new JSONObject();
+					jsonObject.put("id", composedAction.getId());
+					jsonObject.put("name", composedAction.getName());
+					jsonObject.put("vocalCommands", new JSONObject((Map<Locale, String>)composedAction.getVocalCommands()));
+					//jsonObject.put
+					//jsonActions.put("action" + numberOfActions, jsonObject);
+				}
+				numberOfActions++;
+			}
+			jsonActions.put("numberOfActions", numberOfActions);
+			return true;
+		}
+		catch (JSONException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	
