@@ -15,7 +15,7 @@ public abstract class BaseAction extends Action {
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public BaseAction(int id, String name) {
-		super(id, name);
+	public BaseAction(String id) {
+		super(id);
 	}
 }

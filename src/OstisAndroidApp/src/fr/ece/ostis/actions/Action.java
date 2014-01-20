@@ -1,67 +1,90 @@
 package fr.ece.ostis.actions;
 
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Locale;
 
 
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-14
+ * @version 2014-01-21
  */
 public abstract class Action{
 	
 	/**
 	 * TODO Docu
 	 */
-	protected int mId;
-	protected String mName; // TODO Change names for different languages ?
-	protected HashMap<Locale, String> mVocalCommands = null;
+	protected String mId;
+	protected Hashtable<Locale, String> mNameTable; // TODO Change names for different languages ?
+	protected Hashtable<Locale, String> mVocalCommandTable;
 
 	/**
-	 * 
+	 * TODO
 	 * @param id
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public Action(int id, String name) {
+	public Action(String id) {
 		mId = id;
-		mName = name;
-		mVocalCommands = new HashMap<Locale, String>();
+		mNameTable = new Hashtable<Locale, String>();
+		mVocalCommandTable = new Hashtable<Locale, String>();
+	}
+	
+	/**
+	 * TODO
+	 * @param id
+	 * @param name
+	 * @param vocalCommands
+	 */
+	public Action(String id, Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommands) {
+		mId = id;
+		mNameTable = names;
+		mVocalCommandTable = vocalCommands;
 	}
 
 	/**
 	 * TODO
 	 * @return
 	 */
-	public int getId(){
+	public String getId(){
 		return mId;
 	}
-
-
-	/**
-	 * TODO
-	 * @param id
-	 */
-	public void setId(int id){
-		mId = id;
-	}	
 	
 	
 	/**
 	 * TODO Docu
 	 * @return
 	 */
-	public String getName(){
-		return mName; 
+	public String getName(Locale locale){
+		return mNameTable.get(locale); 
 	}
+	
+	/**
+	 * TODO
+	 * @param locale
+	 * @return
+	 */
+	public Hashtable<Locale, String> getNameTable(){
+		return mNameTable; 
+	}
+	
 	
 	/**
 	 * TODO Docu
 	 * @param name
 	 */
-	public void setName(String name){
-		mName = name;
+	public void setName(Locale locale, String name){
+		mNameTable.put(locale, name);
+	}
+	
+	
+	/**
+	 * 
+	 * @param locale
+	 * @param name
+	 */
+	public void setNameTable(Hashtable<Locale, String> names){
+		mNameTable = names;
 	}
 	
 	
@@ -70,8 +93,8 @@ public abstract class Action{
 	 * @param locale
 	 * @return
 	 */
-	public HashMap<Locale, String> getVocalCommands(){ 
-		return mVocalCommands;
+	public Hashtable<Locale, String> getVocalCommandTable(){ 
+		return mVocalCommandTable;
 	}
 	
 	
@@ -81,7 +104,7 @@ public abstract class Action{
 	 * @return
 	 */
 	public String getVocalCommand(Locale locale){ 
-		return mVocalCommands.get(locale);
+		return mVocalCommandTable.get(locale);
 	}
 	
 	
@@ -91,7 +114,16 @@ public abstract class Action{
 	 * @param vocalCommand
 	 */
 	public void setVocalCommand(Locale locale, String vocalCommand){ 
-		mVocalCommands.put(locale, vocalCommand);
+		mVocalCommandTable.put(locale, vocalCommand);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param vocalCommands
+	 */
+	public void setVocalCommands(Hashtable<Locale, String> vocalCommands){
+		mVocalCommandTable = vocalCommands;
 	}
 	
 	
@@ -106,6 +138,6 @@ public abstract class Action{
 	 * @return A string containing the name of the action.
 	 */
 	@Override public String toString(){
-		return mName;
+		return mId;
 	}
 }
