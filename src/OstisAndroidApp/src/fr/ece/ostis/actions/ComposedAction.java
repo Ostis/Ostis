@@ -49,8 +49,8 @@ public class ComposedAction extends Action{
 	 * @param vocalCommmands
 	 * @param actions
 	 */
-	public ComposedAction(Hashtable<Locale, String> names,Hashtable<Locale, String> vocalCommmands, ArrayList<Action> actions){
-		super(generateId(), names, vocalCommmands);
+	public ComposedAction(Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommmands, Hashtable<Locale, String> descriptions, ArrayList<Action> actions){
+		super(generateId(), names, descriptions, vocalCommmands);
 		mActionList = actions;
 	}
 	

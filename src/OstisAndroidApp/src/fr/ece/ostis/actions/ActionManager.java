@@ -172,6 +172,8 @@ public class ActionManager{
 				jsonObject.put("nameValues", new JSONArray(composedAction.getNameTable().values()));
 				jsonObject.put("vocalCommandKeys", new JSONArray(composedAction.getVocalCommandTable().keySet()));
 				jsonObject.put("vocalCommandValues", new JSONArray(composedAction.getVocalCommandTable().values()));
+				jsonObject.put("descriptionKeys", new JSONArray(composedAction.getDescriptionTable().keySet()));
+				jsonObject.put("descriptionValues", new JSONArray(composedAction.getDescriptionTable().values()));
 				jsonObject.put("actionIds", new JSONArray(composedAction.getActionsId()));
 				jsonActions.put(jsonObject);
 			}
@@ -215,6 +217,10 @@ public class ActionManager{
 				jsonValues = jsonObject.getJSONArray("nameValues");
 				for (int j = 0; j < jsonKeys.length(); j++)
 					composedAction.setName(new Locale(jsonKeys.getString(j)), jsonValues.getString(j));
+				jsonKeys = jsonObject.getJSONArray("descriptionKeys");
+				jsonValues = jsonObject.getJSONArray("descriptionValues");
+				for (int j = 0; j < jsonKeys.length(); j++)
+					composedAction.setDescription(new Locale(jsonKeys.getString(j)), jsonValues.getString(j));
 				addComposedAction(composedAction);
 			}
 			return true;

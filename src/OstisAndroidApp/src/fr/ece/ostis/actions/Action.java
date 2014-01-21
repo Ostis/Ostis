@@ -17,6 +17,7 @@ public abstract class Action{
 	protected String mId;
 	protected Hashtable<Locale, String> mNameTable;
 	protected Hashtable<Locale, String> mVocalCommandTable;
+	protected Hashtable<Locale, String> mDescriptionTable;
 
 	/**
 	 * TODO
@@ -28,6 +29,7 @@ public abstract class Action{
 		mId = id;
 		mNameTable = new Hashtable<Locale, String>();
 		mVocalCommandTable = new Hashtable<Locale, String>();
+		mDescriptionTable = new Hashtable<Locale, String>();
 	}
 	
 	/**
@@ -36,10 +38,11 @@ public abstract class Action{
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public Action(String id, Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommands) {
+	public Action(String id, Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommands, Hashtable<Locale, String> descriptions) {
 		mId = id;
 		mNameTable = names;
 		mVocalCommandTable = vocalCommands;
+		mDescriptionTable = descriptions;
 	}
 
 	/**
@@ -59,6 +62,16 @@ public abstract class Action{
 		return mNameTable.get(locale); 
 	}
 	
+	
+	/**
+	 * TODO Docu
+	 * @param name
+	 */
+	public void setName(Locale locale, String name){
+		mNameTable.put(locale, name);
+	}
+
+	
 	/**
 	 * TODO
 	 * @param locale
@@ -70,31 +83,12 @@ public abstract class Action{
 	
 	
 	/**
-	 * TODO Docu
-	 * @param name
-	 */
-	public void setName(Locale locale, String name){
-		mNameTable.put(locale, name);
-	}
-	
-	
-	/**
 	 * 
 	 * @param locale
 	 * @param name
 	 */
 	public void setNameTable(Hashtable<Locale, String> names){
 		mNameTable = names;
-	}
-	
-	
-	/**
-	 * 
-	 * @param locale
-	 * @return
-	 */
-	public Hashtable<Locale, String> getVocalCommandTable(){ 
-		return mVocalCommandTable;
 	}
 	
 	
@@ -116,14 +110,63 @@ public abstract class Action{
 	public void setVocalCommand(Locale locale, String vocalCommand){ 
 		mVocalCommandTable.put(locale, vocalCommand);
 	}
+
+	
+	/**
+	 * 
+	 * @param locale
+	 * @return
+	 */
+	public Hashtable<Locale, String> getVocalCommandTable(){ 
+		return mVocalCommandTable;
+	}
 	
 	
 	/**
 	 * TODO
 	 * @param vocalCommands
 	 */
-	public void setVocalCommands(Hashtable<Locale, String> vocalCommands){
+	public void setVocalCommandTable(Hashtable<Locale, String> vocalCommands){
 		mVocalCommandTable = vocalCommands;
+	}
+	
+	
+	/**
+	 * TODO Docu
+	 * @param locale
+	 * @return
+	 */
+	public String getDescription(Locale locale){ 
+		return mDescriptionTable.get(locale);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param locale
+	 * @param description
+	 */
+	public void setDescription(Locale locale, String description){ 
+		mDescriptionTable.put(locale, description);
+	}
+
+	
+	/**
+	 * 
+	 * @param locale
+	 * @return
+	 */
+	public Hashtable<Locale, String> getDescriptionTable(){ 
+		return mDescriptionTable;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param descriptionTable
+	 */
+	public void setDescriptionTable(Hashtable<Locale, String> descriptionTable){
+		mDescriptionTable = descriptionTable;
 	}
 	
 	

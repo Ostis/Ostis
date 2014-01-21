@@ -22,6 +22,8 @@ public class LiftOffAction extends BaseAction {
 		mNameTable.put(Locale.ENGLISH, "LiftOff");
 		mVocalCommandTable.put(Locale.FRENCH, "d�colle");
 		mVocalCommandTable.put(Locale.ENGLISH, "lift-off");
+		mDescriptionTable.put(Locale.FRENCH, "Permet au drone de decoller");
+		mDescriptionTable.put(Locale.ENGLISH, "Let the drone lift off");
 	}
 	
 	@Override public void run(){
