@@ -1,0 +1,11 @@
+h1. Ostis - Fly the Parrot AR.Drone with your voice.
+
+An end-of-studies project of five students from the "ECE Paris":http://www.ece.fr/ engineering school. Follow our progress on "Twitter":https://twitter.com/OstisProject, we will be posting daliy updates about the challenges we face and how we overcome them.
+
+h2. Introduction
+
+The developpement of this project was scheduled for the month of january 2014. Given the short timeframe, project goals and details have been established before. The end-result will be an android application, able to perform speech recognition to identify orders that will be passed as basic actions to the "AR.Drone":http://ardrone2.parrot.com/.
+
+h2. Installation
+
+Detailed installation instructions are yet to come in the wiki.
