@@ -1,8 +1,5 @@
 package fr.ece.ostis.actions;
 
-import java.util.HashMap;
-import java.util.Locale;
-
 /**
  * TODO
  * @author Nicolas Schurando

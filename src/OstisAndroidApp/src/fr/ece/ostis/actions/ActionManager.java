@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,8 +30,8 @@ public class ActionManager{
 	private Hashtable<String, ComposedAction> mComposedActionTable;
 	private Hashtable<String, BaseAction> mBaseActionTable;
 	private SpeechComparator mSpeechComparator;
-	private Locale mLocale = null;
-	protected Context mContext = null;
+	private Locale mLocale;
+	private Context mContext;
 	
 	
 	/**
@@ -48,10 +45,9 @@ public class ActionManager{
 		mBaseActionTable = new Hashtable<String, BaseAction>();
 		mSpeechComparator = new SpeechComparator(mLocale);
 		
-		// initialize/add baseActions here
+		// TODO declare/initialize/add baseActions here :
 		BaseAction liftOffAction = new LiftOffAction();
 		mBaseActionTable.put(liftOffAction.getId(), liftOffAction);
-		//
 	}
 	
 	
@@ -161,9 +157,8 @@ public class ActionManager{
 		}
 	}
 
-	/////////////
-	public String test = "";
-	////////////////
+	
+	
 	/**
 	 * TODO
 	 */
@@ -184,7 +179,6 @@ public class ActionManager{
 			Editor preferencesEditor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
 			preferencesEditor.putString("composedActions", jsonActions.toString());
 			preferencesEditor.commit();
-			test = jsonActions.toString();///////////////
 			return true;
 		}
 		catch (JSONException e) {
@@ -200,9 +194,7 @@ public class ActionManager{
 	public boolean loadComposedActions(){
 		try {
 			mComposedActionTable.clear();
-			
 			String actionsString = PreferenceManager.getDefaultSharedPreferences(mContext).getString("composedActions", "nothing");
-			test = actionsString;/////////
 			JSONArray jsonComposedActions = new JSONArray(actionsString);
 			int numberOfActions = jsonComposedActions.length();
 			

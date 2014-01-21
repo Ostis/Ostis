@@ -15,7 +15,7 @@ public abstract class Action{
 	 * TODO Docu
 	 */
 	protected String mId;
-	protected Hashtable<Locale, String> mNameTable; // TODO Change names for different languages ?
+	protected Hashtable<Locale, String> mNameTable;
 	protected Hashtable<Locale, String> mVocalCommandTable;
 
 	/**
