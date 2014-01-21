@@ -27,7 +27,7 @@ import android.widget.ToggleButton;
  * @author Nicolas Schurando
  * @version 2014-01-13
  */
-public class MainActivity extends Activity{
+public class DebugActivity extends Activity{
 
 	
 	/** TODO */
@@ -100,15 +100,15 @@ public class MainActivity extends Activity{
 		
 		
 		/** Reference to the activity. */
-		private final WeakReference<MainActivity> mActivityReference;
+		private final WeakReference<DebugActivity> mActivityReference;
 		
 		
 		/**
 		 * Constructor.
-		 * @param service
+		 * @param activity
 		 */
-		IncomingMessageFromServiceHandler(MainActivity activity){
-			mActivityReference = new WeakReference<MainActivity>(activity);
+		IncomingMessageFromServiceHandler(DebugActivity activity){
+			mActivityReference = new WeakReference<DebugActivity>(activity);
 		}
 		
     	
@@ -121,9 +121,9 @@ public class MainActivity extends Activity{
 			Log.d("MainActivity <-> OstisService", "handleMessage | what = " + String.valueOf(message.what));
         	
 			// Retrieve the activity instance
-        	MainActivity activity = mActivityReference.get();
+        	DebugActivity activity = mActivityReference.get();
         	
-            switch (message.what){
+            switch(message.what){
             
 	            case OstisService.MSG_NETWORK_STATUS_UPDATED:
 	            	((ImageView) activity.findViewById(R.id.imageViewWiFi)).setImageResource(R.drawable.icon_tick);
@@ -133,6 +133,7 @@ public class MainActivity extends Activity{
 	            default:
 	                super.handleMessage(message);
             }
+            
         }
         
     }
@@ -148,7 +149,7 @@ public class MainActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		
 		// Set content view
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_debug_nico);
 
 		// Start voice recognition service
 	    doStartService();
@@ -240,7 +241,7 @@ public class MainActivity extends Activity{
     protected void doStartService(){
     	
     	// Start service via intent
-    	Intent _ServiceIntent = new Intent(MainActivity.this, OstisService.class);
+    	Intent _ServiceIntent = new Intent(DebugActivity.this, OstisService.class);
     	startService(_ServiceIntent);
     	
     }
