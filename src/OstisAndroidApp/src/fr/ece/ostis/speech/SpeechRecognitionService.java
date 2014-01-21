@@ -25,34 +25,73 @@ import android.util.Log;
  * TODO
  * The Jelly been workaround is based on the work of Hoan Nguyen at http://stackoverflow.com/questions/14940657/android-speech-recognition-as-a-service-on-android-4-1-4-2/14950616#14950616.
  * @author Nicolas Schurando
- * @version 2014-01-13
+ * @version 2014-01-17
  */
 public class SpeechRecognitionService extends Service{
 	
 	
-	/**
-	 *  Audio and speech recognition related variables.
-	 */
+	/** Audio manager for mute hack. */
 	protected AudioManager mAudioManager; 
+	
+	
+	/** Speech recognizer. */
 	protected SpeechRecognizer mSpeechRecognizer;
+	
+	
+	/** Speech recognizer intent contains the parameters of the recognition. */
 	protected Intent mSpeechRecognizerIntent;
+	
+	
+	/** Is listening flag. */
 	protected boolean mIsListening;
+	
+	
+	/** Is countdown on flag. */
 	protected volatile boolean mIsCountDownOn;
 	
 	
-	/**
-	 * List of client messengers.
-	 */
-	protected ArrayList<Messenger> mClientMessengers = new ArrayList<Messenger>();
+	/** List of client messengers. */
+	protected ArrayList<Messenger> mMessengersToClients = new ArrayList<Messenger>();
 	
 	
-	/**
-	 * Target we publish for clients to send messages to IncomingHandler.
-	 */
-	final Messenger mServiceMessenger = new Messenger(new IncomingMessageFromClientHandler(this));
+	/** Target we publish for clients to send messages to IncomingHandler. */
+	final Messenger mMessengerFromClients = new Messenger(new IncomingMessageFromClientHandler(this));
+
 	
+	/** Count down timer for Jelly Bean work around. */
+	protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000){
+
+		@Override public void onTick(long millisUntilFinished){ }
+
+		@Override public void onFinish(){
+			
+			// Log
+			Log.d("SpeechRecognitionService/CountDownTimer", "onFinish");
+			
+			// Reset flags
+			mIsCountDownOn = false;
+			mIsListening = false;
+			
+			try{
+				
+				// Cancel current listening
+				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
+				mMessengerFromClients.send(message);
+				
+				// Launch new listening
+				message = Message.obtain(null, MSG_START_LISTENING);
+				mMessengerFromClients.send(message);
+				
+			}catch(RemoteException e){
+				e.printStackTrace();
+			}
+			
+		}
+		
+	};
+
 	
-	/**
+	/*
 	 * Message codes.
 	 */
 	public static final int MSG_REGISTER_CLIENT = 1;
@@ -80,9 +119,12 @@ public class SpeechRecognitionService extends Service{
 		// Retrieve speech recognizer
 		mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
 		mSpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
+		
+		// Create speech recognizer intent
 		mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 		mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 		mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+		mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 		
 	}
 	
@@ -113,8 +155,14 @@ public class SpeechRecognitionService extends Service{
 	protected static class IncomingMessageFromClientHandler extends Handler{
 		
 		
-		// Retrieving the speech recognition service reference
+		/** Reference to the speech recognition service. */
 		private final WeakReference<SpeechRecognitionService> mServiceReference; 
+		
+		
+		/**
+		 * Constructor.
+		 * @param service
+		 */
 		IncomingMessageFromClientHandler(SpeechRecognitionService service){
 			mServiceReference = new WeakReference<SpeechRecognitionService>(service);
 		}
@@ -138,18 +186,18 @@ public class SpeechRecognitionService extends Service{
 				// Register a new client
 				case MSG_REGISTER_CLIENT:
 					Log.d("SpeechRecognitionService", "handleMessage -> New client registered");
-					service.mClientMessengers.add(message.replyTo);
+					service.mMessengersToClients.add(message.replyTo);
 					break;
 					
 				// Unregister a client
 				case MSG_UNREGISTER_CLIENT:
 					Log.d("SpeechRecognitionService", "handleMessage -> Removing existing client");
-					service.mClientMessengers.remove(message.replyTo);
+					service.mMessengersToClients.remove(message.replyTo);
 					break;
 			
 				// Start listening in background
 				case MSG_START_LISTENING:
-				
+					
 					// Workaround to turn off beep sound
 					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
 						service.mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
@@ -162,6 +210,8 @@ public class SpeechRecognitionService extends Service{
 						Log.d("SpeechRecognitionService", "handleMessage -> Starting listening");
 						service.mSpeechRecognizer.startListening(service.mSpeechRecognizerIntent);
 						service.mIsListening = true;
+					}else{
+						Log.e("SpeechRecognitionService", "handleMessage -> Already listening");
 					}
 					
 					break;
@@ -176,45 +226,6 @@ public class SpeechRecognitionService extends Service{
 		}
 		
 	}
-	
-
-	/**
-	 * Count down timer for Jelly Bean work around.
-	 */
-	protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000){
-
-		@Override public void onTick(long millisUntilFinished){
-			
-			// Log
-			Log.d("SpeechRecognitionService/CountDownTimer", "onTick");
-
-		}
-
-		@Override public void onFinish(){
-			
-			// Log
-			Log.d("SpeechRecognitionService/CountDownTimer", "onFinish");
-			
-			// Reset flag
-			mIsCountDownOn = false;
-			
-			try{
-				
-				// Cancel current listening
-				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
-				mServiceMessenger.send(message);
-				
-				// Launch new listening
-				message = Message.obtain(null, MSG_START_LISTENING);
-				mServiceMessenger.send(message);
-				
-			}catch(RemoteException e){
-				e.printStackTrace();
-			}
-			
-		}
-		
-	};
 
 
 	/**
@@ -262,8 +273,8 @@ public class SpeechRecognitionService extends Service{
 
 		
 		/**
-		 * TODOerror
-		 * @param params
+		 * TODO
+		 * @param error
 		 */
 		@Override public void onError(int error){
 			
@@ -292,14 +303,23 @@ public class SpeechRecognitionService extends Service{
 			
 			try{
 				
-				// Start listening again
-				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mServiceMessenger.send(message);
+				// Cancel current listening
+				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
+				mMessengerFromClients.send(message);
 				
 			}catch (RemoteException e){
 				e.printStackTrace();
 			}
 			
+			try{
+				
+				// Start listening again
+				Message message = Message.obtain(null, MSG_START_LISTENING);
+				mMessengerFromClients.send(message);
+				
+			}catch (RemoteException e){
+				e.printStackTrace();
+			}
 			
 		}
 
@@ -356,6 +376,9 @@ public class SpeechRecognitionService extends Service{
 			// Extract results
 			ArrayList<String> sentences = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 			float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+			
+			// Prevent null pointer exception
+			if(sentences == null || scores == null) return;
 
 			// Log
 			for (int i = 0; i < sentences.size(); i++){
@@ -369,7 +392,7 @@ public class SpeechRecognitionService extends Service{
 				
 				// Start listening again
 				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mServiceMessenger.send(message);
+				mMessengerFromClients.send(message);
 				
 			}catch (RemoteException e){
 				e.printStackTrace();
@@ -380,15 +403,15 @@ public class SpeechRecognitionService extends Service{
 			Message message = Message.obtain(null, MSG_FINISHED_WITH_RESULTS);
 			messageBundle.putStringArrayList("SpeechRecognitionResult", sentences);
 			message.setData(messageBundle);
-			for(int clientsIterator = mClientMessengers.size() - 1; clientsIterator >= 0; clientsIterator--){
+			for(int clientsIterator = mMessengersToClients.size() - 1; clientsIterator >= 0; clientsIterator--){
 				
 				// Try to send the message to the client. If an exception is raised, it means that the client is dead. So we should
 				// remove it from the list. We are going through the list from back to front so this is safe to do inside the loop.
 				try{
-					mClientMessengers.get(clientsIterator).send(message);
+					mMessengersToClients.get(clientsIterator).send(message);
 				}catch(RemoteException e){
 					e.printStackTrace();
-	                mClientMessengers.remove(clientsIterator);
+	                mMessengersToClients.remove(clientsIterator);
 				}
 			}
 			
@@ -411,7 +434,7 @@ public class SpeechRecognitionService extends Service{
 	@Override
 	public IBinder onBind(Intent intent){
 		Log.d("SpeechRecognitionService", "onBind");
-		return mServiceMessenger.getBinder();
+		return mMessengerFromClients.getBinder();
 	}
 	
 }
