@@ -1,6 +1,6 @@
-h1. Ostis - Fly your Parrot AR.Drone with your own voice.
+h1. Ostis - Fly the Parrot AR.Drone with your voice.
 
-An end-of-studies project of five students from the "ECE Paris":http://www.ece.fr/ engineering school. Follow our progress on "Twitter":https://twitter.com/OstisProject, we wil post daliy updates about the challenges we face and how we managed to overcome them.
+An end-of-studies project of five students from the "ECE Paris":http://www.ece.fr/ engineering school. Follow our progress on "Twitter":https://twitter.com/OstisProject, we will be posting daliy updates about the challenges we face and how we overcome them.
 
 h2. Introduction
 
