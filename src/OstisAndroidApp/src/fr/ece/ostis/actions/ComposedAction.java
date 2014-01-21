@@ -1,16 +1,17 @@
 package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Locale;
+import java.util.UUID;
 
 
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-14
+ * @version 2014-01-21
  */
-public abstract class ComposedAction extends Action{
+public class ComposedAction extends Action{
 	
 	/**
 	 * TODO
@@ -19,16 +20,12 @@ public abstract class ComposedAction extends Action{
 	
 	
 	/**
-	 * TODO Docu
-	 * @param id
-	 * @param name
-	 * @param vocalCommands
+	 * 
+	 * @param actions
 	 */
-	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands){
-		mId = id;
-		mName = name;
-		mVocalCommands = vocalCommands;
-		mActionList = new ArrayList<Action>();
+	public ComposedAction(ArrayList<Action> actions){
+		super(generateId());
+		mActionList = actions;
 	}
 	
 	
@@ -39,10 +36,21 @@ public abstract class ComposedAction extends Action{
 	 * @param vocalCommands
 	 * @param actions
 	 */
-	public ComposedAction(int id, String name, HashMap<Locale, String> vocalCommands, ArrayList<Action> actions){
-		mId = id;
-		mName = name;
-		mVocalCommands = vocalCommands;
+	public ComposedAction(String id, ArrayList<Action> actions){
+		super(id);
+		mActionList = actions;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param id
+	 * @param name
+	 * @param vocalCommmands
+	 * @param actions
+	 */
+	public ComposedAction(Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommmands, Hashtable<Locale, String> descriptions, ArrayList<Action> actions){
+		super(generateId(), names, descriptions, vocalCommmands);
 		mActionList = actions;
 	}
 	
@@ -53,6 +61,17 @@ public abstract class ComposedAction extends Action{
 	 */
 	public ArrayList<Action> getActions(){
 		return mActionList;
+	}
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public ArrayList<String> getActionsId(){
+		ArrayList<String> actionsId = new ArrayList<String>();
+		for (Action action : mActionList)
+			actionsId.add(action.getId());
+		return actionsId;
 	}
 	
 	
@@ -81,6 +100,15 @@ public abstract class ComposedAction extends Action{
 	 */
 	public void removeAction(Action action){
 		mActionList.remove(action);
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	private static String generateId(){
+		return UUID.randomUUID().toString().substring(0, 8);
 	}
 	
 	
