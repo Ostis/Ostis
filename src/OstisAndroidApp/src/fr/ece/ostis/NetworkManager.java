@@ -54,7 +54,16 @@ public class NetworkManager {
 	/** TODO */
     private AtomicBoolean mHipriEnabled = new AtomicBoolean(false);
 	
-	
+    
+    /*
+     * TODO
+     */
+    public static final int KEY_MOBILE = 1;
+    public static final int KEY_WIFI = 2;
+	public static final int STATUS_CONNECTED = 1;
+	public static final int STATUS_DISCONNECTED = 2;
+    
+    
 	/**
 	 * TODO
 	 * @param context

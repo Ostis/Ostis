@@ -1,9 +1,13 @@
 package fr.ece.ostis;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
+
+import com.codeminders.ardrone.ARDrone;
 
 import fr.ece.ostis.NetworkManager.InvokeFailedException;
 import fr.ece.ostis.lang.LanguageManager;
@@ -14,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -36,7 +41,7 @@ import android.util.Log;
  * TODO Include reference to the drone proxy.
  * TODO Add a timer to relaunch enableHipri every 50 seconds
  * @author Nicolas Schurando
- * @version 2014-01-14
+ * @version 2014-01-22
  */
 public class OstisService extends Service{
 	
@@ -52,12 +57,18 @@ public class OstisService extends Service{
 	/** Message code : the status of the network has changed */
 	public static final int MSG_NETWORK_STATUS_UPDATED = 3;
 	
-
+	
 	public static final int MSG_HIPRI_START = 4;
 	public static final int MSG_HIPRI_STOP = 5;
 	public static final int MSG_SPEECH_START = 6;
 	public static final int MSG_SPEECH_STOP = 7;
 	public static final int MSG_VOICE_RESULTS = 8;
+	public static final int MSG_DRONE_CONNECT = 10;
+	public static final int MSG_DRONE_CONNECTION_SUCCESS = 11;
+	public static final int MSG_DRONE_CONNECTION_FAILED = 12;
+	public static final int MSG_DRONE_DISCONNECT = 13;
+	public static final int MSG_DRONE_TAKEOFF = 14;
+	public static final int MSG_DRONE_LAND = 15;
 	
 	
 	/** List of client messengers. */
@@ -94,6 +105,10 @@ public class OstisService extends Service{
 	
 	/** Reference to the network manager. */
 	protected NetworkManager mNetworkManager = null;
+	
+	
+	/** Reference to the javadrone api */
+	protected static ARDrone mDrone = null;
 	
 
     /** Class for monitoring the state of the speech recognition service. */
@@ -243,9 +258,11 @@ public class OstisService extends Service{
 				Log.d("OstisService", "prepareNetwork -> disabling wifi");
 				mNetworkManager.disableWifi();
 				Log.d("OstisService", "prepareNetwork -> wifi disabled");
+				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_DISCONNECTED, NetworkManager.STATUS_DISCONNECTED);
 				Log.d("OstisService", "prepareNetwork -> enabling mobile");
 				mNetworkManager.enableMobileConnection();
 				Log.d("OstisService", "prepareNetwork -> mobile enabled");
+				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_CONNECTED, NetworkManager.STATUS_DISCONNECTED);
 			}catch(InvokeFailedException e){
 				e.printStackTrace();
 				mException = e;
@@ -284,6 +301,7 @@ public class OstisService extends Service{
 			Log.d("OstisService", "prepareNetwork -> enabling wifi");
 			mNetworkManager.enableWifi();
 			Log.d("OstisService", "prepareNetwork -> wifi enabled");
+			OstisService.this.publishNetworkStatus(NetworkManager.STATUS_CONNECTED, NetworkManager.STATUS_CONNECTED);
 			Log.d("OstisService", "prepareNetwork -> obtaining wifi lock");
 			mNetworkManager.acquireWifiLock(); // TODO Release wakelock at some point
 			Log.d("OstisService", "prepareNetwork -> wifi wake locked");
@@ -303,6 +321,31 @@ public class OstisService extends Service{
 		
 	}
 	
+	
+	/**
+	 * TODO
+	 * @param mobileStatus
+	 * @param wifiStatus
+	 */
+	protected void publishNetworkStatus(int mobileStatus, int wifiStatus){
+		
+		Bundle messageBundle = new Bundle();
+		messageBundle.putInt("StatusMobile", mobileStatus);
+		messageBundle.putInt("StatusWifi", wifiStatus);
+        Message message = Message.obtain(null, MSG_NETWORK_STATUS_UPDATED);
+        message.setData(messageBundle);
+		
+		for(int clientsIterator = mMessengersToClients.size() - 1; clientsIterator >= 0; clientsIterator--){
+		
+	        try{
+	        	mMessengersToClients.get(clientsIterator).send(message);
+	        }catch(RemoteException e){
+	        	e.printStackTrace();
+	        }
+	        
+		}
+		
+	}
 	
 	/**
 	 * 
@@ -340,7 +383,7 @@ public class OstisService extends Service{
 	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-14
+	 * @version 2014-01-22
 	 */
 	protected static class IncomingMessageFromClientHandler extends Handler{
 		
@@ -414,6 +457,34 @@ public class OstisService extends Service{
 			        	e.printStackTrace();
 			        }
 					break;
+					
+				case MSG_DRONE_CONNECT:
+					service.doDroneConnect();
+					break;
+					
+				case MSG_DRONE_DISCONNECT:
+					service.doDroneDisconnect();
+					break;
+					
+				case MSG_DRONE_TAKEOFF:
+					try {
+						Log.d("OstisService", "doDroneTakeoff");
+						if(mDrone != null) mDrone.takeOff();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+					
+				case MSG_DRONE_LAND:
+					try {
+						Log.d("OstisService", "doDroneLand");
+						if(mDrone != null) mDrone.land();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
 			
 			}
 			
@@ -425,7 +496,7 @@ public class OstisService extends Service{
 	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-1
+	 * @version 2014-01-22
 	 */
 	protected static class IncomingMessageFromSpeechRecognizer extends Handler{
 		
@@ -482,7 +553,6 @@ public class OstisService extends Service{
 	}
 
 	
-	
     /**
      * Binds to the speech recognition service.
      */
@@ -511,4 +581,109 @@ public class OstisService extends Service{
     	}
     }
 	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-01-22
+	 */
+	protected class DroneConnectionTask extends AsyncTask<byte[], Integer, Boolean>{
+
+		@Override protected Boolean doInBackground(byte[]... ips){
+			
+			byte[] droneIp = ips[0];
+			
+			try{
+				
+				OstisService.mDrone = new ARDrone(InetAddress.getByAddress(droneIp), 10000, 60000);
+				OstisService.mDrone.connect();
+				OstisService.mDrone.clearEmergencySignal();
+				OstisService.mDrone.trim();
+				OstisService.mDrone.waitForReady(10000);
+				OstisService.mDrone.playLED(1, 10, 4);
+				OstisService.mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
+				OstisService.mDrone.setCombinedYawMode(true);
+				return true;
+				
+			}catch(Exception e){
+				Log.e("DroneConnectionTask", "Failed to connect to drone.", e);
+				
+				try{
+					
+					OstisService.mDrone.clearEmergencySignal();
+					OstisService.mDrone.clearImageListeners();
+					OstisService.mDrone.clearNavDataListeners();
+					OstisService.mDrone.clearStatusChangeListeners();
+					OstisService.mDrone.disconnect();
+					
+				}catch(Exception e2){
+					Log.w("DroneConnectionTask", "Failed to clear drone state.", e2);
+				}
+	
+			}
+			
+			return false;
+		}
+
+		protected void onPostExecute(Boolean success){
+			if(success.booleanValue()){
+				onDroneConnected();
+			}else{
+				onDroneConnectionFailed();
+			}
+		}
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void doDroneConnect(){
+		Log.d("OstisService", "doDroneConnect");
+		(new DroneConnectionTask()).execute(new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1}); 
+	}	
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void doDroneDisconnect(){
+		Log.d("OstisService", "doDroneDisconnect");
+		
+		if(OstisService.mDrone == null) return;
+		
+		try{
+			OstisService.mDrone.clearEmergencySignal();
+			OstisService.mDrone.clearImageListeners();
+			OstisService.mDrone.clearNavDataListeners();
+			OstisService.mDrone.clearStatusChangeListeners();
+		}catch(Exception e){
+			Log.w("OstisService", "Failed to clear drone state.", e);
+		}
+		
+		try{
+			OstisService.mDrone.disconnect();
+		}catch(Exception e){
+			Log.w("OstisService", "Failed to disconnect drone.", e);
+		}
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void onDroneConnected(){
+		Log.d("OstisService", "onDroneConnected");
+		// TODO
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void onDroneConnectionFailed(){
+		Log.d("OstisService", "onDroneConnectionFailed");
+		// TODO
+	}
 }
