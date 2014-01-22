@@ -1,8 +1,6 @@
 package fr.ece.ostis.ui;
 
 import fr.ece.ostis.R;
-import fr.ece.ostis.R.layout;
-import fr.ece.ostis.R.menu;
 import android.os.Bundle;
 import android.os.Message;
 import android.app.Activity;
