@@ -32,18 +32,6 @@ public abstract class Action{
 		mDescriptionTable = new Hashtable<Locale, String>();
 	}
 	
-	/**
-	 * TODO
-	 * @param id
-	 * @param name
-	 * @param vocalCommands
-	 */
-	public Action(String id, Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommands, Hashtable<Locale, String> descriptions) {
-		mId = id;
-		mNameTable = names;
-		mVocalCommandTable = vocalCommands;
-		mDescriptionTable = descriptions;
-	}
 
 	/**
 	 * TODO

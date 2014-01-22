@@ -1,15 +1,13 @@
 package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Locale;
 import java.util.UUID;
 
 
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-21
+ * @version 2014-01-23
  */
 public class ComposedAction extends Action{
 	
@@ -23,9 +21,9 @@ public class ComposedAction extends Action{
 	 * 
 	 * @param actions
 	 */
-	public ComposedAction(ArrayList<Action> actions){
+	public ComposedAction(){
 		super(generateId());
-		mActionList = actions;
+		mActionList = new ArrayList<Action>();
 	}
 	
 	
@@ -36,22 +34,9 @@ public class ComposedAction extends Action{
 	 * @param vocalCommands
 	 * @param actions
 	 */
-	public ComposedAction(String id, ArrayList<Action> actions){
+	public ComposedAction(String id){
 		super(id);
-		mActionList = actions;
-	}
-	
-	
-	/**
-	 * TODO
-	 * @param id
-	 * @param name
-	 * @param vocalCommmands
-	 * @param actions
-	 */
-	public ComposedAction(Hashtable<Locale, String> names, Hashtable<Locale, String> vocalCommmands, Hashtable<Locale, String> descriptions, ArrayList<Action> actions){
-		super(generateId(), names, descriptions, vocalCommmands);
-		mActionList = actions;
+		mActionList = new ArrayList<Action>();
 	}
 	
 	
@@ -62,6 +47,16 @@ public class ComposedAction extends Action{
 	public ArrayList<Action> getActions(){
 		return mActionList;
 	}
+	
+	
+	/**
+	 * 
+	 * @param actionList
+	 */
+	public void setActions(ArrayList<Action> actionList){
+		mActionList = actionList;
+	}
+	
 	
 	/**
 	 * TODO

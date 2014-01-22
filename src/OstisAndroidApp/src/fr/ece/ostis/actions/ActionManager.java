@@ -19,7 +19,7 @@ import fr.ece.ostis.speech.SpeechComparator;
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-21
+ * @version 2014-01-23
  */
 public class ActionManager{
 	
@@ -90,7 +90,7 @@ public class ActionManager{
 	 * @param ids
 	 * @return
 	 */
-	public ArrayList<Action> getActionsByIds(ArrayList<String> ids){
+	public ArrayList<Action> getActions(ArrayList<String> ids){
 		ArrayList<Action> actions = new ArrayList<Action>();
 		for (String id : ids)
 			actions.add(getAction(id));
@@ -106,8 +106,8 @@ public class ActionManager{
 	public Action getAction(String id){
 		ComposedAction composedAction = mComposedActionTable.get(id);
 		BaseAction baseAction = mBaseActionTable.get(id);
-		if (composedAction != null) return composedAction;
-		else return baseAction;
+		if (baseAction != null) return baseAction;
+		else return composedAction;
 	}
 	
 	
@@ -199,16 +199,18 @@ public class ActionManager{
 			String actionsString = PreferenceManager.getDefaultSharedPreferences(mContext).getString("composedActions", "nothing");
 			JSONArray jsonComposedActions = new JSONArray(actionsString);
 			int numberOfActions = jsonComposedActions.length();
+			Hashtable<String, ArrayList<String>> corresTable = new Hashtable<String, ArrayList<String>>();
 			
 			for (int i = 0; i < numberOfActions; i++)
 			{
 				JSONObject jsonObject = (JSONObject) jsonComposedActions.get(i);
 				String id = jsonObject.getString("id");
 				JSONArray jsonActionsId = jsonObject.getJSONArray("actionIds");
-				ArrayList<Action> actionsId= new ArrayList<Action>();
+				ArrayList<String> actionsId= new ArrayList<String>();
 				for (int j = 0; j < jsonActionsId.length(); j++)
-					actionsId.add(getAction(jsonActionsId.getString(j)));
-				ComposedAction composedAction = new ComposedAction(id, actionsId);
+					actionsId.add(jsonActionsId.getString(j));
+				corresTable.put(id, actionsId);
+				ComposedAction composedAction = new ComposedAction(id);
 				JSONArray jsonKeys = jsonObject.getJSONArray("vocalCommandKeys");
 				JSONArray jsonValues = jsonObject.getJSONArray("vocalCommandValues");
 				for (int j = 0; j < jsonKeys.length(); j++)
@@ -223,6 +225,10 @@ public class ActionManager{
 					composedAction.setDescription(new Locale(jsonKeys.getString(j)), jsonValues.getString(j));
 				addComposedAction(composedAction);
 			}
+			ArrayList<String> idsList = new ArrayList<String>(corresTable.keySet());
+			ArrayList<ArrayList<String>> actionIdsList = new ArrayList<ArrayList<String>>(corresTable.values());
+			for (int i = 0; i < idsList.size(); i++)
+				((ComposedAction)getAction(idsList.get(i))).setActions(getActions(actionIdsList.get(i)));
 			return true;
 		}
 		catch (JSONException e) {
