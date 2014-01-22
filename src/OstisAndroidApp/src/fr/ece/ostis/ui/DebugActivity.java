@@ -1,6 +1,9 @@
 package fr.ece.ostis.ui;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+
+import fr.ece.ostis.NetworkManager;
 import fr.ece.ostis.OstisService;
 import fr.ece.ostis.R;
 import android.os.Bundle;
@@ -113,7 +116,7 @@ public class DebugActivity extends Activity{
 		
     	
     	/**
-    	 * 
+    	 * TODO
     	 */
         @Override public void handleMessage(Message message){
 			
@@ -126,9 +129,27 @@ public class DebugActivity extends Activity{
             switch(message.what){
             
 	            case OstisService.MSG_NETWORK_STATUS_UPDATED:
-	            	((ImageView) activity.findViewById(R.id.imageViewWiFi)).setImageResource(R.drawable.icon_tick);
-	            	((ImageView) activity.findViewById(R.id.ImageView3G)).setImageResource(R.drawable.icon_tick);
+	            	
+	            	if( message.getData() == null) break;
+	            	
+	            	int statusMobile = message.getData().getInt("StatusMobile");
+	            	int statusWifi = message.getData().getInt("StatusWifi");
+	            
+            		if(statusWifi == NetworkManager.STATUS_CONNECTED) ((ImageView) activity.findViewById(R.id.imageViewWiFi)).setImageResource(R.drawable.icon_tick);
+            		else ((ImageView) activity.findViewById(R.id.imageViewWiFi)).setImageResource(R.drawable.icon_cross);
+            		
+            		if(statusMobile == NetworkManager.STATUS_CONNECTED) ((ImageView) activity.findViewById(R.id.ImageView3G)).setImageResource(R.drawable.icon_tick);
+            		else ((ImageView) activity.findViewById(R.id.ImageView3G)).setImageResource(R.drawable.icon_cross);
+	            	
 	                break;
+	            	
+	            case OstisService.MSG_DRONE_CONNECTION_SUCCESS:
+	            	// TODO
+	            	break;
+	                
+	            case OstisService.MSG_DRONE_CONNECTION_FAILED:
+	            	// TODO
+	            	break;
 	                
 	            default:
 	                super.handleMessage(message);
@@ -179,6 +200,75 @@ public class DebugActivity extends Activity{
 			public void onClick(View v) {
 		        Message _Message = new Message();
 		        _Message.what = (_SpeechButton.isChecked())?OstisService.MSG_SPEECH_START:OstisService.MSG_SPEECH_STOP; 
+
+		        try{
+		        	mMessengerToOstisService.send(_Message);
+		        }catch (RemoteException e){
+		            e.printStackTrace();
+		        }
+			}
+		});
+	    
+	    // Set callback on button
+	    final Button _ConnectButton = (Button) findViewById(R.id.buttonDroneConnect);
+	    _ConnectButton.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v) {
+		        Message _Message = new Message();
+		        _Message.what = OstisService.MSG_DRONE_CONNECT; 
+
+		        try{
+		        	mMessengerToOstisService.send(_Message);
+		        }catch (RemoteException e){
+		            e.printStackTrace();
+		        }
+			}
+		});
+	    
+	    // Set callback on button
+	    final Button _DisconnectButton = (Button) findViewById(R.id.buttonDroneDisconnect);
+	    _DisconnectButton.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v) {
+		        Message _Message = new Message();
+		        _Message.what = OstisService.MSG_DRONE_DISCONNECT; 
+
+		        try{
+		        	mMessengerToOstisService.send(_Message);
+		        }catch (RemoteException e){
+		            e.printStackTrace();
+		        }
+			}
+		});
+	    
+	    // Set callback on button
+	    final Button _TakeoffButton = (Button) findViewById(R.id.ButtonDroneTakeoff);
+	    _TakeoffButton.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v) {
+		        Message _Message = new Message();
+		        _Message.what = OstisService.MSG_DRONE_TAKEOFF; 
+
+		        try{
+		        	mMessengerToOstisService.send(_Message);
+		        }catch (RemoteException e){
+		            e.printStackTrace();
+		        }
+			}
+		});
+	    
+	    
+	    // Set callback on button
+	    final Button _LandButton = (Button) findViewById(R.id.ButtonDroneLand);
+	    _LandButton.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v) {
+		        Message _Message = new Message();
+		        _Message.what = OstisService.MSG_DRONE_LAND; 
 
 		        try{
 		        	mMessengerToOstisService.send(_Message);

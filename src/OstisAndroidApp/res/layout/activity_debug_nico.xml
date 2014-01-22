@@ -1,7 +1,8 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -9,19 +10,15 @@
     tools:context=".DebugActivity" >
 
     <LinearLayout
-        android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
         android:layout_margin="5dp" >
 
         <ImageView
             android:id="@+id/imageViewWiFi"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/icon_tick" />
+            android:src="@drawable/icon_alert" />
 
         <TextView
             android:layout_width="match_parent"
@@ -31,19 +28,15 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout1"
         android:layout_margin="5dp" >
 
         <ImageView
             android:id="@+id/ImageView3G"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:src="@drawable/icon_tick" />
+            android:src="@drawable/icon_alert" />
 
         <TextView
             android:layout_width="match_parent"
@@ -52,34 +45,91 @@
             android:text="3G" />
     </LinearLayout>
 
-    <ToggleButton
-        android:id="@+id/toggleButtonHipri"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:text="ToggleButton" />
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-    <ToggleButton
-        android:id="@+id/toggleButtonSpeech"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:text="Hipri" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/toggleButtonHipri"
-        android:layout_alignParentLeft="true"
-        android:text="Hipri" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Link" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/toggleButtonSpeech"
-        android:layout_alignParentRight="true"
-        android:text="Speech" />
+        <Button
+            android:id="@+id/buttonDroneConnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Connect" />
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/buttonDroneDisconnect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disconnect" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Drone" />
+
+        <Button
+            android:id="@+id/ButtonDroneTakeoff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Takeoff" />
+
+        <Button
+            android:id="@+id/ButtonDroneLand"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Land" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hipri" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonHipri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Speech" />
+
+        <ToggleButton
+            android:id="@+id/toggleButtonSpeech"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hipri" />
+
+    </LinearLayout>
+
+</LinearLayout>

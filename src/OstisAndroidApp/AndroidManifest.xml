@@ -21,7 +21,20 @@
         android:allowBackup="true"
         android:icon="@drawable/icon_ostis"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
+        
+        <service
+            android:name="fr.ece.ostis.OstisService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <service
+            android:name="fr.ece.ostis.speech.SpeechRecognitionService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+        
         <activity
             android:name="fr.ece.ostis.ui.DebugActivity"
             android:label="@string/app_name"
@@ -29,35 +42,21 @@
             android:windowSoftInputMode="stateAlwaysHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name="fr.ece.ostis.speech.SpeechRecognitionService"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
-        <service
-            android:name="fr.ece.ostis.OstisService"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
 
         <activity
             android:name="fr.ece.ostis.ui.HomeActivity"
-            android:label="@string/title_activity_home" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
         </activity>
+        
         <activity
             android:name="fr.ece.ostis.ui.FlyActivity"
-            android:label="@string/title_activity_fly" >
+            android:label="@string/title_activity_fly">
         </activity>
+        
     </application>
 
 </manifest>
