@@ -65,7 +65,8 @@ public class ComposedAction extends Action{
 	public ArrayList<String> getActionsId(){
 		ArrayList<String> actionsId = new ArrayList<String>();
 		for (Action action : mActionList)
-			actionsId.add(action.getId());
+			if (action != null)
+				actionsId.add(action.getId());
 		return actionsId;
 	}
 	
@@ -112,7 +113,8 @@ public class ComposedAction extends Action{
 	 */
 	@Override public void run(){
 		for (Action action : mActionList)
-			action.run();
+			if (action != null)
+				action.run();
 	}
 	
 }

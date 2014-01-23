@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import fr.ece.ostis.actions.base.LandAction;
 import fr.ece.ostis.actions.base.LiftOffAction;
 import fr.ece.ostis.speech.SpeechComparator;
 
@@ -48,6 +49,8 @@ public class ActionManager{
 		// TODO declare/initialize/add baseActions here :
 		BaseAction liftOffAction = new LiftOffAction();
 		mBaseActionTable.put(liftOffAction.getId(), liftOffAction);
+		BaseAction landAction = new LandAction();
+		mBaseActionTable.put(landAction.getId(), landAction);
 	}
 	
 	
@@ -157,7 +160,6 @@ public class ActionManager{
 		}
 	}
 
-	
 	
 	/**
 	 * TODO

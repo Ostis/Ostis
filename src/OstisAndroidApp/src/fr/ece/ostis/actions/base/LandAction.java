@@ -8,7 +8,7 @@ import fr.ece.ostis.actions.BaseAction;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-14
+ * @version 2014-01-23
  */
 public class LandAction extends BaseAction {
 
