@@ -7,14 +7,22 @@
     <!-- General -->
     <string name="app_name">Ostis</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
 
+    <!-- Debug activity -->
+    <string name="title_activity_debug">Debug</string>
+
+    <!-- Splash activity -->
+    <string name="title_activity_splash">Loading</string>
+    <string name="spash_image_description">Splash image</string>
+    
     <!-- Home activity -->
+    <string name="title_activity_home">Home</string>
     <string name="home_menu_fly">Fly</string>
-    <string name="home_menu_medias">Gallerie</string>
-    <string name="home_menu_commands">Commandes</string>
-    <string name="home_menu_about">A propos</string>
-    <string name="title_activity_home">HomeActivity</string>
-    <string name="title_activity_fly">FlyActivity</string>
+    <string name="home_menu_medias">Gallery</string>
+    <string name="home_menu_commands">Commands</string>
+    <string name="home_menu_about">About</string>
+    
+    <!-- Fly activity -->
+    <string name="title_activity_fly">In flight</string>
 
 </resources>

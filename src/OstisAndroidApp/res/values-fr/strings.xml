@@ -5,13 +5,24 @@
 <resources>
 
     <!-- General -->
+    <string name="app_name">Ostis</string>
     <string name="action_settings">Paramètres</string>
-    <string name="hello_world">Bonjour le monde !</string>
+
+    <!-- Debug activity -->
+    <string name="title_activity_debug">Debug</string>
+
+    <!-- Splash activity -->
+    <string name="title_activity_splash">Chargement</string>
+    <string name="spash_image_description">Splash image</string>
     
     <!-- Home activity -->
+    <string name="title_activity_home">Accueil</string>
     <string name="home_menu_fly">Piloter</string>
     <string name="home_menu_medias">Gallerie</string>
     <string name="home_menu_commands">Commandes</string>
     <string name="home_menu_about">A propos</string>
+    
+    <!-- Fly activity -->
+    <string name="title_activity_fly">En vol</string>
     
 </resources>

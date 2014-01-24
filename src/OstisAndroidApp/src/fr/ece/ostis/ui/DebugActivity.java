@@ -170,7 +170,7 @@ public class DebugActivity extends Activity{
 		super.onCreate(savedInstanceState);
 		
 		// Set content view
-		setContentView(R.layout.activity_debug_nico);
+		setContentView(R.layout.activity_debug);
 
 		// Start voice recognition service
 	    doStartService();
