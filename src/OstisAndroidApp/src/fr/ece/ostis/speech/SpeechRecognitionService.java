@@ -82,11 +82,13 @@ public class SpeechRecognitionService extends Service{
 			}
 
 			// Launch new listening
-			try{
-				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mMessengerFromClients.send(message);
-			}catch(RemoteException e){
-				e.printStackTrace();
+			if(mIsListening){
+				try{
+					Message message = Message.obtain(null, MSG_START_LISTENING);
+					mMessengerFromClients.send(message);
+				}catch(RemoteException e){
+					e.printStackTrace();
+				}
 			}
 			
 		}
@@ -208,8 +210,6 @@ public class SpeechRecognitionService extends Service{
 					
 					// Start listening
 					if (!service.mIsListening){
-						Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening (auto)");
-						service.mSpeechRecognizer.cancel();
 						Log.d("SpeechRecognitionService", "handleMessage -> Starting listening");
 						service.mSpeechRecognizer.startListening(service.mSpeechRecognizerIntent);
 						service.mIsListening = true;
@@ -227,8 +227,18 @@ public class SpeechRecognitionService extends Service{
 					
 					break;
 
-				 case MSG_CANCEL_LISTENING:
+				case MSG_CANCEL_LISTENING:
+					
+					// Log
 					Log.d("SpeechRecognitionService", "handleMessage -> Canceling listening");
+					
+					// Stop the countdown timer
+					if (service.mIsCountDownOn){
+						service.mIsCountDownOn = false;
+						if(service.mNoSpeechCountDown != null) service.mNoSpeechCountDown.cancel();
+					}
+					
+					// Stop speech recognition
 					service.mSpeechRecognizer.cancel();
 					service.mIsListening = false;
 					break;
@@ -313,11 +323,13 @@ public class SpeechRecognitionService extends Service{
 			}
 			
 			// Start listening again
-			try{
-				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mMessengerFromClients.send(message);
-			}catch (RemoteException e){
-				e.printStackTrace();
+			if(mIsListening){
+				try{
+					Message message = Message.obtain(null, MSG_START_LISTENING);
+					mMessengerFromClients.send(message);
+				}catch (RemoteException e){
+					e.printStackTrace();
+				}
 			}
 			
 		}
@@ -384,11 +396,13 @@ public class SpeechRecognitionService extends Service{
 			}
 			
 			// Start listening again
-			try{
-				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mMessengerFromClients.send(message);
-			}catch (RemoteException e){
-				e.printStackTrace();
+			if(mIsListening){
+				try{
+					Message message = Message.obtain(null, MSG_START_LISTENING);
+					mMessengerFromClients.send(message);
+				}catch (RemoteException e){
+					e.printStackTrace();
+				}
 			}
 			
 			// Prevent null pointer exception

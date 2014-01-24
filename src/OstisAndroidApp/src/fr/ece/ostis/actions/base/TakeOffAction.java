@@ -20,7 +20,7 @@ public class TakeOffAction extends BaseAction {
 	 * Public constructor which sets the values for this base action.
 	 */
 	public TakeOffAction(){
-		super("liftOff");
+		super("Takeoff");
 		mNameTable.put(Locale.FRENCH, "Decollage");
 		mNameTable.put(Locale.ENGLISH, "TakeOff");
 		mVocalCommandTable.put(Locale.FRENCH, "décolle");
@@ -35,6 +35,8 @@ public class TakeOffAction extends BaseAction {
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
 		
 		// TODO Implement lift-off base function
+        drone.clearEmergencySignal();
+        drone.trim();
 		drone.takeOff();
 		
 	}

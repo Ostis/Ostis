@@ -14,6 +14,8 @@ import com.codeminders.ardrone.ARDrone;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import fr.ece.ostis.actions.base.EmergencyAction;
 import fr.ece.ostis.actions.base.LandAction;
 import fr.ece.ostis.actions.base.TakeOffAction;
 import fr.ece.ostis.speech.SpeechComparator;
@@ -28,27 +30,23 @@ public class ActionManager{
 	
 	
 	/** TODO */
-	private Hashtable<String, ComposedAction> mComposedActionTable;	
+	private Hashtable<String, ComposedAction> mComposedActionTable;
 	
 	
 	/** TODO */
-	private Hashtable<String, BaseAction> mBaseActionTable;	
+	private Hashtable<String, BaseAction> mBaseActionTable;
 	
 	
 	/** TODO */
-	private SpeechComparator mSpeechComparator;	
+	private SpeechComparator mSpeechComparator;
 	
 	
 	/** TODO */
-	private Locale mLocale;	
+	private Locale mLocale;
 	
 	
 	/** TODO */
-	private Context mContext;	
-	
-	
-	/** Reference to the drone api of the ostis service. */
-	private ARDrone mDrone;
+	private Context mContext;
 	
 	
 	/**
@@ -57,7 +55,7 @@ public class ActionManager{
 	 * @param context
 	 * @param drone
 	 */
-	public ActionManager(Locale locale, Context context, ARDrone drone){
+	public ActionManager(Locale locale, Context context){
 		
 		mLocale = locale;
 		mContext = context;
@@ -72,6 +70,8 @@ public class ActionManager{
 		mBaseActionTable.put(liftOffAction.getId(), liftOffAction);
 		BaseAction landAction = new LandAction();
 		mBaseActionTable.put(landAction.getId(), landAction);
+		BaseAction emergencyAction = new EmergencyAction();
+		mBaseActionTable.put(emergencyAction.getId(), emergencyAction);
 		
 	}
 	
@@ -170,24 +170,28 @@ public class ActionManager{
 	 * @param command
 	 * @return True if a command has been executed, or false otherwise.
 	 */
-	public boolean runCommand(String command){
+	public Action matchCommandToRun(String command){
 		try{
 			for (Action action : mBaseActionTable.values()){
+				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
 				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-					action.run(mDrone);
-					return true;
+					//action.run(mDrone);
+					//Log.d("ActionManager", "runCommand : " + command);
+					return action;
 				}
 			}
 			for (Action action : mComposedActionTable.values()){
+				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
 				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-					action.run(mDrone);
-					return true;
+					//action.run(mDrone);
+					//Log.d("ActionManager", "runCommand : " + command);
+					return action;
 				}
 			}
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 
 	

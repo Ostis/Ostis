@@ -239,6 +239,16 @@ public class NetworkManager {
 	
 	/**
 	 * TODO
+	 * @param dns
+	 */
+	public void setWifiDns(String dns){
+	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, dns);
+	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS2, dns);
+	}
+	
+	
+	/**
+	 * TODO
 	 * @throws Exception 
 	 */
 	protected void enableHipri(ArrayList<Integer> addresses) throws Exception{
@@ -250,6 +260,10 @@ public class NetworkManager {
 			Log.d("NetworkManager", "Hipri already connecting, no need to go further.");
 			return;
 		}
+		
+		// Debug : reset wifi dns
+		Log.d("NetworkManager", "Setting wifi dns");
+		setWifiDns("8.8.8.8");
 		
 	    // (Re-)Activate mobile connection in addition to other connection already activated
 	    Log.d("NetworkManager", "Starting to use Hipri profile.");
@@ -455,6 +469,8 @@ public class NetworkManager {
 	public int lookupHost(String hostname) throws UnknownHostException{
 		
 	    InetAddress inetAddress = InetAddress.getByName(hostname);
+	    
+	    Log.d("NetworkManager", "Host " + hostname + " > " + inetAddress.toString());
 	    
 	    byte[] addrBytes;
 	    int addrInt;

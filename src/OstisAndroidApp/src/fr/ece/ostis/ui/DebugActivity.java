@@ -57,10 +57,10 @@ public class DebugActivity extends Activity{
 	    @Override public void onServiceConnected(ComponentName name, IBinder service){
 
 	        mMessengerToOstisService = new Messenger(service);
-	        Message _Message = Message.obtain(null, OstisService.MSG_REGISTER_CLIENT);
-	        _Message.replyTo = mMessengerFromOstisService;
+	        Message message = Message.obtain(null, OstisService.MSG_REGISTER_CLIENT);
+	        message.replyTo = mMessengerFromOstisService;
 	        try{
-	        	mMessengerToOstisService.send(_Message);
+	        	mMessengerToOstisService.send(message);
 	        }catch (RemoteException e){
 	        		
 	        	// Log

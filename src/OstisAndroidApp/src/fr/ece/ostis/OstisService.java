@@ -10,6 +10,8 @@ import java.util.concurrent.TimeoutException;
 import com.codeminders.ardrone.ARDrone;
 
 import fr.ece.ostis.NetworkManager.InvokeFailedException;
+import fr.ece.ostis.actions.Action;
+import fr.ece.ostis.actions.ActionManager;
 import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.speech.SpeechRecognitionService;
 import android.app.Service;
@@ -69,6 +71,10 @@ public class OstisService extends Service{
 	public static final int MSG_DRONE_DISCONNECT = 13;
 	
 	
+	/** Reference to the action manager. */
+	protected ActionManager mActionManager = null;
+	
+	
 	/** List of client messengers. */
 	protected ArrayList<Messenger> mMessengersToClients = new ArrayList<Messenger>();
 	
@@ -121,10 +127,10 @@ public class OstisService extends Service{
 	    @Override public void onServiceConnected(ComponentName name, IBinder service){
 
 	    	mMessengerToSpeechService = new Messenger(service);
-	        Message _Message = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
-	        _Message.replyTo = mMessengerFromSpeechService;
+	        Message message = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
+	        message.replyTo = mMessengerFromSpeechService;
 	        try{
-	        	mMessengerToSpeechService.send(_Message);
+	        	mMessengerToSpeechService.send(message);
 	        }catch (RemoteException e){
 	        	
 	        	// Log
@@ -173,7 +179,10 @@ public class OstisService extends Service{
 		doBindSpeechService();
 		
 		// Start language manager
-		// TODO
+		mLanguageManager = new LanguageManager();
+		
+		// Start action manager
+		mActionManager = new ActionManager(mLanguageManager.getCurrentLocale(), this);
 		
 		// Start the network manager
 		try{
@@ -233,10 +242,11 @@ public class OstisService extends Service{
 	protected void prepareNetwork(){
 		
 		// Launch task
-		new HostLookupTask().execute(
+		new PrepareNetworkTask().execute(
 				"8.8.8.8",
 				"google.com",
 				"m.google.com",
+				"web.google.com",
 				"dl-ssl.google.com",
 				"dl-ssl.l.google.com",
 				"mobile.google.com",
@@ -245,7 +255,7 @@ public class OstisService extends Service{
 	}
 
 	
-	protected class HostLookupTask extends AsyncTask<String, Void, Void>{
+	protected class PrepareNetworkTask extends AsyncTask<String, Void, Void>{
 	
 		private Exception mException = null;
 		
@@ -353,7 +363,7 @@ public class OstisService extends Service{
 		mNetworkManager.disableWifi();
 		mNetworkManager.stopHipri();
 		try {
-			mNetworkManager.disableMobileConnection();
+			mNetworkManager.enableMobileConnection();
 		} catch (NullPointerException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -517,11 +527,22 @@ public class OstisService extends Service{
 	            	// Log
 	                Log.d("OstisService", "Received speech recognition results.");
 	                
-	                // Debug
-	                ArrayList<String> _Sentences = message.getData().getStringArrayList("VoiceRecognitionResult");
+	                // Pass it to the action manager
+	                ArrayList<String> _Sentences = message.getData().getStringArrayList("SpeechRecognitionResult");
 	                if(_Sentences != null){
 		    			for (int i = 0; i < _Sentences.size(); i++){
-		    				Log.d("OstisService", _Sentences.get(i));
+		    				Action actionMatched = service.mActionManager.matchCommandToRun(_Sentences.get(i));
+		    				
+		    				if(actionMatched != null){
+		    					Log.d("OstisService", "Running action " + actionMatched.getId());
+		    					try {
+									actionMatched.run(OstisService.mDrone);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+		    					return;
+		    				}
 		    			}
 	                }
 	                break;
