@@ -2,13 +2,15 @@ package fr.ece.ostis.actions.base;
 
 import java.util.Locale;
 
+import com.codeminders.ardrone.ARDrone;
+
 import fr.ece.ostis.actions.BaseAction;
 
 
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-23
+ * @version 2014-01-24
  */
 public class LandAction extends BaseAction {
 
@@ -26,8 +28,7 @@ public class LandAction extends BaseAction {
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone land.");
 	}
 	
-	@Override public void run(){
-		// TODO Retrieve a reference to the drone proxy
+	@Override public void run(ARDrone drone){
 		// TODO Implement lit-off base function
 	}
 

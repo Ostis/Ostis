@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.codeminders.ardrone.ARDrone;
+
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
@@ -20,23 +22,38 @@ import fr.ece.ostis.speech.SpeechComparator;
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-23
+ * @version 2014-01-24
  */
 public class ActionManager{
 	
 	
+	/** TODO */
+	private Hashtable<String, ComposedAction> mComposedActionTable;	
+	
+	
+	/** TODO */
+	private Hashtable<String, BaseAction> mBaseActionTable;	
+	
+	
+	/** TODO */
+	private SpeechComparator mSpeechComparator;	
+	
+	
+	/** TODO */
+	private Locale mLocale;	
+	
+	
+	/** TODO */
+	private Context mContext;	
+	
+	
+	/** Reference to the drone api of the ostis service. */
+	private ARDrone mDrone;
+	
+	
 	/**
 	 * TODO
-	 */
-	private Hashtable<String, ComposedAction> mComposedActionTable;
-	private Hashtable<String, BaseAction> mBaseActionTable;
-	private SpeechComparator mSpeechComparator;
-	private Locale mLocale;
-	private Context mContext;
-	
-	
-	/**
-	 * 
+	 * @param locale
 	 * @param context
 	 */
 	public ActionManager(Locale locale, Context context){
@@ -55,15 +72,16 @@ public class ActionManager{
 	
 	
 	/**
-	 * 
+	 * TODO
 	 * @return
 	 */
 	public Hashtable<String, ComposedAction> getComposedActionTable(){
 		return mComposedActionTable;
 	}
 	
+	
 	/**
-	 * 
+	 * TODO
 	 * @return
 	 */
 	public Collection<ComposedAction> getComposedActions(){
@@ -72,15 +90,16 @@ public class ActionManager{
 	
 	
 	/**
-	 * 
+	 * TODO
 	 * @return
 	 */
 	public Hashtable<String, BaseAction> getBaseActionTable(){
 		return mBaseActionTable;
 	}
 	
+	
 	/**
-	 * 
+	 * TODO
 	 * @return
 	 */
 	public Collection<BaseAction> getBaseActions(){
@@ -148,13 +167,13 @@ public class ActionManager{
 	public void runCommand(String command){
 		for (Action action : mBaseActionTable.values()){
 			if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-				action.run();
+				action.run(mDrone);
 				return;
 			}
 		}
 		for (Action action : mComposedActionTable.values()){
 			if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-				action.run();
+				action.run(mDrone);
 				return;
 			}
 		}
@@ -196,15 +215,14 @@ public class ActionManager{
 	 * TODO
 	 */
 	public boolean loadComposedActions(){
-		try {
+		try{
 			mComposedActionTable.clear();
 			String actionsString = PreferenceManager.getDefaultSharedPreferences(mContext).getString("composedActions", "nothing");
 			JSONArray jsonComposedActions = new JSONArray(actionsString);
 			int numberOfActions = jsonComposedActions.length();
 			Hashtable<String, ArrayList<String>> corresTable = new Hashtable<String, ArrayList<String>>();
 			
-			for (int i = 0; i < numberOfActions; i++)
-			{
+			for (int i = 0; i < numberOfActions; i++){
 				JSONObject jsonObject = (JSONObject) jsonComposedActions.get(i);
 				String id = jsonObject.getString("id");
 				JSONArray jsonActionsId = jsonObject.getJSONArray("actionIds");
@@ -232,8 +250,7 @@ public class ActionManager{
 			for (int i = 0; i < idsList.size(); i++)
 				((ComposedAction)getAction(idsList.get(i))).setActions(getActions(actionIdsList.get(i)));
 			return true;
-		}
-		catch (JSONException e) {
+		}catch(JSONException e){
 			e.printStackTrace();
 			return false;
 		}

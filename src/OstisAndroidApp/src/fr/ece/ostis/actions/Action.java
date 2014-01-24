@@ -3,11 +3,13 @@ package fr.ece.ostis.actions;
 import java.util.Hashtable;
 import java.util.Locale;
 
+import com.codeminders.ardrone.ARDrone;
+
 
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-01-21
+ * @version 2014-01-24
  */
 public abstract class Action{
 	
@@ -161,7 +163,7 @@ public abstract class Action{
 	/**
 	 * Executes the given action.
 	 */
-	public abstract void run();
+	public abstract void run(ARDrone drone);
 	
 	
 	/**

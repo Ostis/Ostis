@@ -3,6 +3,8 @@ package fr.ece.ostis.actions;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import com.codeminders.ardrone.ARDrone;
+
 
 /**
  * TODO
@@ -11,14 +13,13 @@ import java.util.UUID;
  */
 public class ComposedAction extends Action{
 	
-	/**
-	 * TODO
-	 */
+	
+	/** TODO */
 	private ArrayList<Action> mActionList;
 	
 	
 	/**
-	 * 
+	 * TODO
 	 * @param actions
 	 */
 	public ComposedAction(){
@@ -50,7 +51,7 @@ public class ComposedAction extends Action{
 	
 	
 	/**
-	 * 
+	 * TODO
 	 * @param actionList
 	 */
 	public void setActions(ArrayList<Action> actionList){
@@ -100,7 +101,7 @@ public class ComposedAction extends Action{
 	
 	
 	/**
-	 * 
+	 * TODO
 	 * @return
 	 */
 	private static String generateId(){
@@ -110,11 +111,12 @@ public class ComposedAction extends Action{
 	
 	/**
 	 * TODO
+	 * @param drone
 	 */
-	@Override public void run(){
-		for (Action action : mActionList)
-			if (action != null)
-				action.run();
+	@Override public void run(ARDrone drone){
+		for(Action action : mActionList)
+			if(action != null)
+				action.run(drone);
 	}
 	
 }
