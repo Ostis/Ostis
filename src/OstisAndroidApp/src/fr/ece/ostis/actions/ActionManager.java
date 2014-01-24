@@ -15,7 +15,7 @@ import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import fr.ece.ostis.actions.base.LandAction;
-import fr.ece.ostis.actions.base.LiftOffAction;
+import fr.ece.ostis.actions.base.TakeOffAction;
 import fr.ece.ostis.speech.SpeechComparator;
 
 
@@ -55,19 +55,24 @@ public class ActionManager{
 	 * TODO
 	 * @param locale
 	 * @param context
+	 * @param drone
 	 */
-	public ActionManager(Locale locale, Context context){
+	public ActionManager(Locale locale, Context context, ARDrone drone){
+		
 		mLocale = locale;
 		mContext = context;
 		mComposedActionTable = new Hashtable<String, ComposedAction>();
 		mBaseActionTable = new Hashtable<String, BaseAction>();
 		mSpeechComparator = new SpeechComparator(mLocale);
 		
-		// TODO declare/initialize/add baseActions here :
-		BaseAction liftOffAction = new LiftOffAction();
+		/*
+		 * TODO : Declare/initialize/add baseActions here
+		 */
+		BaseAction liftOffAction = new TakeOffAction();
 		mBaseActionTable.put(liftOffAction.getId(), liftOffAction);
 		BaseAction landAction = new LandAction();
 		mBaseActionTable.put(landAction.getId(), landAction);
+		
 	}
 	
 	
@@ -163,20 +168,26 @@ public class ActionManager{
 	/**
 	 * TODO
 	 * @param command
+	 * @return True if a command has been executed, or false otherwise.
 	 */
-	public void runCommand(String command){
-		for (Action action : mBaseActionTable.values()){
-			if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-				action.run(mDrone);
-				return;
+	public boolean runCommand(String command){
+		try{
+			for (Action action : mBaseActionTable.values()){
+				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
+					action.run(mDrone);
+					return true;
+				}
 			}
-		}
-		for (Action action : mComposedActionTable.values()){
-			if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-				action.run(mDrone);
-				return;
+			for (Action action : mComposedActionTable.values()){
+				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
+					action.run(mDrone);
+					return true;
+				}
 			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
+		return false;
 	}
 
 	
@@ -254,6 +265,7 @@ public class ActionManager{
 			e.printStackTrace();
 			return false;
 		}
+		
 	}
 	
 }

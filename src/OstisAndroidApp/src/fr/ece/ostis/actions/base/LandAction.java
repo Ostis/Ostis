@@ -1,5 +1,6 @@
 package fr.ece.ostis.actions.base;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
@@ -28,8 +29,14 @@ public class LandAction extends BaseAction {
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone land.");
 	}
 	
-	@Override public void run(ARDrone drone){
+	@Override public void run(ARDrone drone) throws IOException{
+		
+		// Ensure drone reference has been set
+		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
+		
 		// TODO Implement lit-off base function
+		drone.land();
+		
 	}
 
 }

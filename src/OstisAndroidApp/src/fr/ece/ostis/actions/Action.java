@@ -1,5 +1,6 @@
 package fr.ece.ostis.actions;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Locale;
 
@@ -162,8 +163,9 @@ public abstract class Action{
 	
 	/**
 	 * Executes the given action.
+	 * @throws IOException 
 	 */
-	public abstract void run(ARDrone drone);
+	public abstract void run(ARDrone drone) throws IOException;
 	
 	
 	/**

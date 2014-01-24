@@ -1,5 +1,6 @@
 package fr.ece.ostis.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -112,8 +113,9 @@ public class ComposedAction extends Action{
 	/**
 	 * TODO
 	 * @param drone
+	 * @throws IOException 
 	 */
-	@Override public void run(ARDrone drone){
+	@Override public void run(ARDrone drone) throws IOException{
 		for(Action action : mActionList)
 			if(action != null)
 				action.run(drone);

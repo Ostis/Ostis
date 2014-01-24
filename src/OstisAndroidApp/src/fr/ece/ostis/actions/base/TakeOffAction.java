@@ -1,5 +1,6 @@
 package fr.ece.ostis.actions.base;
 
+import java.io.IOException;
 import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
@@ -12,24 +13,30 @@ import fr.ece.ostis.actions.BaseAction;
  * @author Nicolas Schurando
  * @version 2014-01-24
  */
-public class LiftOffAction extends BaseAction {
+public class TakeOffAction extends BaseAction {
 
 	
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public LiftOffAction(){
+	public TakeOffAction(){
 		super("liftOff");
 		mNameTable.put(Locale.FRENCH, "Decollage");
-		mNameTable.put(Locale.ENGLISH, "LiftOff");
+		mNameTable.put(Locale.ENGLISH, "TakeOff");
 		mVocalCommandTable.put(Locale.FRENCH, "décolle");
-		mVocalCommandTable.put(Locale.ENGLISH, "lift-off");
+		mVocalCommandTable.put(Locale.ENGLISH, "takeoff");
 		mDescriptionTable.put(Locale.FRENCH, "Permet au drone de decoller.");
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone lift off.");
 	}
 	
-	@Override public void run(ARDrone drone){
+	@Override public void run(ARDrone drone) throws IOException{
+		
+		// Ensure drone reference has been set
+		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
+		
 		// TODO Implement lift-off base function
+		drone.takeOff();
+		
 	}
 
 }
