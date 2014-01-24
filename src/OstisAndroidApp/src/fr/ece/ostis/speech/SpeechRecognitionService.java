@@ -25,7 +25,7 @@ import android.util.Log;
  * TODO
  * The Jelly been workaround is based on the work of Hoan Nguyen at http://stackoverflow.com/questions/14940657/android-speech-recognition-as-a-service-on-android-4-1-4-2/14950616#14950616.
  * @author Nicolas Schurando
- * @version 2014-01-17
+ * @version 2014-01-24
  */
 public class SpeechRecognitionService extends Service{
 	
@@ -58,8 +58,10 @@ public class SpeechRecognitionService extends Service{
 	final Messenger mMessengerFromClients = new Messenger(new IncomingMessageFromClientHandler(this));
 
 	
-	/** Count down timer for Jelly Bean work around. */
-	protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000){
+	/** Count down timer for Jelly Bean work around.
+	 * TODO : Eventually implement relaunch on tick and exception on finish
+	 */
+	protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(1000, 1000){
 
 		@Override public void onTick(long millisUntilFinished){ }
 
@@ -70,18 +72,19 @@ public class SpeechRecognitionService extends Service{
 			
 			// Reset flags
 			mIsCountDownOn = false;
-			mIsListening = false;
-			
+
+			// Cancel current listening
 			try{
-				
-				// Cancel current listening
 				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
 				mMessengerFromClients.send(message);
-				
-				// Launch new listening
-				message = Message.obtain(null, MSG_START_LISTENING);
+			}catch(RemoteException e){
+				e.printStackTrace();
+			}
+
+			// Launch new listening
+			try{
+				Message message = Message.obtain(null, MSG_START_LISTENING);
 				mMessengerFromClients.send(message);
-				
 			}catch(RemoteException e){
 				e.printStackTrace();
 			}
@@ -150,7 +153,7 @@ public class SpeechRecognitionService extends Service{
 	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-13
+	 * @version 2014-01-24
 	 */
 	protected static class IncomingMessageFromClientHandler extends Handler{
 		
@@ -210,6 +213,14 @@ public class SpeechRecognitionService extends Service{
 						Log.d("SpeechRecognitionService", "handleMessage -> Starting listening");
 						service.mSpeechRecognizer.startListening(service.mSpeechRecognizerIntent);
 						service.mIsListening = true;
+						
+						// Start the countdown timer for workaround
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
+							service.mIsCountDownOn = true;
+							service.mNoSpeechCountDown.start();
+							service.mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
+						}
+						
 					}else{
 						Log.e("SpeechRecognitionService", "handleMessage -> Already listening");
 					}
@@ -243,12 +254,6 @@ public class SpeechRecognitionService extends Service{
 			
 			// Log
 			Log.d("SpeechRecognitionService", "onBeginningOfSpeech");
-			
-			// Speech input will be processed, so there is no need for count down anymore
-			if (mIsCountDownOn){
-				mIsCountDownOn = false;
-				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
-			}
 			
 		}
 
@@ -290,6 +295,7 @@ public class SpeechRecognitionService extends Service{
 				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: Log.e("SpeechRecognitionService/onError", "RecognitionService busy."); break;
 				case SpeechRecognizer.ERROR_SERVER: Log.e("SpeechRecognitionService/onError", "Server sends error status."); break;
 				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: Log.e("SpeechRecognitionService/onError", "No speech input"); break;
+				default: Log.e("SpeechRecognitionService/onError", "Unknown error"); break;
 			}
 			
 			// Stop the countdown timer
@@ -297,26 +303,19 @@ public class SpeechRecognitionService extends Service{
 				mIsCountDownOn = false;
 				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
 			}
-			
-			// Set the not listening flag
-			mIsListening = false;
-			
+
+			// Cancel current listening
 			try{
-				
-				// Cancel current listening
 				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
 				mMessengerFromClients.send(message);
-				
-			}catch (RemoteException e){
+			}catch(RemoteException e){
 				e.printStackTrace();
 			}
 			
+			// Start listening again
 			try{
-				
-				// Start listening again
 				Message message = Message.obtain(null, MSG_START_LISTENING);
 				mMessengerFromClients.send(message);
-				
 			}catch (RemoteException e){
 				e.printStackTrace();
 			}
@@ -347,26 +346,25 @@ public class SpeechRecognitionService extends Service{
 		
 		/**
 		 * Called when the endpointer is ready for the user to start speaking.
-		 * @param params
+		 * @param params parameters set by the recognition service. Reserved for future use.
 		 */
 		@Override public void onReadyForSpeech(Bundle params){
 			
-			
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
-				mIsCountDownOn = true;
-				mNoSpeechCountDown.start();
-				mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
-			}
-			
 			// Log
 			Log.d("SpeechRecognitionService", "onReadyForSpeech");
+			
+			// Speech input will be processed, so there is no need for count down anymore
+			if (mIsCountDownOn){
+				mIsCountDownOn = false;
+				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
+			}
 			
 		}
 		
 		
 		/**
-		 * TODO
-		 * @param results
+		 * Called when recognition results are ready.
+		 * @param results the recognition results. To retrieve the results in ArrayList<String> format use getStringArrayList(String) with RESULTS_RECOGNITION as a parameter. A float array of confidence values might also be given in CONFIDENCE_SCORES.
 		 */
 		@Override public void onResults(Bundle results){
 			
@@ -376,6 +374,22 @@ public class SpeechRecognitionService extends Service{
 			// Extract results
 			ArrayList<String> sentences = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 			float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+
+			// Cancel current listening
+			try{
+				Message message = Message.obtain(null, MSG_CANCEL_LISTENING);
+				mMessengerFromClients.send(message);
+			}catch(RemoteException e){
+				e.printStackTrace();
+			}
+			
+			// Start listening again
+			try{
+				Message message = Message.obtain(null, MSG_START_LISTENING);
+				mMessengerFromClients.send(message);
+			}catch (RemoteException e){
+				e.printStackTrace();
+			}
 			
 			// Prevent null pointer exception
 			if(sentences == null || scores == null) return;
@@ -383,19 +397,6 @@ public class SpeechRecognitionService extends Service{
 			// Log
 			for (int i = 0; i < sentences.size(); i++){
 				Log.d("SpeechRecognitionService", "onResults | " + sentences.get(i) + " (" + String.valueOf(scores[i])+")");
-			}
-			
-			// Set the not listening flag
-			mIsListening = false;
-			
-			try{
-				
-				// Start listening again
-				Message message = Message.obtain(null, MSG_START_LISTENING);
-				mMessengerFromClients.send(message);
-				
-			}catch (RemoteException e){
-				e.printStackTrace();
 			}
 			
 			// Send results to clients
@@ -419,8 +420,8 @@ public class SpeechRecognitionService extends Service{
 
 		
 		/**
-		 * TODO
-		 * @param rmsdB
+		 * The sound level in the audio stream has changed. There is no guarantee that this method will be called.
+		 * @param rmsdB the new RMS dB value.
 		 */
 		@Override public void onRmsChanged(float rmsdB){}
 

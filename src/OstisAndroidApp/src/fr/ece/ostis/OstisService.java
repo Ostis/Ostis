@@ -67,8 +67,6 @@ public class OstisService extends Service{
 	public static final int MSG_DRONE_CONNECTION_SUCCESS = 11;
 	public static final int MSG_DRONE_CONNECTION_FAILED = 12;
 	public static final int MSG_DRONE_DISCONNECT = 13;
-	public static final int MSG_DRONE_TAKEOFF = 14;
-	public static final int MSG_DRONE_LAND = 15;
 	
 	
 	/** List of client messengers. */
@@ -457,35 +455,17 @@ public class OstisService extends Service{
 			        	e.printStackTrace();
 			        }
 					break;
-					
+				
+				// Connect to drone
 				case MSG_DRONE_CONNECT:
 					service.doDroneConnect();
 					break;
 					
+				// Disconnect from drone
 				case MSG_DRONE_DISCONNECT:
 					service.doDroneDisconnect();
 					break;
-					
-				case MSG_DRONE_TAKEOFF:
-					try {
-						Log.d("OstisService", "doDroneTakeoff");
-						if(mDrone != null) mDrone.takeOff();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					break;
-					
-				case MSG_DRONE_LAND:
-					try {
-						Log.d("OstisService", "doDroneLand");
-						if(mDrone != null) mDrone.land();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					break;
-			
+
 			}
 			
 		}

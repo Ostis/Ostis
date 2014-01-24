@@ -243,41 +243,6 @@ public class DebugActivity extends Activity{
 			}
 		});
 	    
-	    // Set callback on button
-	    final Button _TakeoffButton = (Button) findViewById(R.id.ButtonDroneTakeoff);
-	    _TakeoffButton.setOnClickListener(new OnClickListener(){
-			
-			@Override
-			public void onClick(View v) {
-		        Message _Message = new Message();
-		        _Message.what = OstisService.MSG_DRONE_TAKEOFF; 
-
-		        try{
-		        	mMessengerToOstisService.send(_Message);
-		        }catch (RemoteException e){
-		            e.printStackTrace();
-		        }
-			}
-		});
-	    
-	    
-	    // Set callback on button
-	    final Button _LandButton = (Button) findViewById(R.id.ButtonDroneLand);
-	    _LandButton.setOnClickListener(new OnClickListener(){
-			
-			@Override
-			public void onClick(View v) {
-		        Message _Message = new Message();
-		        _Message.what = OstisService.MSG_DRONE_LAND; 
-
-		        try{
-		        	mMessengerToOstisService.send(_Message);
-		        }catch (RemoteException e){
-		            e.printStackTrace();
-		        }
-			}
-		});
-	    
 	}
 
 	
