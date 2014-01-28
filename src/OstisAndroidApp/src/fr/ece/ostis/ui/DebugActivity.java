@@ -3,9 +3,9 @@ package fr.ece.ostis.ui;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-import fr.ece.ostis.NetworkManager;
 import fr.ece.ostis.OstisService;
 import fr.ece.ostis.R;
+import fr.ostis.ece.network.NetworkManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;

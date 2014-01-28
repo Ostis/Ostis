@@ -9,11 +9,12 @@ import java.util.concurrent.TimeoutException;
 
 import com.codeminders.ardrone.ARDrone;
 
-import fr.ece.ostis.NetworkManager.InvokeFailedException;
 import fr.ece.ostis.actions.Action;
 import fr.ece.ostis.actions.ActionManager;
 import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.speech.SpeechRecognitionService;
+import fr.ostis.ece.network.NetworkManager;
+import fr.ostis.ece.network.NetworkManager.InvokeFailedException;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;

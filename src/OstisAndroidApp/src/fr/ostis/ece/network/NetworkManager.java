@@ -1,4 +1,4 @@
-package fr.ece.ostis;
+package fr.ostis.ece.network;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -13,20 +13,22 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.util.Log;
 
 /**
- * Class used for managing all network related tasks, including wi-fi
- * to the drone, and 3g connectivity to the voice recognition service.
+ * Class used for managing all network related tasks, such as wi-fi, 3g/4g and access point!!.
  * 
  * TODO Implement function to retrieve current wifi networks.
  * 
  * @see http://stackoverflow.com/questions/2513713/how-to-use-3g-connection-in-android-application-instead-of-wi-fi/4756630#4756630 for original source code.
  * 
+ * @see http://stackoverflow.com/questions/7048922/android-2-3-wifi-hotspot-api for ap functions
+ * 
  * @author Nicolas Schurando
- * @version 2014-01-20
+ * @version 2014-01-28
  */
 public class NetworkManager {
 
@@ -55,15 +57,45 @@ public class NetworkManager {
     private AtomicBoolean mHipriEnabled = new AtomicBoolean(false);
 	
     
+    /** Log tag */
+    private static final String mTag = "NetworkManager";
+    
+    
     /*
      * TODO
      */
-    public static final int KEY_MOBILE = 1;
-    public static final int KEY_WIFI = 2;
+    private static final String mAccessPointName = "OstisAP";
+    private static final int mAccessPointChannel = 9;
+    
+    
+    /*
+     * TODO
+     */
 	public static final int STATUS_CONNECTED = 1;
 	public static final int STATUS_DISCONNECTED = 2;
-    
-    
+	public static final int WIFI_AP_STATE_UNKNOWN = -1;
+	public static final int WIFI_AP_STATE_DISABLING = 0;
+    public static final int WIFI_AP_STATE_DISABLED = 1;
+    public static final int WIFI_AP_STATE_ENABLING = 2;
+    public static final int WIFI_AP_STATE_ENABLED = 3;
+    public static final int WIFI_AP_STATE_FAILED = 4;
+	
+	/*
+	 * TODO
+	 */
+	protected int mMobileStatePrevious = -1;
+	protected int mWifiStatePrevious = WifiManager.WIFI_STATE_UNKNOWN;
+	
+	
+	/*
+	 * TODO
+	 */
+	protected static final int mWifiTimeout = 5000;
+	protected static final int mWifiTimeoutSteps = 500;
+	protected static final int mMobileTimeout = 5000;
+	protected static final int mMobileTimeoutSteps = 500;
+	
+	
 	/**
 	 * TODO
 	 * @param context
@@ -118,6 +150,26 @@ public class NetworkManager {
 	
 	
 	/**
+	 * Waits for mWifiTimeout seconds until wifi is disabled.
+	 * @throws TimeoutException if wifi is not disabled at the end of time.
+	 */
+	public void waitForWifiDisabled() throws TimeoutException{
+		
+		for(int i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
+			if(getWifiState() == WifiManager.WIFI_STATE_DISABLED) return;
+            try{
+            	Thread.sleep(mWifiTimeoutSteps);
+            }catch(Exception e){
+            	Log.w(mTag, e.getMessage());
+            }
+		}
+		
+        throw new TimeoutException("Wifi disable timed out.");
+		
+	}
+	
+	
+	/**
 	 * TODO
 	 * @param enabled
 	 * @throws NullPointerException
@@ -130,10 +182,156 @@ public class NetworkManager {
 	
 	/**
 	 * TODO
+	 * @return
+	 */
+	public int getWifiState(){
+		try{
+			return mWifiManager.getWifiState();
+		}catch(Exception e){
+			Log.w(mTag, e);
+			return WifiManager.WIFI_STATE_UNKNOWN;
+		}
+	}
+	
+
+	/**
+	 * Enables the wifi access point.
+	 * @throws TimeoutException 
+	 */
+	public void enableWifiAp() throws TimeoutException{
+		setWifiApEnabled(true);
+	}
+	
+	
+	/**
+	 * Disables the wifi access point.
+	 * @throws TimeoutException 
+	 */
+	public void disableWifiAp() throws TimeoutException{
+		setWifiApEnabled(false);
+	}
+	
+	
+    /**
+     * Enables or disables the wifi access point.
+     * @param true or false
+     * @return WifiAP state
+     * @throws TimeoutException 
+     */
+    protected void setWifiApEnabled(boolean enabled) throws TimeoutException{
+    	
+    	// Log
+        Log.d(mTag, "setWifiApEnabled " + String.valueOf(enabled));
+
+        // Create a wifi configuration for the access point
+        WifiConfiguration wifiConfiguration = new WifiConfiguration();
+        wifiConfiguration.SSID = mAccessPointName;
+        wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        
+        // Try to specify channel for the wifi configuration
+        try{
+        	WifiConfiguration.class.getField("channel").setInt(wifiConfiguration, mAccessPointChannel);
+        }catch(Exception e){
+        	Log.w(mTag, e);
+        }
+
+        // Remember wireless current state
+        if(enabled && mWifiStatePrevious == WifiManager.WIFI_STATE_UNKNOWN){
+        	mWifiStatePrevious = getWifiState();
+        }
+
+        // Disable wireless
+        if(enabled && mWifiManager.getConnectionInfo() != null){
+            Log.d(mTag, "Wifi disabling");
+            disableWifi();
+            waitForWifiDisabled();
+            Log.d(mTag, "Wifi disabled");
+        }
+
+        // Enable/disable wifi access point
+        try{
+            Log.d(mTag, "Wifi ap " + (enabled?"enabling":"disabling"));
+            Method method = mWifiManager.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+            method.invoke(mWifiManager, wifiConfiguration, enabled);
+        }catch(Exception e){
+            Log.e(mTag, e.getMessage());
+        }
+
+        // Hold thread up while processing occurs
+        if(enabled){
+        	
+        	int i;
+        	for(i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
+        		int state = getWifiAPState();
+        		if(state == WIFI_AP_STATE_ENABLED) break;
+        		
+                try{
+                    Thread.sleep(mWifiTimeoutSteps);
+                }catch(Exception e){
+                	Log.w(mTag, e);
+                }
+        	}
+        	if(i >= mWifiTimeout) throw new TimeoutException("Enabling wifi ap timed out.");
+            Log.d(mTag, "Wifi ap enabled");
+            
+        }else{
+        	
+        	int i;
+        	for(i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
+        		int state = getWifiAPState();
+        		if(state == WIFI_AP_STATE_DISABLED) break;
+        		
+                try{
+                    Thread.sleep(mWifiTimeoutSteps);
+                }catch(Exception e){
+                	Log.w(mTag, e);
+                }
+        	}
+        	if(i >= mWifiTimeout) throw new TimeoutException("Disabling wifi ap timed out.");
+            Log.d(mTag, "Wifi ap disabled");
+            
+            // Enable wifi if it was enabled beforehand
+            if(mWifiStatePrevious == WifiManager.WIFI_STATE_ENABLED || mWifiStatePrevious == WifiManager.WIFI_STATE_ENABLING || mWifiStatePrevious == WifiManager.WIFI_STATE_UNKNOWN){
+                Log.d(mTag, "enable wifi: calling");
+                enableWifi();
+            }
+
+            // Reset flag
+            mWifiStatePrevious = WifiManager.WIFI_STATE_UNKNOWN;
+        }
+        
+    }
+    
+    
+    /**
+     * Returns the state of the wifi access point by performing an invoke.
+     * @return an int representing the state of the wifi access point.
+     */
+    public int getWifiAPState(){
+    	
+        int state = WIFI_AP_STATE_UNKNOWN;
+        
+        try{
+            Method method = mWifiManager.getClass().getMethod("getWifiApState");
+            state = (Integer) method.invoke(mWifiManager);
+        }catch(Exception e){
+        	e.printStackTrace();
+        }
+
+        if(state >= 10) state -= 10;
+
+        Log.d(mTag, "getWifiAPState.state " + String.valueOf(state));
+        
+        return state;
+        
+    }
+	
+	
+	/**
+	 * TODO
 	 * @throws NullPointerException
 	 * @throws InvokeFailedException 
 	 * @throws TimeoutException
-	 * @deprecated Shouldn't be used.
 	 */
 	public void enableMobileConnection() throws NullPointerException, InvokeFailedException, TimeoutException{
 		
@@ -143,15 +341,17 @@ public class NetworkManager {
 		// Wait until connected
 	    try{
 	    	State checkState = null;
-	        for(int counter = 0; counter < 60; counter++){
+	        for(int counter = 0; counter < mMobileTimeout; counter += mMobileTimeoutSteps){
 	            checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 	            if(checkState.compareTo(State.CONNECTED) == 0) return;
-	            Thread.sleep(500);
+	            Thread.sleep(mMobileTimeout);
 	        }
-	    }catch(InterruptedException e){}
+	    }catch(InterruptedException e){
+	    	Log.w(mTag, e);
+	    }
 	    
 	    // Throw timeout exception
-	    throw new TimeoutException();
+	    throw new TimeoutException("Enabling mobile connection timed out.");
 	    
 	}
 	
@@ -161,7 +361,6 @@ public class NetworkManager {
 	 * @throws NullPointerException
 	 * @throws InvokeFailedException 
 	 * @throws TimeoutException 
-	 * @deprecated Shouldn't be used.
 	 */
 	public void disableMobileConnection() throws NullPointerException, InvokeFailedException, TimeoutException{
 		
@@ -189,7 +388,6 @@ public class NetworkManager {
 	 * @param enabled
 	 * @throws NullPointerException
 	 * @throws InvokeFailedException
-	 * @deprecated Shouldn't be used.
 	 */
 	protected void setMobileDataEnabled(boolean enabled) throws NullPointerException, InvokeFailedException{
         
@@ -215,22 +413,22 @@ public class NetworkManager {
 	        setMobileDataEnabledMethod.invoke(interfaceConnectivityManager, enabled);
 	        
 		}catch(IllegalArgumentException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}catch(IllegalAccessException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}catch(InvocationTargetException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}catch(ClassNotFoundException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}catch(NoSuchFieldException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}catch(NoSuchMethodException e){
-			e.printStackTrace();
+			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}
         
@@ -242,6 +440,7 @@ public class NetworkManager {
 	 * @param dns
 	 */
 	public void setWifiDns(String dns){
+		Log.d(mTag, "setWifiDns");
 	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, dns);
 	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS2, dns);
 	}
