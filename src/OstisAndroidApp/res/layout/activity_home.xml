@@ -8,4 +8,53 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".HomeActivity" >
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/buttonFly"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:layout_margin="5dp"
+                android:text="Pilotage" />
+
+            <Button
+                android:id="@+id/buttonGallery"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:layout_margin="5dp"
+                android:text="Médias" />
+            
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                android:id="@+id/buttonConfig"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:layout_margin="5dp"
+                android:text="Configuration" />
+
+            <Button
+                android:id="@+id/buttonAbout"
+                android:layout_width="140dp"
+                android:layout_height="60dp"
+                android:layout_margin="5dp"
+                android:text="A propos" />
+            
+        </LinearLayout>
+        
+    </LinearLayout>
+
 </RelativeLayout>

@@ -1,105 +1,95 @@
 package fr.ece.ostis.ui;
 
-import java.lang.ref.WeakReference;
-
+import fr.ece.ostis.OstisService;
 import fr.ece.ostis.R;
+import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.ServiceConnection;
-import android.view.Menu;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 
 
 /**
- * 
+ * TODO
  * @author Nicolas Schurando
- * @version 2014-01-21
+ * @version 2014-01-28
  */
-public class HomeActivity extends Activity implements ServiceConnection {
+public class HomeActivity extends ConnectedActivity{
 
 	
-	/** Is bound to ostis service. */
-	protected boolean mOstisServiceIsBound = false;
+	/** Log tag. */
+	protected static final String mTag = "HomeActivity";
 	
 	
-	/** Messenger to ostis service. */
-	protected Messenger mMessengerToOstisService = null;
-
-
-	/** Messenger from ostis service. */
-	protected Messenger mMessengerFromOstisService = new Messenger(new IncomingMessageFromServiceHandler(this));
+	/** Local copy of the drone connection status. */
+	protected int mDroneConnectionStatus = OstisService.DRONE_STATUS_UNKNOWN;
 	
 	
-	@Override protected void onCreate(Bundle savedInstanceState) {
+	@Override
+	protected void onCreate(Bundle savedInstanceState){
+		
+		// Super
 		super.onCreate(savedInstanceState);
+		
+		// Set layout
 		setContentView(R.layout.activity_home);
+		
+		// Add on click listeners
+		Button buttonFly = (Button) findViewById(R.id.buttonFly);
+		buttonFly.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v){
+				if(mOstisServiceIsBound){
+					if(mDroneConnectionStatus == OstisService.DRONE_STATUS_CONNECTED){
+						// If connected to drone, go directly to fly view
+						Intent intent = new Intent(HomeActivity.this, FlyActivity.class);
+						startActivity(intent);
+					}else{
+						// Else go to network wizard
+						Intent intent = new Intent(HomeActivity.this, NetworkWizardActivity.class);
+						startActivity(intent);
+					}
+				}
+			}
+			
+		});
 	}
-	
-
-	@Override public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.home, menu);
-		return true;
-	}
 
 
-	@Override public void onServiceConnected(ComponentName name, IBinder service) {
-		// TODO Auto-generated method stub
+	@Override
+	protected void onBoundToOstisService(){
 		
-	}
-
-
-	@Override public void onServiceDisconnected(ComponentName name) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * 
-	 * @author Nicolas Schurando
-	 * @version 2014-01-21
-	 */
-	protected static class IncomingMessageFromServiceHandler extends Handler{
-		
-		
-		/** Reference to the activity. */
-		private final WeakReference<HomeActivity> mActivityReference;
-		
-		
-		/**
-		 * Constructor.
-		 * @param activity
-		 */
-		IncomingMessageFromServiceHandler(HomeActivity activity){
-			mActivityReference = new WeakReference<HomeActivity>(activity);
-		}
-		
-    	
-    	/**
-    	 * 
-    	 */
-        @Override public void handleMessage(Message message){
-
-			// Retrieve the activity instance
-			HomeActivity activity = mActivityReference.get();
-        	
-            switch(message.what){
-            
-	            /*case OstisService.MSG_NETWORK_STATUS_UPDATED:
-	            	((ImageView) activity.findViewById(R.id.imageViewWiFi)).setImageResource(R.drawable.icon_tick);
-	            	((ImageView) activity.findViewById(R.id.ImageView3G)).setImageResource(R.drawable.icon_tick);
-	                break;*/
-	                
-	            default:
-	                super.handleMessage(message);
-            }
-            
+        try{
+        	// Ask for connection status to drone
+        	sendMessageToOstisService(OstisService.MSG_DRONE_STATUS_REQUEST);
+        }catch(Exception e){
+        	Log.w(mTag, "Could not send a drone connection status request to the ostis service.", e);
         }
         
-    }
+	}
+
+
+	@Override
+	protected void onUnboundFromOstisService(){
+
+	}
+	
+
+	@Override
+	protected void onMessageFromOstisService(Message message){
+		
+		switch(message.what){
+		
+			// Retrieve and store connection status with drone
+			case OstisService.MSG_DRONE_STATUS_UPDATED:
+				mDroneConnectionStatus = message.getData().getInt("droneConnectionStatus");
+				break;
+		
+		}
+		
+	}
 
 }

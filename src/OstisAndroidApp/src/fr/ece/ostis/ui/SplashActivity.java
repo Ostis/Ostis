@@ -10,13 +10,21 @@ import android.content.Intent;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-24
+ * @version 2014-01-28
  */
 public class SplashActivity extends Activity{
 
+	
+	/** Reference to the countdown timer. */
 	protected CountDownTimer mTimer = null;
+	
+	
+	/** Splash time. */
 	protected static final long mSplashTime = 1000;
-	protected static final Class<DebugActivity> mNextActivity = DebugActivity.class;
+	
+	
+	/** Next activity after splash. */
+	protected static final Class<HomeActivity> mNextActivity = HomeActivity.class;
 	
 	
 	@Override
@@ -52,7 +60,6 @@ public class SplashActivity extends Activity{
 		// Super
 		super.onStart();
 		
-
 		// Start timer
 		mTimer.start();
 		

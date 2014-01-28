@@ -71,6 +71,11 @@ public class OstisService extends Service{
 	public static final int MSG_DRONE_CONNECTION_FAILED = 12;
 	public static final int MSG_DRONE_DISCONNECT = 13;
 	
+	public static final int MSG_DRONE_STATUS_REQUEST = 14;
+	public static final int MSG_DRONE_STATUS_UPDATED = 15;
+	public static final int DRONE_STATUS_UNKNOWN = -1;
+	public static final int DRONE_STATUS_DISCONNECTED = 0;
+	public static final int DRONE_STATUS_CONNECTED = 1;
 	
 	/** Reference to the action manager. */
 	protected ActionManager mActionManager = null;
@@ -115,51 +120,34 @@ public class OstisService extends Service{
 	/** Reference to the javadrone api */
 	protected static ARDrone mDrone = null;
 	
+	
+    /** Log tag. */
+    private static final String mTag = "OstisService";
+	
 
     /** Class for monitoring the state of the speech recognition service. */
     private final ServiceConnection mServiceSpeechConnection = new ServiceConnection(){
 		
     	
-    	/**
-    	 * Called when a connection to the Service has been established, with the IBinder of the communication channel to the Service.
-    	 * @param name The concrete component name of the service that has been connected.
-		 * @param service The IBinder of the Service's communication channel, which you can now make calls on.
-    	 */
 	    @Override public void onServiceConnected(ComponentName name, IBinder service){
 
+	        Log.d(mTag, "onServiceConnected");
 	    	mMessengerToSpeechService = new Messenger(service);
 	        Message message = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
 	        message.replyTo = mMessengerFromSpeechService;
 	        try{
 	        	mMessengerToSpeechService.send(message);
-	        }catch (RemoteException e){
-	        	
-	        	// Log
-	            e.printStackTrace();
-	            
+	        }catch(RemoteException e){
+	            Log.w(mTag, e);
                 // In this case the service has crashed before we could even do anything with it
-	            // Nothing
-	            
 	        }
 	        
 	    }
 
 	    
-	    /**
-	     * Called when a connection to the Service has been lost. This typically happens when the process hosting the
-	     * service has crashed or been killed. This does not remove the ServiceConnection itself -- this binding to the
-	     * service will remain active, and you will receive a call to onServiceConnected(ComponentName, IBinder) when
-	     * the Service is next running.
-	     * @param name The concrete component name of the service whose connection has been lost.
-	     */
 	    @Override public void onServiceDisconnected(ComponentName name){
-	    	
-	    	// Log
-	        Log.d("MainActivity", "onServiceDisconnected");
-	        
-	        // Delete messenger
+	        Log.d(mTag, "onServiceDisconnected");
 	        mMessengerToSpeechService = null;
-	        
 	    }
 
 	};
