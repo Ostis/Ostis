@@ -1,4 +1,4 @@
-package fr.ostis.ece.network;
+package fr.ece.ostis.network;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
