@@ -11,27 +11,25 @@ import android.util.Log;
  * Class used for managing languages in the application. Future uses might 
  * include changing on the fly the current language in the application.
  * @author Nicolas Schurando
- * @version 2014-01-24
+ * @version 2014-01-28
  */
-public class LanguageManager {
+public class LanguageManager{
 
 	
-	/**
-	 * The list of supported locales.
-	 */
+	/** The list of supported locales. */
     protected static final List<Locale> mSupportedLocales = Arrays.asList(Locale.ENGLISH, Locale.FRENCH);
     
     
-    /**
-     * The default locale to be used if the locale of the system is not part of the supported ones.
-     */
+    /** The default locale to be used if the locale of the system is not part of the supported ones. */
     protected static final Locale mDefaultLocale = Locale.ENGLISH;
     
     
-    /**
-     * Used to store the dertermined current locale.
-     */
+    /** Used to store the dertermined current locale. */
 	protected Locale mCurrentLocale = null;
+	
+	
+	/** Log tag. */
+	protected static final String mTag = "LanguageManager";
     
 	
     /**
@@ -45,11 +43,9 @@ public class LanguageManager {
     	if(language.equalsIgnoreCase("fr")) mCurrentLocale = Locale.FRENCH;
     	else if(language.equalsIgnoreCase("en")) mCurrentLocale = Locale.ENGLISH;
     	
-    	Log.d("LanguageManager", "Before = " + mCurrentLocale.toString());
-    	
     	if(!mSupportedLocales.contains(mCurrentLocale)) mCurrentLocale = mDefaultLocale;
     	
-    	Log.d("LanguageManager", "After = " + mCurrentLocale.toString());
+    	Log.i(mTag, "Selected " + mCurrentLocale.toString() + " locale.");
     	
     	return mCurrentLocale;
     }
