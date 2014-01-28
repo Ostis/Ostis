@@ -57,7 +57,7 @@ public class NetworkManager {
     private AtomicBoolean mHipriEnabled = new AtomicBoolean(false);
 	
     
-    /** Log tag */
+    /** Log tag. */
     private static final String mTag = "NetworkManager";
     
     
