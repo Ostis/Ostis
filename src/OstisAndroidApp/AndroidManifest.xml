@@ -31,7 +31,7 @@
         </service>
         
         <service
-            android:name="fr.ece.ostis.speech.SpeechRecognitionService"
+            android:name="fr.ece.ostis.speech.SpeechRecognitionManager"
             android:enabled="true"
             android:exported="true" >
         </service>
