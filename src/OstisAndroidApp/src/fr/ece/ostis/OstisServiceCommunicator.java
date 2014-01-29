@@ -34,7 +34,7 @@ public abstract class OstisServiceCommunicator extends Service{
 	
 	
     /** Log tag. */
-    private static final String mTag = "OstisServiceCommunicator";
+    protected static final String mTag = "OstisServiceCommunicator";
 	
 	
 	/** Reference to the speech recognition service. */

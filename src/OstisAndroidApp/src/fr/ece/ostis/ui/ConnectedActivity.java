@@ -23,7 +23,7 @@ import android.util.Log;
  * @author Nicolas Schurando
  * @version 2014-01-28
  */
-public abstract class ConnectedActivity extends Activity {
+public abstract class ConnectedActivity extends Activity{
 	
 	
 	/** TODO */

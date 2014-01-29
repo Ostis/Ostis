@@ -102,7 +102,7 @@ public class NetworkManager {
 	 * TODO
 	 * @param context
 	 */
-	public NetworkManager(Context context) throws Exception{
+	public NetworkManager(Context context){
 		
 		// Retrieve context
 		mContext = context;

@@ -7,7 +7,9 @@
     <!-- General -->
     <string name="app_name">Ostis</string>
     <string name="action_settings">Paramètres</string>
-
+	<string name="notification_title">Ostis</string>
+	<string name="notification_description">Le service est en cours d\'execution</string>
+    
     <!-- Debug activity -->
     <string name="title_activity_debug">Debug</string>
 

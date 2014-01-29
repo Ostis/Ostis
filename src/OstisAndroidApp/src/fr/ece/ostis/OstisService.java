@@ -14,7 +14,12 @@ import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.network.NetworkManager;
 import fr.ece.ostis.network.NetworkManager.InvokeFailedException;
 import fr.ece.ostis.speech.SpeechRecognitionService;
+import fr.ece.ostis.ui.HomeActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Message;
@@ -56,15 +61,15 @@ public class OstisService extends OstisServiceCommunicator{
 	
 	
     /** Log tag. */
-    private static final String mTag = "OstisService";
-	
-	
-	/** Reference to the action manager. */
-	protected ActionManager mActionManager = null;
+    protected static final String mTag = "OstisService";
 	
 	
 	/** Reference to the javadrone api */
 	protected static ARDrone mDrone = null;
+	
+	
+	/** Reference to the action manager. */
+	protected ActionManager mActionManager = null;
 	
 	
 	/** Reference to the language manager. */
@@ -75,12 +80,20 @@ public class OstisService extends OstisServiceCommunicator{
 	protected NetworkManager mNetworkManager = null;
 	
 	
+	/** TODO */
+	protected NotificationManager mNotificationManager = null;
+	
+	
 	/** The selected method network. */
 	protected int mNetworkMethod = NETWORK_METHOD_UNKNOWN;
 	
 	
 	/** Reference to the wakelock system. */
 	protected WakeLock mWakeLock = null;
+	
+	
+	/** Service notification id. */
+	protected static final int mNotificationId = 123456;
 	
 	
 	@Override
@@ -92,46 +105,61 @@ public class OstisService extends OstisServiceCommunicator{
 		// Obtain wakelock
 		acquireWakeLock();
 		
-		// Bind to speech recognition service
-		doBindSpeechService();
-		
-		// Start language manager
+		// Retrieve managers
 		mLanguageManager = new LanguageManager();
-		
-		// Start action manager
 		mActionManager = new ActionManager(mLanguageManager.getCurrentLocale(), this);
+		mNetworkManager = new NetworkManager(this);
+		mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		
-		// Start the network manager
-		try{
-			mNetworkManager = new NetworkManager(this);
-		}catch (Exception e){
-			e.printStackTrace();
-			mNetworkManager = null;
-		}
-		
+		// Show notification
+		showNotification();
 	}
 	
 
 	@Override
 	public void onDestroy(){
 		
-		// Unbind from speech recognition service
-		doUnbindSpeechService();
+		// Log
+		Log.i(mTag, "Service created.");
 		
+		// Dismiss notification
+        mNotificationManager.cancel(mNotificationId);
+
 		// Restore network
 		restoreNetwork();
 		
 		// Release wakelock
 		releaseWakeLock();
 		
-		// Cleanup
-		mMessengersToClients.clear();
-		
 		// Super
-		super.onDestroy();		
+		super.onDestroy();
 		
 	}
 
+	
+	/**
+	 * TODO
+	 */
+	protected void showNotification(){
+		
+		// In this sample, we'll use the same text for the ticker and the expanded notification
+        CharSequence text = getText(R.string.notification_description);
+
+        // Set the icon, scrolling text and timestamp
+        Notification notification = new Notification(R.drawable.icon_info, text, System.currentTimeMillis());
+        notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+
+        // The PendingIntent to launch our activity if the user selects this notification
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, HomeActivity.class), 0);
+
+        // Set the info for the views that show in the notification panel.
+        notification.setLatestEventInfo(this, getText(R.string.notification_title), text, contentIntent);
+
+        // Send the notification.
+        mNotificationManager.notify(mNotificationId, notification);
+        
+	}
+	
 	
 	/**
 	 * Acquires a wakelock that prevents the service from stopping when the user powers-off the screen.
