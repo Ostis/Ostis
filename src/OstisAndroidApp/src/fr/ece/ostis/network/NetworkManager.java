@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,6 +14,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.State;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
@@ -193,7 +195,38 @@ public class NetworkManager {
 		}
 	}
 	
+	
+	/**
+	 * TODO
+	 * @throws Exception
+	 */
+	public void startWifiScan() throws Exception{
+		
+		// Ensure that wifi has been enabled.
+		if(isWifiEnabled() != true) throw new Exception("Wifi has not been enabled.");
+		
+		// Start scan
+		if(mWifiManager.startScan() != true) throw new Exception("Wifi scan failed.");
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 * @throws Exception 
+	 */
+	public List<ScanResult> getWifiResults() throws Exception{
+		
+		// Ensure that wifi has been enabled.
+		if(isWifiEnabled() != true) throw new Exception("Wifi has not been enabled.");
+		
+		// Return
+		return mWifiManager.getScanResults();
+		
+	}
 
+	
 	/**
 	 * Enables the wifi access point.
 	 * @throws TimeoutException 

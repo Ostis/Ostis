@@ -1,7 +1,6 @@
 package fr.ece.ostis;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -15,17 +14,10 @@ import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.network.NetworkManager;
 import fr.ece.ostis.network.NetworkManager.InvokeFailedException;
 import fr.ece.ostis.speech.SpeechRecognitionService;
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.PowerManager.WakeLock;
@@ -33,130 +25,66 @@ import android.util.Log;
 
 
 /**
- * TODO Docu
  * TODO
- *  1 - Connect to 3G
- *  2 - Retrieve and store IP addresses for dl-ssl.l.google.com and m.google.com and mobile.l.google.com
- *  3 - Shutdown 3G ?
- *  4 - Start wi-fi
- *  5 - Add hipri routes for retrieved ip addresses
- *  6 - Check if drone is present
- * TODO Include reference to the drone proxy.
- * TODO Add a timer to relaunch enableHipri every 50 seconds
  * @author Nicolas Schurando
- * @version 2014-01-22
+ * @version 2014-01-29
  */
-public class OstisService extends Service{
+public class OstisService extends OstisServiceCommunicator{
 	
 	
-	/** Message code : register a new client */
-	public static final int MSG_REGISTER_CLIENT = 1;
+	/*
+	 * Constants
+	 */
+	public static final int MSG_NETWORK_STATUS_UPDATED = 3;		// Message code : the status of the network has changed
+	public static final int MSG_HIPRI_START = 4;				// TODO REMOVE
+	public static final int MSG_HIPRI_STOP = 5;					// TODO REMOVE
+	public static final int MSG_SPEECH_START = 6;				// TODO REMOVE ?
+	public static final int MSG_SPEECH_STOP = 7;				// TODO REMOVE ?
+	public static final int MSG_VOICE_RESULTS = 8;				// Message code
+	public static final int MSG_DRONE_CONNECT = 10;				// Message code
+	public static final int MSG_DRONE_CONNECTION_SUCCESS = 11;	// Message code
+	public static final int MSG_DRONE_CONNECTION_FAILED = 12;	// Message code
+	public static final int MSG_DRONE_DISCONNECT = 13;			// Message code
+	public static final int MSG_DRONE_STATUS_REQUEST = 14;		// Message code
+	public static final int MSG_DRONE_STATUS_UPDATED = 15;		// Message code
+	public static final int DRONE_STATUS_UNKNOWN = -1;			// Drone status
+	public static final int DRONE_STATUS_DISCONNECTED = 0;		// Drone status
+	public static final int DRONE_STATUS_CONNECTED = 1;			// Drone status
+	public static final int NETWORK_METHOD_UNKNOWN = 0;			// Drone status
+	public static final int NETWORK_METHOD_AP = 1;				// Drone status
+	public static final int NETWORK_METHOD_HIPRI = 2;			// Drone status
 	
 	
-	/** Message code : unregister an existing client */
-	public static final int MSG_UNREGISTER_CLIENT = 2;
+    /** Log tag. */
+    private static final String mTag = "OstisService";
 	
-	
-	/** Message code : the status of the network has changed */
-	public static final int MSG_NETWORK_STATUS_UPDATED = 3;
-	
-	
-	public static final int MSG_HIPRI_START = 4;
-	public static final int MSG_HIPRI_STOP = 5;
-	public static final int MSG_SPEECH_START = 6;
-	public static final int MSG_SPEECH_STOP = 7;
-	public static final int MSG_VOICE_RESULTS = 8;
-	public static final int MSG_DRONE_CONNECT = 10;
-	public static final int MSG_DRONE_CONNECTION_SUCCESS = 11;
-	public static final int MSG_DRONE_CONNECTION_FAILED = 12;
-	public static final int MSG_DRONE_DISCONNECT = 13;
-	
-	public static final int MSG_DRONE_STATUS_REQUEST = 14;
-	public static final int MSG_DRONE_STATUS_UPDATED = 15;
-	public static final int DRONE_STATUS_UNKNOWN = -1;
-	public static final int DRONE_STATUS_DISCONNECTED = 0;
-	public static final int DRONE_STATUS_CONNECTED = 1;
 	
 	/** Reference to the action manager. */
 	protected ActionManager mActionManager = null;
-	
-	
-	/** List of client messengers. */
-	protected ArrayList<Messenger> mMessengersToClients = new ArrayList<Messenger>();
-	
-	
-	/** Target we publish for clients to send messages to IncomingHandler. */
-	protected Messenger mMessengerFromClients = new Messenger(new IncomingMessageFromClientHandler(this));
-	
-	
-	/** Local messenger as receiver we publish to the speech recognizer. */
-	protected Messenger mMessengerFromSpeechService = new Messenger(new IncomingMessageFromSpeechRecognizer(this)); 
-	
-	
-	/** TODO */
-	protected Messenger mMessengerToSpeechService = null;
-	
-	
-	/** Reference to the speech recognition service. */
-	protected SpeechRecognitionService mSpeechRecognitionService = null; 
-	
-	
-	/** Reference to the language manager. */
-	protected LanguageManager mLanguageManager = null;
-	
-	
-	/** TODO */
-	protected boolean mSpeechServiceIsBound = false;
-	
-	
-	/** Reference to the wakelock system. */
-	protected WakeLock mWakeLock = null;
-
-	
-	/** Reference to the network manager. */
-	protected NetworkManager mNetworkManager = null;
 	
 	
 	/** Reference to the javadrone api */
 	protected static ARDrone mDrone = null;
 	
 	
-    /** Log tag. */
-    private static final String mTag = "OstisService";
-	
-
-    /** Class for monitoring the state of the speech recognition service. */
-    private final ServiceConnection mServiceSpeechConnection = new ServiceConnection(){
-		
-    	
-	    @Override public void onServiceConnected(ComponentName name, IBinder service){
-
-	        Log.d(mTag, "onServiceConnected");
-	    	mMessengerToSpeechService = new Messenger(service);
-	        Message message = Message.obtain(null, SpeechRecognitionService.MSG_REGISTER_CLIENT);
-	        message.replyTo = mMessengerFromSpeechService;
-	        try{
-	        	mMessengerToSpeechService.send(message);
-	        }catch(RemoteException e){
-	            Log.w(mTag, e);
-                // In this case the service has crashed before we could even do anything with it
-	        }
-	        
-	    }
-
-	    
-	    @Override public void onServiceDisconnected(ComponentName name){
-	        Log.d(mTag, "onServiceDisconnected");
-	        mMessengerToSpeechService = null;
-	    }
-
-	};
+	/** Reference to the language manager. */
+	protected LanguageManager mLanguageManager = null;
 	
 	
-	/**
-	 * TODO
-	 */
-	@Override public void onCreate(){
+	/** Reference to the network manager. */
+	protected NetworkManager mNetworkManager = null;
+	
+	
+	/** The selected method network. */
+	protected int mNetworkMethod = NETWORK_METHOD_UNKNOWN;
+	
+	
+	/** Reference to the wakelock system. */
+	protected WakeLock mWakeLock = null;
+	
+	
+	@Override
+	public void onCreate(){
 		
 		// Super
 		super.onCreate();
@@ -183,11 +111,9 @@ public class OstisService extends Service{
 		
 	}
 	
-	
-	/**
-	 * TODO
-	 */
-	@Override public void onDestroy(){
+
+	@Override
+	public void onDestroy(){
 		
 		// Unbind from speech recognition service
 		doUnbindSpeechService();
@@ -326,21 +252,15 @@ public class OstisService extends Service{
 	 */
 	protected void publishNetworkStatus(int mobileStatus, int wifiStatus){
 		
+		// Construct message
 		Bundle messageBundle = new Bundle();
 		messageBundle.putInt("StatusMobile", mobileStatus);
 		messageBundle.putInt("StatusWifi", wifiStatus);
         Message message = Message.obtain(null, MSG_NETWORK_STATUS_UPDATED);
         message.setData(messageBundle);
-		
-		for(int clientsIterator = mMessengersToClients.size() - 1; clientsIterator >= 0; clientsIterator--){
-		
-	        try{
-	        	mMessengersToClients.get(clientsIterator).send(message);
-	        }catch(RemoteException e){
-	        	e.printStackTrace();
-	        }
-	        
-		}
+        
+        // Send it to all clients
+        sendMessageToClients(message);
 		
 	}
 	
@@ -368,218 +288,15 @@ public class OstisService extends Service{
 	
 	
 	/**
-	 * When binding to the service, we return an interface to our messenger
-	 * for sending messages to the service.
-	 */
-	@Override public IBinder onBind(Intent intent){
-		Log.d("OstisService", "onBind");
-		return mMessengerFromClients.getBinder();
-	}
-	
-	
-	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-22
-	 */
-	protected static class IncomingMessageFromClientHandler extends Handler{
-		
-		
-		/** Reference to the ostis service. */
-		private final WeakReference<OstisService> mOstisServiceReference;
-		
-		
-		/**
-		 * Constructor.
-		 * @param service
-		 */
-		IncomingMessageFromClientHandler(OstisService service){
-			mOstisServiceReference = new WeakReference<OstisService>(service);
-		}
-	
-		
-		/**
-		 * TODO
-		 * @param message
-		 */
-		@Override public void handleMessage(Message message){
-			
-			// Log
-			Log.d("OstisService<->Activities", "handleMessage | what = " + String.valueOf(message.what));
-
-			// Retrieve the service instance
-			OstisService service = mOstisServiceReference.get();
-			
-			// React according to the type of object of the message
-			switch(message.what){
-
-				// Register a new client
-				case MSG_REGISTER_CLIENT:
-					Log.d("OstisService", "handleMessage -> New client registered");
-					service.mMessengersToClients.add(message.replyTo);
-					break;
-					
-				// Unregister a client
-				case MSG_UNREGISTER_CLIENT:
-					Log.d("OstisService", "handleMessage -> Removing existing client");
-					service.mMessengersToClients.remove(message.replyTo);
-					break;
-		
-				case MSG_HIPRI_START:
-					Log.d("OstisService", "handleMessage -> start debug");
-					service.prepareNetwork();
-					break;
-					
-				case MSG_HIPRI_STOP:
-					Log.d("OstisService", "handleMessage -> stop debug");
-					service.restoreNetwork();
-					break;
-					
-				case MSG_SPEECH_START:
-					Log.d("OstisService", "handleMessage -> start speech");
-			        try{
-				        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_START_LISTENING);
-			        	service.mMessengerToSpeechService.send(message2);
-			        }catch(RemoteException e){
-			        	e.printStackTrace();
-			        }
-					break;
-					
-				case MSG_SPEECH_STOP:
-					Log.d("OstisService", "handleMessage -> stop speech");
-			        try{
-				        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_CANCEL_LISTENING);
-			        	service.mMessengerToSpeechService.send(message2);
-			        }catch(RemoteException e){
-			        	e.printStackTrace();
-			        }
-					break;
-				
-				// Connect to drone
-				case MSG_DRONE_CONNECT:
-					service.doDroneConnect();
-					break;
-					
-				// Disconnect from drone
-				case MSG_DRONE_DISCONNECT:
-					service.doDroneDisconnect();
-					break;
-
-			}
-			
-		}
-		
-	}
-	
-	
-	/**
-	 * TODO
-	 * @author Nicolas Schurando
-	 * @version 2014-01-22
-	 */
-	protected static class IncomingMessageFromSpeechRecognizer extends Handler{
-		
-		
-		/**
-		 * Reference to the ostis service.
-		 */
-		private final WeakReference<OstisService> mServiceReference;
-		
-		
-		/**
-		 * Constructor.
-		 * @param service
-		 */
-		IncomingMessageFromSpeechRecognizer(OstisService service){
-			mServiceReference = new WeakReference<OstisService>(service);
-		}
-	
-		
-		/**
-		 * TODO
-		 * @param message
-		 */
-		@Override public void handleMessage(Message message){
-			
-			// Log
-			Log.d("OstisService<->SpeechService", "handleMessage | what = " + String.valueOf(message.what));
-
-			// Retrieve the service instance
-			OstisService service = mServiceReference.get();
-			
-			// React according to the type of object of the message
-			switch(message.what){
-
-				// Received speech recognition results
-	            case SpeechRecognitionService.MSG_FINISHED_WITH_RESULTS:
-	            	
-	            	// Log
-	                Log.d("OstisService", "Received speech recognition results.");
-	                
-	                // Pass it to the action manager
-	                ArrayList<String> _Sentences = message.getData().getStringArrayList("SpeechRecognitionResult");
-	                if(_Sentences != null){
-		    			for (int i = 0; i < _Sentences.size(); i++){
-		    				Action actionMatched = service.mActionManager.matchCommandToRun(_Sentences.get(i));
-		    				
-		    				if(actionMatched != null){
-		    					Log.d("OstisService", "Running action " + actionMatched.getId());
-		    					try {
-									actionMatched.run(OstisService.mDrone);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-		    					return;
-		    				}
-		    			}
-	                }
-	                break;
-		
-			}
-			
-		}
-		
-	}
-
-	
-    /**
-     * Binds to the speech recognition service.
-     */
-	protected void doBindSpeechService(){
-    	if(mSpeechServiceIsBound != true){
-		    bindService(new Intent(this, SpeechRecognitionService.class), mServiceSpeechConnection, Context.BIND_AUTO_CREATE);
-		    mSpeechServiceIsBound = true;
-    	}
-    }
-	
-
-	/**
-	 * Unbinds from the speech recognition service.
-	 */
-	protected void doUnbindSpeechService(){
-    	if(mSpeechServiceIsBound != false){
-	        try{
-		        Message message = Message.obtain(null, SpeechRecognitionService.MSG_UNREGISTER_CLIENT);
-		        message.replyTo = mMessengerFromSpeechService;
-	        	mMessengerToSpeechService.send(message);
-	        }catch(RemoteException e){
-	        	e.printStackTrace();
-	        }
-    		unbindService(mServiceSpeechConnection);
-    		mSpeechServiceIsBound = false;
-    	}
-    }
-	
-	
-	/**
-	 * TODO
-	 * @author Nicolas Schurando
-	 * @version 2014-01-22
+	 * @version 2014-01-29
 	 */
 	protected class DroneConnectionTask extends AsyncTask<byte[], Integer, Boolean>{
 
-		@Override protected Boolean doInBackground(byte[]... ips){
+		
+		@Override
+		protected Boolean doInBackground(byte[]... ips){
 			
 			byte[] droneIp = ips[0];
 			
@@ -660,12 +377,104 @@ public class OstisService extends Service{
 	}
 	
 	
+	@Override
+	protected void onMessageFromClient(Message message){
+		switch(message.what){
+			
+			case MSG_HIPRI_START:
+				Log.d(mTag, "Handling message : start debug");
+				prepareNetwork();
+				break;
+			
+			case MSG_HIPRI_STOP:
+				Log.d(mTag, "Handling message : stop debug");
+				restoreNetwork();
+				break;
+			
+			case MSG_SPEECH_START:
+				Log.d(mTag, "Handling message : start speech");
+		        try{
+			        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_START_LISTENING);
+		        	mMessengerToSpeechService.send(message2);
+		        }catch(RemoteException e){
+		        	e.printStackTrace();
+		        }
+				break;
+			
+			case MSG_SPEECH_STOP:
+				Log.d("OstisService", "Handling message : stop speech");
+		        try{
+			        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_CANCEL_LISTENING);
+		        	mMessengerToSpeechService.send(message2);
+		        }catch(RemoteException e){
+		        	e.printStackTrace();
+		        }
+				break;
+			
+			// Connect to drone
+			case MSG_DRONE_CONNECT:
+				doDroneConnect();
+				break;
+				
+			// Disconnect from drone
+			case MSG_DRONE_DISCONNECT:
+				doDroneDisconnect();
+				break;
+
+		}
+	}
+
+
+	@Override
+	protected void onMessageFromSpeechRecognizer(Message message){
+		
+		// React according to the type of object of the message
+		switch(message.what){
+
+			// Received speech recognition results
+            case SpeechRecognitionService.MSG_FINISHED_WITH_RESULTS:
+            	
+            	// Log
+                Log.i(mTag, "Received speech recognition results.");
+                
+                // Pass it to the action manager
+                ArrayList<String> _Sentences = message.getData().getStringArrayList("SpeechRecognitionResult");
+                if(_Sentences != null){
+	    			for (int i = 0; i < _Sentences.size(); i++){
+	    				Action actionMatched = mActionManager.matchCommandToRun(_Sentences.get(i));
+	    				
+	    				if(actionMatched != null){
+	    					Log.d("OstisService", "Running action " + actionMatched.getId());
+	    					try {
+								actionMatched.run(OstisService.mDrone);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+	    					return;
+	    				}
+	    			}
+                }
+                break;
+	
+		}
+		
+	}
+	
+	
 	/**
 	 * TODO
 	 */
 	protected void onDroneConnected(){
-		Log.d("OstisService", "onDroneConnected");
-		// TODO
+		
+		// Log
+		Log.i(mTag, "Connected to drone.");
+		
+		// TODO Update local variable
+		
+		// TODO Warn clients
+		//sendMessageToClients(message);
+		
 	}
 	
 	
@@ -673,7 +482,14 @@ public class OstisService extends Service{
 	 * TODO
 	 */
 	protected void onDroneConnectionFailed(){
-		Log.d("OstisService", "onDroneConnectionFailed");
-		// TODO
+		
+		// Log
+		Log.w(mTag, "Connection to drone failed.");
+		
+		// TODO Update local variable
+		
+		// TODO Warn clients
+		//sendMessageToClients(message);
+		
 	}
 }
