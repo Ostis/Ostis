@@ -39,10 +39,10 @@ public class MobileNetworkManager extends NetworkManager{
 	
 	
 	/** TODO */
-    protected AtomicBoolean mHipriEnabled = new AtomicBoolean(false);
-    
-    
-    /** TODO */
+	protected AtomicBoolean mHipriEnabled = new AtomicBoolean(false);
+	
+	
+	/** TODO */
 	protected static final int mMobileTimeout = 5000;
 	
 	
@@ -76,20 +76,20 @@ public class MobileNetworkManager extends NetworkManager{
 		setMobileDataEnabled(true);
 		
 		// Wait until connected
-	    try{
-	    	State checkState = null;
-	        for(int counter = 0; counter < mMobileTimeout; counter += mMobileTimeoutSteps){
-	            checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-	            if(checkState.compareTo(State.CONNECTED) == 0) return;
-	            Thread.sleep(mMobileTimeout);
-	        }
-	    }catch(InterruptedException e){
-	    	Log.w(mTag, e);
-	    }
-	    
-	    // Throw timeout exception
-	    throw new TimeoutException("Enabling mobile connection timed out.");
-	    
+		try{
+			State checkState = null;
+			for(int counter = 0; counter < mMobileTimeout; counter += mMobileTimeoutSteps){
+				checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+				if(checkState.compareTo(State.CONNECTED) == 0) return;
+				Thread.sleep(mMobileTimeout);
+			}
+		}catch(InterruptedException e){
+			Log.w(mTag, e);
+		}
+		
+		// Throw timeout exception
+		throw new TimeoutException("Enabling mobile connection timed out.");
+		
 	}
 	
 	
@@ -105,18 +105,18 @@ public class MobileNetworkManager extends NetworkManager{
 		setMobileDataEnabled(false);
 		
 		// Wait until disconnected
-	    try{
-	    	State checkState = null;
-	        for(int counter = 0; counter < 60; counter++){
-	            checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-	            if(checkState.compareTo(State.DISCONNECTED) == 0) return;
-	            Thread.sleep(500);
-	        }
-	    }catch(InterruptedException e){}
-	    
-	    // Throw timeout exception
-	    throw new TimeoutException();
-	    
+		try{
+			State checkState = null;
+			for(int counter = 0; counter < 60; counter++){
+				checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+				if(checkState.compareTo(State.DISCONNECTED) == 0) return;
+				Thread.sleep(500);
+			}
+		}catch(InterruptedException e){}
+		
+		// Throw timeout exception
+		throw new TimeoutException();
+		
 	}
 	
 	
@@ -127,28 +127,28 @@ public class MobileNetworkManager extends NetworkManager{
 	 * @throws InvokeFailedException
 	 */
 	protected void setMobileDataEnabled(boolean enabled) throws NullPointerException, InvokeFailedException{
-        
+		
 		// Ensure connectivity manager is set
 		if(mConnectivityManager == null) throw new NullPointerException("Connectivity manager is null.");
 		
 		try{
 			
 			// Retrieve the class for the connectivity manager
-	        final Class<?> classConnectivityManager = Class.forName(mConnectivityManager.getClass().getName());
-	        
-	        // Sets the inner service field accessible
-	        final Field fieldConnectivityManager = classConnectivityManager.getDeclaredField("mService");
-	        fieldConnectivityManager.setAccessible(true);
-	        
-	        // Retrieve the interface
-	        final Object interfaceConnectivityManager = fieldConnectivityManager.get(mConnectivityManager);
-	        final Class<?> classInterfaceConnectivityManagerClass = Class.forName(interfaceConnectivityManager.getClass().getName());
-	        
-	        // Retrieve the method, set it accessible, and invoke it
-	        final Method setMobileDataEnabledMethod = classInterfaceConnectivityManagerClass.getDeclaredMethod("setMobileDataEnabled", Boolean.TYPE);
-	        setMobileDataEnabledMethod.setAccessible(true);
-	        setMobileDataEnabledMethod.invoke(interfaceConnectivityManager, enabled);
-	        
+			final Class<?> classConnectivityManager = Class.forName(mConnectivityManager.getClass().getName());
+			
+			// Sets the inner service field accessible
+			final Field fieldConnectivityManager = classConnectivityManager.getDeclaredField("mService");
+			fieldConnectivityManager.setAccessible(true);
+			
+			// Retrieve the interface
+			final Object interfaceConnectivityManager = fieldConnectivityManager.get(mConnectivityManager);
+			final Class<?> classInterfaceConnectivityManagerClass = Class.forName(interfaceConnectivityManager.getClass().getName());
+			
+			// Retrieve the method, set it accessible, and invoke it
+			final Method setMobileDataEnabledMethod = classInterfaceConnectivityManagerClass.getDeclaredMethod("setMobileDataEnabled", Boolean.TYPE);
+			setMobileDataEnabledMethod.setAccessible(true);
+			setMobileDataEnabledMethod.invoke(interfaceConnectivityManager, enabled);
+			
 		}catch(IllegalArgumentException e){
 			Log.w(mTag, e);
 			throw new InvokeFailedException();
@@ -168,8 +168,8 @@ public class MobileNetworkManager extends NetworkManager{
 			Log.w(mTag, e);
 			throw new InvokeFailedException();
 		}
-        
-     }
+		
+	 }
 	
 	
 	/**
@@ -190,47 +190,47 @@ public class MobileNetworkManager extends NetworkManager{
 		//Log.d("NetworkManager", "Setting wifi dns");
 		//setWifiDns("8.8.8.8");
 		
-	    // (Re-)Activate mobile connection in addition to other connection already activated
-	    Log.d("NetworkManager", "Starting to use Hipri profile.");
-	    int resultInt = mConnectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
-	    switch(resultInt){
-	    
-	    	case -1: // -1 means errors
-	    		Log.e("NetworkManager", "Hipri request failed.");
-	    		throw new Exception("Could not start using hipri profile, system failed.");
-	    		
-	    	case 0: // 0 means already enabled
-		        Log.e("NetworkManager", "Hipri already enabled, no need to perform additional network settings.");
-		        return;
-		        
-	    	case 1: // 1 means enabled
-		        Log.e("NetworkManager", "Hipri sucessfully enabled.");
-		        break;
-		        
-	    	default: // Other values can be returned, because this method is vendor specific
-		        Log.e("NetworkManager", "Hipri request result code is unknown : " + String.valueOf(resultInt));
-	    		throw new Exception("Could not start using hipri profile, the result was unexcepted.");
-	    }
+		// (Re-)Activate mobile connection in addition to other connection already activated
+		Log.d("NetworkManager", "Starting to use Hipri profile.");
+		int resultInt = mConnectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
+		switch(resultInt){
 		
-	    // Wait some time needed to connection manager for waking up
-	    try{
-	    	State checkState = null;
-	        for(int counter = 0; counter < 60; counter++){
-	            checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
-	            if(checkState.compareTo(State.CONNECTED) == 0) break;
-	            Thread.sleep(500);
-	        }
-	    }catch(InterruptedException e){}
-	    
-	    // Add routes
-	    for (int address : addresses){
-	    	if(mConnectivityManager.requestRouteToHost(ConnectivityManager.TYPE_MOBILE_HIPRI, address)){
-	    		Log.d("NetworkManager", "Route to host " + String.valueOf(address) + " added.");
-	    	}else{
-	    		Log.e("NetworkManager", "Route to host " + String.valueOf(address) + " failed.");
-	    		throw new Exception("Could not add a route for host " + String.valueOf(address) + ", hipri will not work.");
-	    	}
-	    }
+			case -1: // -1 means errors
+				Log.e("NetworkManager", "Hipri request failed.");
+				throw new Exception("Could not start using hipri profile, system failed.");
+				
+			case 0: // 0 means already enabled
+				Log.e("NetworkManager", "Hipri already enabled, no need to perform additional network settings.");
+				return;
+				
+			case 1: // 1 means enabled
+				Log.e("NetworkManager", "Hipri sucessfully enabled.");
+				break;
+				
+			default: // Other values can be returned, because this method is vendor specific
+				Log.e("NetworkManager", "Hipri request result code is unknown : " + String.valueOf(resultInt));
+				throw new Exception("Could not start using hipri profile, the result was unexcepted.");
+		}
+		
+		// Wait some time needed to connection manager for waking up
+		try{
+			State checkState = null;
+			for(int counter = 0; counter < 60; counter++){
+				checkState = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
+				if(checkState.compareTo(State.CONNECTED) == 0) break;
+				Thread.sleep(500);
+			}
+		}catch(InterruptedException e){}
+		
+		// Add routes
+		for (int address : addresses){
+			if(mConnectivityManager.requestRouteToHost(ConnectivityManager.TYPE_MOBILE_HIPRI, address)){
+				Log.d("NetworkManager", "Route to host " + String.valueOf(address) + " added.");
+			}else{
+				Log.e("NetworkManager", "Route to host " + String.valueOf(address) + " failed.");
+				throw new Exception("Could not add a route for host " + String.valueOf(address) + ", hipri will not work.");
+			}
+		}
 		
 	}
 	
@@ -255,9 +255,9 @@ public class MobileNetworkManager extends NetworkManager{
 		
 		// Defines the pinger thread as renewing the hipri connection every 20 seconds. No routing setup is needed.
 		mPingerThread = new Thread(new Runnable(){
-            @Override public void run(){
-                while(mHipriEnabled.get()){
-                	try{
+			@Override public void run(){
+				while(mHipriEnabled.get()){
+					try{
 						enableHipri(addresses);
 						Thread.sleep(20000);
 					}catch(InterruptedException e){
@@ -265,12 +265,12 @@ public class MobileNetworkManager extends NetworkManager{
 					}catch(Exception e){
 						stopHipri();
 					}
-                }
-            }
-        });
+				}
+			}
+		});
 		
 		// Start pinger thread
-        mPingerThread.start();
+		mPingerThread.start();
 		
 	}
 	
@@ -281,17 +281,17 @@ public class MobileNetworkManager extends NetworkManager{
 	public void stopHipri(){
 		
 		// Reset flag
-        mHipriEnabled.set(false);
+		mHipriEnabled.set(false);
 		
-        // Diable hipri
+		// Diable hipri
 		disableHipri();
-        
-        // Stop pinger thread
+		
+		// Stop pinger thread
 		if(mPingerThread != null){
-	        mPingerThread.interrupt();
-	        mPingerThread = null;
+			mPingerThread.interrupt();
+			mPingerThread = null;
 		}
-        
+		
 	}
 	
 }

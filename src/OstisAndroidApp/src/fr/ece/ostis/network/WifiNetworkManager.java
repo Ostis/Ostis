@@ -27,15 +27,15 @@ public class WifiNetworkManager extends NetworkManager{
 	
 	/** Log tag. */
 	protected static final String mTag = "WifiNetworkManager";
-    
-    
-    /** TODO */
+	
+	
+	/** TODO */
 	protected static final int mWifiTimeout = 5000;
 	
 	
 	/** TODO */
 	protected static final int mWifiTimeoutSteps = 500;
-    
+	
 	
 	/** TODO */
 	protected Context mContext = null;
@@ -84,9 +84,9 @@ public class WifiNetworkManager extends NetworkManager{
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 		BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
-		    public void onReceive(Context c, Intent i){
-		    	WifiNetworkManager.this.onWifiScanResultsUpdated();
-		    }
+			public void onReceive(Context c, Intent i){
+				WifiNetworkManager.this.onWifiScanResultsUpdated();
+			}
 		};
 		mContext.registerReceiver(broadcastReceiver, intentFilter);
 		
@@ -162,14 +162,14 @@ public class WifiNetworkManager extends NetworkManager{
 		
 		for(int i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
 			if(getWifiState() == WifiManager.WIFI_STATE_ENABLED) return;
-            try{
-            	Thread.sleep(mWifiTimeoutSteps);
-            }catch(Exception e){
-            	Log.w(mTag, e.getMessage());
-            }
+			try{
+				Thread.sleep(mWifiTimeoutSteps);
+			}catch(Exception e){
+				Log.w(mTag, e.getMessage());
+			}
 		}
 		
-        throw new TimeoutException("Wifi enable timed out.");
+		throw new TimeoutException("Wifi enable timed out.");
 		
 	}
 	
@@ -182,14 +182,14 @@ public class WifiNetworkManager extends NetworkManager{
 		
 		for(int i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
 			if(getWifiState() == WifiManager.WIFI_STATE_DISABLED) return;
-            try{
-            	Thread.sleep(mWifiTimeoutSteps);
-            }catch(Exception e){
-            	Log.w(mTag, e.getMessage());
-            }
+			try{
+				Thread.sleep(mWifiTimeoutSteps);
+			}catch(Exception e){
+				Log.w(mTag, e.getMessage());
+			}
 		}
 		
-        throw new TimeoutException("Wifi disable timed out.");
+		throw new TimeoutException("Wifi disable timed out.");
 		
 	}
 	
@@ -280,8 +280,8 @@ public class WifiNetworkManager extends NetworkManager{
 	 */
 	public void setWifiDns(String dns){
 		Log.i(mTag, "Setting wifi dns to " + dns);
-	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, dns);
-	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS2, dns);
+		android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS1, dns);
+		android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS2, dns);
 	}
 	
 	

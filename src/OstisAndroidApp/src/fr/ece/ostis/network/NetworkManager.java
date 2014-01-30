@@ -21,21 +21,21 @@ public abstract class NetworkManager{
 	 */
 	public int lookupHost(String hostname) throws UnknownHostException{
 		
-	    InetAddress inetAddress = InetAddress.getByName(hostname);
-	    
-	    Log.d("NetworkManager", "Host " + hostname + " > " + inetAddress.toString());
-	    
-	    byte[] addrBytes;
-	    int addrInt;
-	    
-	    addrBytes = inetAddress.getAddress();
-	    addrInt = ((addrBytes[3] & 0xff) << 24)
-	            | ((addrBytes[2] & 0xff) << 16)
-	            | ((addrBytes[1] & 0xff) << 8 )
-	            |  (addrBytes[0] & 0xff);
-	    
-	    return addrInt;
-	    
+		InetAddress inetAddress = InetAddress.getByName(hostname);
+		
+		Log.d("NetworkManager", "Host " + hostname + " > " + inetAddress.toString());
+		
+		byte[] addrBytes;
+		int addrInt;
+		
+		addrBytes = inetAddress.getAddress();
+		addrInt = ((addrBytes[3] & 0xff) << 24)
+				| ((addrBytes[2] & 0xff) << 16)
+				| ((addrBytes[1] & 0xff) << 8 )
+				|  (addrBytes[0] & 0xff);
+		
+		return addrInt;
+		
 	}
 	
 	
