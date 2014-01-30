@@ -539,6 +539,17 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     }
 
 
+    /**
+     * TODO
+     * @param method
+     * @throws Exception
+     */
+    public void setNetworkMethod(int method) throws Exception{
+    	if(mNetworkMethod != NETWORK_METHOD_UNKNOWN) throw new Exception("Network method already set.");
+    	mNetworkMethod = method;
+    }
+    
+    
 	@Override
 	public void navDataReceived(NavData nd){
 		

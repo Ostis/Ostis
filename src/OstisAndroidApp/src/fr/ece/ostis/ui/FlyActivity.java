@@ -2,7 +2,6 @@ package fr.ece.ostis.ui;
 
 import fr.ece.ostis.R;
 import android.os.Bundle;
-import android.os.Message;
 import android.view.Menu;
 
 /**

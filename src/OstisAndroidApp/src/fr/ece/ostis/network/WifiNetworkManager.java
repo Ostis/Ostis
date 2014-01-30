@@ -11,6 +11,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.util.Log;
@@ -246,6 +247,32 @@ public class WifiNetworkManager extends NetworkManager{
 		mWifiScanResultsCallbacks.clear();
 	}
 	
+	
+	/**
+	 * TODO
+	 * @param ssid
+	 * @throws Exception 
+	 */
+	public void connectToOpenNetwork(String ssid) throws Exception{
+		
+		// Log
+		Log.i(mTag, "Connecting to wifi network " + ssid + ".");
+		
+		// Create configuration
+		WifiConfiguration config = new WifiConfiguration();
+		config.SSID = "\"" + ssid + "\"";
+		config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+		
+		// Add configuration to wifi manager
+		int networkId = mWifiManager.addNetwork(config);
+		if(networkId < 0) throw new Exception("Failed adding the new network.");
+		
+		// Enable it
+		mWifiManager.disconnect();
+		mWifiManager.enableNetwork(networkId, true);
+		mWifiManager.reconnect();
+		
+	}
 	
 	/**
 	 * TODO
