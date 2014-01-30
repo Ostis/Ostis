@@ -56,6 +56,14 @@ public class WifiNetworkManager extends NetworkManager{
 	protected ArrayList<OnWifiScanResultsUpdatedListener> mWifiScanResultsCallbacks = new ArrayList<OnWifiScanResultsUpdatedListener>();
 	
 	
+	/*
+	 * Constants
+	 */
+	public static final String KEY_NETWORK_BSSID = "BSSID";
+	public static final String KEY_NETWORK_SSID = "SSID";
+	public static final String KEY_NETWORK_LEVEL = "LEVEL";
+	
+	
 	/**
 	 * TODO
 	 * @param context
@@ -146,6 +154,26 @@ public class WifiNetworkManager extends NetworkManager{
 	
 	
 	/**
+	 * Waits for mWifiTimeout seconds until wifi is enabled.
+	 * @throws TimeoutException if wifi is not enabled at the end of time.
+	 */
+	public void waitForWifiEnabled() throws TimeoutException{
+		
+		for(int i = 0; i < mWifiTimeout; i += mWifiTimeoutSteps){
+			if(getWifiState() == WifiManager.WIFI_STATE_ENABLED) return;
+            try{
+            	Thread.sleep(mWifiTimeoutSteps);
+            }catch(Exception e){
+            	Log.w(mTag, e.getMessage());
+            }
+		}
+		
+        throw new TimeoutException("Wifi enable timed out.");
+		
+	}
+	
+	
+	/**
 	 * Waits for mWifiTimeout seconds until wifi is disabled.
 	 * @throws TimeoutException if wifi is not disabled at the end of time.
 	 */
@@ -207,6 +235,11 @@ public class WifiNetworkManager extends NetworkManager{
 		Log.i(mTag, "Wifi scan results available.");
 		
 		List<ScanResult> wifiResults = mWifiManager.getScanResults();
+		
+		/*for (ScanResult network: wifiResults){
+			Log.d(mTag, "Wifi network : [" + network.BSSID + "] " + network.SSID);
+		}*/
+		
 		for (OnWifiScanResultsUpdatedListener callback: mWifiScanResultsCallbacks)
 			if(callback != null) callback.onWifiScanResultsUpdated(wifiResults);
 		
