@@ -51,11 +51,11 @@ public class ActionManager{
 	
 	/**
 	 * TODO
-	 * @param locale
 	 * @param context
+	 * @param locale
 	 * @param drone
 	 */
-	public ActionManager(Locale locale, Context context){
+	public ActionManager(Context context, Locale locale){
 		
 		mLocale = locale;
 		mContext = context;

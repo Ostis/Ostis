@@ -1,30 +1,29 @@
 package fr.ece.ostis;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
-
 import com.codeminders.ardrone.ARDrone;
+import com.codeminders.ardrone.NavData;
+import com.codeminders.ardrone.NavDataListener;
 
 import fr.ece.ostis.actions.Action;
 import fr.ece.ostis.actions.ActionManager;
 import fr.ece.ostis.lang.LanguageManager;
-import fr.ece.ostis.network.NetworkManager;
-import fr.ece.ostis.network.NetworkManager.InvokeFailedException;
-import fr.ece.ostis.speech.SpeechRecognitionService;
+import fr.ece.ostis.network.MobileNetworkManager;
+import fr.ece.ostis.network.WifiAPNetworkManager;
+import fr.ece.ostis.network.WifiNetworkManager;
+import fr.ece.ostis.speech.SpeechRecognitionResultsListener;
 import fr.ece.ostis.ui.HomeActivity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
-import android.os.Message;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.RemoteException;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 
@@ -32,29 +31,18 @@ import android.util.Log;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-29
+ * @version 2014-01-30
  */
-public class OstisService extends OstisServiceCommunicator{
+public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener{
 	
 	
 	/*
 	 * Constants
 	 */
-	public static final int MSG_NETWORK_STATUS_UPDATED = 3;		// Message code : the status of the network has changed
-	public static final int MSG_HIPRI_START = 4;				// TODO REMOVE
-	public static final int MSG_HIPRI_STOP = 5;					// TODO REMOVE
-	public static final int MSG_SPEECH_START = 6;				// TODO REMOVE ?
-	public static final int MSG_SPEECH_STOP = 7;				// TODO REMOVE ?
-	public static final int MSG_VOICE_RESULTS = 8;				// Message code
-	public static final int MSG_DRONE_CONNECT = 10;				// Message code
-	public static final int MSG_DRONE_CONNECTION_SUCCESS = 11;	// Message code
-	public static final int MSG_DRONE_CONNECTION_FAILED = 12;	// Message code
-	public static final int MSG_DRONE_DISCONNECT = 13;			// Message code
-	public static final int MSG_DRONE_STATUS_REQUEST = 14;		// Message code
-	public static final int MSG_DRONE_STATUS_UPDATED = 15;		// Message code
 	public static final int DRONE_STATUS_UNKNOWN = -1;			// Drone status
-	public static final int DRONE_STATUS_DISCONNECTED = 0;		// Drone status
-	public static final int DRONE_STATUS_CONNECTED = 1;			// Drone status
+	public static final int DRONE_STATUS_CONNECTING = 0;		// Drone status
+	public static final int DRONE_STATUS_DISCONNECTED = 1;		// Drone status
+	public static final int DRONE_STATUS_CONNECTED = 2;			// Drone status
 	public static final int NETWORK_METHOD_UNKNOWN = 0;			// Drone status
 	public static final int NETWORK_METHOD_AP = 1;				// Drone status
 	public static final int NETWORK_METHOD_HIPRI = 2;			// Drone status
@@ -63,27 +51,45 @@ public class OstisService extends OstisServiceCommunicator{
     /** Log tag. */
     protected static final String mTag = "OstisService";
 	
-	
+    
+	/** Service binder. */
+    protected final IBinder mBinder = new OstisServiceBinder();
+    
+    
+    /** Service clients. */
+    protected ArrayList<OnDroneStatusChangedListener> mDroneStatusChangedListeners = new ArrayList<OnDroneStatusChangedListener>();
+    
+    
 	/** Reference to the javadrone api */
 	protected static ARDrone mDrone = null;
 	
 	
-	/** Reference to the action manager. */
-	protected ActionManager mActionManager = null;
+	/** Drone connected state */
+	protected int mDroneConnectionStatus = DRONE_STATUS_UNKNOWN; 
 	
 	
 	/** Reference to the language manager. */
 	protected LanguageManager mLanguageManager = null;
 	
 	
-	/** Reference to the network manager. */
-	protected NetworkManager mNetworkManager = null;
+	/** Reference to the action manager. */
+	protected ActionManager mActionManager = null;
 	
 	
-	/** TODO */
+	/* Reference to the networks manager. */
+	protected MobileNetworkManager mMobileNetworkManager = null;
+	protected WifiNetworkManager mWifiNetworkManager = null;
+	protected WifiAPNetworkManager mWifiAPNetworkManager = null;
+	
+	
+	/** Reference to the notification manager. */
 	protected NotificationManager mNotificationManager = null;
 	
 	
+	/** Flag for the notification shown or not. */
+	protected boolean mNotificationShown = false;
+	
+
 	/** The selected method network. */
 	protected int mNetworkMethod = NETWORK_METHOD_UNKNOWN;
 	
@@ -102,17 +108,14 @@ public class OstisService extends OstisServiceCommunicator{
 		// Super
 		super.onCreate();
 		
-		// Obtain wakelock
-		acquireWakeLock();
-		
-		// Retrieve managers
+		// Instantiate managers
 		mLanguageManager = new LanguageManager();
-		mActionManager = new ActionManager(mLanguageManager.getCurrentLocale(), this);
-		mNetworkManager = new NetworkManager(this);
+		mActionManager = new ActionManager(this, mLanguageManager.getCurrentLocale());
+		mMobileNetworkManager = new MobileNetworkManager(this.getApplicationContext());
+		mWifiNetworkManager = new WifiNetworkManager(this);
+		mWifiAPNetworkManager = new WifiAPNetworkManager(this, mWifiNetworkManager);
 		mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		
-		// Show notification
-		showNotification();
 	}
 	
 
@@ -122,18 +125,24 @@ public class OstisService extends OstisServiceCommunicator{
 		// Log
 		Log.i(mTag, "Service created.");
 		
-		// Dismiss notification
-        mNotificationManager.cancel(mNotificationId);
-
-		// Restore network
-		restoreNetwork();
+		// Dismiss notification if displayed
+		if(mNotificationShown) hideNotification();
 		
-		// Release wakelock
-		releaseWakeLock();
+		// Restore network
+		/*restoreNetwork();*/
+		
+		// Release wakelock if held
+		if(mWakeLock.isHeld()) releaseWakeLock();
 		
 		// Super
 		super.onDestroy();
 		
+	}
+
+
+	@Override
+	public IBinder onBind(Intent intent){
+		return mBinder;
 	}
 
 	
@@ -158,6 +167,23 @@ public class OstisService extends OstisServiceCommunicator{
         // Send the notification.
         mNotificationManager.notify(mNotificationId, notification);
         
+        // Set flag
+        mNotificationShown = true;
+        
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void hideNotification(){
+		
+		// Dismiss notification
+        mNotificationManager.cancel(mNotificationId);
+        
+        // Set flag
+        mNotificationShown = false;
+		
 	}
 	
 	
@@ -185,7 +211,7 @@ public class OstisService extends OstisServiceCommunicator{
 	protected void prepareNetwork(){
 		
 		// Launch task
-		new PrepareNetworkTask().execute(
+		/*new PrepareNetworkTask().execute(
 				"8.8.8.8",
 				"google.com",
 				"m.google.com",
@@ -193,12 +219,12 @@ public class OstisService extends OstisServiceCommunicator{
 				"dl-ssl.google.com",
 				"dl-ssl.l.google.com",
 				"mobile.google.com",
-				"mobile.l.google.com");
+				"mobile.l.google.com");*/
 		
 	}
 
 	
-	protected class PrepareNetworkTask extends AsyncTask<String, Void, Void>{
+	/*protected class PrepareNetworkTask extends AsyncTask<String, Void, Void>{
 	
 		private Exception mException = null;
 		
@@ -207,11 +233,11 @@ public class OstisService extends OstisServiceCommunicator{
 			// Step 1 : Connect to mobile network
 			try {
 				Log.d("OstisService", "prepareNetwork -> disabling wifi");
-				mNetworkManager.disableWifi();
+				mWifiNetworkManager.disableWifi();
 				Log.d("OstisService", "prepareNetwork -> wifi disabled");
 				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_DISCONNECTED, NetworkManager.STATUS_DISCONNECTED);
 				Log.d("OstisService", "prepareNetwork -> enabling mobile");
-				mNetworkManager.enableMobileConnection();
+				mMobileNetworkManager.enableMobileConnection();
 				Log.d("OstisService", "prepareNetwork -> mobile enabled");
 				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_CONNECTED, NetworkManager.STATUS_DISCONNECTED);
 			}catch(InvokeFailedException e){
@@ -270,31 +296,12 @@ public class OstisService extends OstisServiceCommunicator{
 			}
 		}
 		
-	}
+	}*/
 	
 	
-	/**
-	 * TODO
-	 * @param mobileStatus
-	 * @param wifiStatus
-	 */
-	protected void publishNetworkStatus(int mobileStatus, int wifiStatus){
-		
-		// Construct message
-		Bundle messageBundle = new Bundle();
-		messageBundle.putInt("StatusMobile", mobileStatus);
-		messageBundle.putInt("StatusWifi", wifiStatus);
-        Message message = Message.obtain(null, MSG_NETWORK_STATUS_UPDATED);
-        message.setData(messageBundle);
-        
-        // Send it to all clients
-        sendMessageToClients(message);
-		
-	}
-	
-	/**
+	/*/**
 	 * 
-	 */
+	 *
 	protected void restoreNetwork(){
 		
 		mNetworkManager.disableWifi();
@@ -312,16 +319,20 @@ public class OstisService extends OstisServiceCommunicator{
 			e.printStackTrace();
 		}
 		
-	}
+	}*/
 	
 	
 	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-29
+	 * @version 2014-01-30
 	 */
 	protected class DroneConnectionTask extends AsyncTask<byte[], Integer, Boolean>{
 
+		
+		/** Log tag */
+		protected final static String mTag = "DroneConnectionTask";
+		
 		
 		@Override
 		protected Boolean doInBackground(byte[]... ips){
@@ -341,7 +352,7 @@ public class OstisService extends OstisServiceCommunicator{
 				return true;
 				
 			}catch(Exception e){
-				Log.e("DroneConnectionTask", "Failed to connect to drone.", e);
+				Log.w(mTag, "Failed to connect to drone.", e);
 				
 				try{
 					
@@ -352,7 +363,7 @@ public class OstisService extends OstisServiceCommunicator{
 					OstisService.mDrone.disconnect();
 					
 				}catch(Exception e2){
-					Log.w("DroneConnectionTask", "Failed to clear drone state.", e2);
+					Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
 				}
 	
 			}
@@ -373,120 +384,44 @@ public class OstisService extends OstisServiceCommunicator{
 	/**
 	 * TODO
 	 */
-	protected void doDroneConnect(){
-		Log.d("OstisService", "doDroneConnect");
-		(new DroneConnectionTask()).execute(new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1}); 
+	public void doDroneConnect(){
+		Log.i(mTag, "Connecting to drone.");
+		(new DroneConnectionTask()).execute(new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1});
+		mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
 	}	
 	
 	
 	/**
 	 * TODO
 	 */
-	protected void doDroneDisconnect(){
-		Log.d("OstisService", "doDroneDisconnect");
+	public void doDroneDisconnect(){
 		
-		if(OstisService.mDrone == null) return;
+		// Log
+		Log.i(mTag, "Disconnecting from drone.");
 		
+		if(mDrone == null) return;
 		try{
-			OstisService.mDrone.clearEmergencySignal();
-			OstisService.mDrone.clearImageListeners();
-			OstisService.mDrone.clearNavDataListeners();
-			OstisService.mDrone.clearStatusChangeListeners();
+			mDrone.clearEmergencySignal();
+			mDrone.clearImageListeners();
+			mDrone.clearNavDataListeners();
+			mDrone.clearStatusChangeListeners();
 		}catch(Exception e){
-			Log.w("OstisService", "Failed to clear drone state.", e);
+			Log.w(mTag, "Failed to clear drone state.", e);
 		}
-		
 		try{
-			OstisService.mDrone.disconnect();
+			mDrone.disconnect();
 		}catch(Exception e){
 			Log.w("OstisService", "Failed to disconnect drone.", e);
 		}
 		
-	}
-	
-	
-	@Override
-	protected void onMessageFromClient(Message message){
-		switch(message.what){
-			
-			case MSG_HIPRI_START:
-				Log.d(mTag, "Handling message : start debug");
-				prepareNetwork();
-				break;
-			
-			case MSG_HIPRI_STOP:
-				Log.d(mTag, "Handling message : stop debug");
-				restoreNetwork();
-				break;
-			
-			case MSG_SPEECH_START:
-				Log.d(mTag, "Handling message : start speech");
-		        try{
-			        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_START_LISTENING);
-		        	mMessengerToSpeechService.send(message2);
-		        }catch(RemoteException e){
-		        	e.printStackTrace();
-		        }
-				break;
-			
-			case MSG_SPEECH_STOP:
-				Log.d("OstisService", "Handling message : stop speech");
-		        try{
-			        Message message2 = Message.obtain(null, SpeechRecognitionService.MSG_CANCEL_LISTENING);
-		        	mMessengerToSpeechService.send(message2);
-		        }catch(RemoteException e){
-		        	e.printStackTrace();
-		        }
-				break;
-			
-			// Connect to drone
-			case MSG_DRONE_CONNECT:
-				doDroneConnect();
-				break;
-				
-			// Disconnect from drone
-			case MSG_DRONE_DISCONNECT:
-				doDroneDisconnect();
-				break;
-
-		}
-	}
-
-
-	@Override
-	protected void onMessageFromSpeechRecognizer(Message message){
+		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		Log.i(mTag, "Disconnected from drone.");
 		
-		// React according to the type of object of the message
-		switch(message.what){
-
-			// Received speech recognition results
-            case SpeechRecognitionService.MSG_FINISHED_WITH_RESULTS:
-            	
-            	// Log
-                Log.i(mTag, "Received speech recognition results.");
-                
-                // Pass it to the action manager
-                ArrayList<String> _Sentences = message.getData().getStringArrayList("SpeechRecognitionResult");
-                if(_Sentences != null){
-	    			for (int i = 0; i < _Sentences.size(); i++){
-	    				Action actionMatched = mActionManager.matchCommandToRun(_Sentences.get(i));
-	    				
-	    				if(actionMatched != null){
-	    					Log.d("OstisService", "Running action " + actionMatched.getId());
-	    					try {
-								actionMatched.run(OstisService.mDrone);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-	    					return;
-	    				}
-	    			}
-                }
-                break;
-	
+		// Warn clients
+		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+			if(callback != null) callback.onDroneDisconnected();
+			else Log.w(mTag, "Drone status changed listener is null.");
 		}
-		
 	}
 	
 	
@@ -498,10 +433,14 @@ public class OstisService extends OstisServiceCommunicator{
 		// Log
 		Log.i(mTag, "Connected to drone.");
 		
-		// TODO Update local variable
+		// Update local variable
+		mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
 		
-		// TODO Warn clients
-		//sendMessageToClients(message);
+		// Warn clients
+		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+			if(callback != null) callback.onDroneConnected();
+			else Log.w(mTag, "Drone status changed listener is null.");
+		}
 		
 	}
 	
@@ -514,10 +453,103 @@ public class OstisService extends OstisServiceCommunicator{
 		// Log
 		Log.w(mTag, "Connection to drone failed.");
 		
-		// TODO Update local variable
+		// Update local variable
+		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
 		
-		// TODO Warn clients
-		//sendMessageToClients(message);
+		// Warn clients
+		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+			if(callback != null) callback.onDroneConnectionFailed();
+			else Log.w(mTag, "Drone status changed listener is null.");
+		}
 		
 	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void registerDroneStatusChangedListener(OnDroneStatusChangedListener listener){
+		mDroneStatusChangedListeners.add(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void unregisterDroneStatusChangedListener(OnDroneStatusChangedListener listener){
+		mDroneStatusChangedListeners.remove(listener);
+	}
+
+
+	@Override
+	public void onSpeechRecognitionResultsAvailable(ArrayList<String> sentences) {
+
+    	// Log
+        Log.i(mTag, "Received speech recognition results.");
+        
+        // Pass it to the action manager
+        if(sentences != null){
+			for (int i = 0; i < sentences.size(); i++){
+				Action actionMatched = mActionManager.matchCommandToRun(sentences.get(i));
+				if(actionMatched != null){
+					Log.d("OstisService", "Running action " + actionMatched.getId());
+					try{
+						actionMatched.run(mDrone);
+					}catch(Exception e){
+						Log.e(mTag, "Could not run matched action", e);
+						// TODO Auto-generated catch block
+					}
+					return;
+				}
+			}
+        }
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public WifiNetworkManager getWifiNetworkManager(){
+		return mWifiNetworkManager;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public int getDroneStatus(){
+		return mDroneConnectionStatus;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-01-30
+	 */
+    public class OstisServiceBinder extends Binder{
+    	public OstisService getService(){
+            return OstisService.this;
+        }
+    }
+
+
+	@Override
+	public void navDataReceived(NavData nd){
+		
+		// Hide / Display service notification according to is flying
+		if(!mNotificationShown && nd.isFlying()) showNotification();
+		else if(mNotificationShown) hideNotification();
+		
+		// Obtain / Release wakelock according to is flying
+		if(!mWakeLock.isHeld() && nd.isFlying()) acquireWakeLock();
+		else if(!nd.isFlying() && !mWakeLock.isHeld()) releaseWakeLock();
+		
+	}
+    
 }

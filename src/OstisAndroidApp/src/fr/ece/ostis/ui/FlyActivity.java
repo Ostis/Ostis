@@ -8,7 +8,7 @@ import android.view.Menu;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-28
+ * @version 2014-01-30
  */
 public class FlyActivity extends ConnectedActivity{
 
@@ -41,13 +41,6 @@ public class FlyActivity extends ConnectedActivity{
 
 	@Override
 	protected void onUnboundFromOstisService() {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	protected void onMessageFromOstisService(Message message){
 		// TODO Auto-generated method stub
 		
 	}

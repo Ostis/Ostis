@@ -19,7 +19,7 @@ import android.util.Log;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-29
+ * @version 2014-01-30
  */
 public class WifiNetworkManager extends NetworkManager{
 	
@@ -189,7 +189,7 @@ public class WifiNetworkManager extends NetworkManager{
 		Log.i(mTag, "Starting wifi scan.");
 		
 		// Ensure that wifi has been enabled.
-		if(isWifiEnabled() != true) throw new Exception("Wifi has not been enabled.");
+		if(isWifiEnabled() != true) throw new WifiNotEnabledException("Wifi has not been enabled.");
 		
 		// Set callback
 		mWifiScanResultsCallbacks.add(callback);		
@@ -224,5 +224,16 @@ public class WifiNetworkManager extends NetworkManager{
 	    android.provider.Settings.System.putString(mContext.getContentResolver(), android.provider.Settings.System.WIFI_STATIC_DNS2, dns);
 	}
 	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-01-30
+	 */
+	public class WifiNotEnabledException extends Exception{
+		private static final long serialVersionUID = -2693396693905205724L;
+		public WifiNotEnabledException(){ super(); }
+		public WifiNotEnabledException(String detailMessage){ super(detailMessage); }
+	}
 	
 }

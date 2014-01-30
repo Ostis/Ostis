@@ -18,7 +18,7 @@ import android.util.Log;
  * TODO
  * @see http://stackoverflow.com/questions/14940657/android-speech-recognition-as-a-service-on-android-4-1-4-2/14950616#14950616 for the Jelly been workaround, based on the work of Hoan Nguyen.
  * @author Nicolas Schurando
- * @version 2014-01-29
+ * @version 2014-01-30
  */
 public class SpeechRecognitionManager{
 	
@@ -52,7 +52,7 @@ public class SpeechRecognitionManager{
 	
 	
 	/** List of client callbacks. */
-	protected ArrayList<OnSpeechRecognitionResultsAvailable> mResultsAvailableCallbacks = new ArrayList<OnSpeechRecognitionResultsAvailable>();
+	protected ArrayList<SpeechRecognitionResultsListener> mResultsAvailableCallbacks = new ArrayList<SpeechRecognitionResultsListener>();
 	
 	
 	/** Count down timer for Jelly Bean work around. */
@@ -107,7 +107,7 @@ public class SpeechRecognitionManager{
 	 * TODO
 	 * @param callback
 	 */
-	protected void registerCallback(OnSpeechRecognitionResultsAvailable callback){
+	protected void registerCallback(SpeechRecognitionResultsListener callback){
 		mResultsAvailableCallbacks.add(callback);
 	}
 	
@@ -116,7 +116,7 @@ public class SpeechRecognitionManager{
 	 * TODO
 	 * @param callback
 	 */
-	protected void unregisterCallback(OnSpeechRecognitionResultsAvailable callback){
+	protected void unregisterCallback(SpeechRecognitionResultsListener callback){
 		mResultsAvailableCallbacks.remove(callback);
 	}
 	
@@ -282,7 +282,7 @@ public class SpeechRecognitionManager{
 			}
 			
 			// Send results to callbacks
-			for (OnSpeechRecognitionResultsAvailable callback: mResultsAvailableCallbacks)
+			for (SpeechRecognitionResultsListener callback: mResultsAvailableCallbacks)
 				if(callback != null) callback.onSpeechRecognitionResultsAvailable(sentences);
 			
 		}

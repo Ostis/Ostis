@@ -24,6 +24,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:enabled="false"
                 android:text="Pilotage" />
 
             <Button
@@ -31,6 +32,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:enabled="false"
                 android:text="Médias" />
             
         </LinearLayout>
@@ -44,6 +46,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:enabled="false"
                 android:text="Configuration" />
 
             <Button
@@ -51,6 +54,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:enabled="false"
                 android:text="A propos" />
             
         </LinearLayout>

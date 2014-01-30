@@ -42,31 +42,12 @@ public abstract class NetworkManager{
 	/**
 	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-29
+	 * @version 2014-01-30
 	 */
 	public class InvokeFailedException extends Exception{
-		
-		
-		/** TODO */
 		private static final long serialVersionUID = 5725839131023631430L;
-
-
-		/**
-		 * TODO
-		 */
-		public InvokeFailedException(){
-			super();
-		}
-		
-		
-		/**
-		 * TODO
-		 * @param detailMessage
-		 */
-		public InvokeFailedException(String detailMessage){
-			super(detailMessage);
-		}
-		
+		public InvokeFailedException(){ super(); }
+		public InvokeFailedException(String detailMessage){ super(detailMessage); }
 	}
 	
 }
