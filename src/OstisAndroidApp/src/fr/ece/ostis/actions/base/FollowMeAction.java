@@ -12,7 +12,7 @@ import fr.ece.ostis.actions.BaseAction;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-30
+ * @version 2014-02-03
  */
 public class FollowMeAction extends BaseAction implements DroneVideoListener{
 
@@ -31,10 +31,14 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 	}
 	
 	
-	@Override public void run(ARDrone drone) throws IOException{
+	@Override
+	public void run(ARDrone drone) throws IOException{
 		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
+		
+		// Register as image listener
+		drone.addImageListener(this); // TODO remove image listener on end of task
 		
 		// TODO Implement follow-me base function
 		
@@ -42,7 +46,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 
 	
 	@Override
-	public void frameReceived(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize) {
+	public void frameReceived(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize){
 		// TODO Auto-generated method stub
 		
 	}

@@ -2,6 +2,8 @@ package fr.ece.ostis;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.codeminders.ardrone.ARDrone;
 import com.codeminders.ardrone.NavData;
 import com.codeminders.ardrone.NavDataListener;
@@ -114,6 +116,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/** TODO */
 	public static final int mAccessPointChannel = 9;
+	
+	
+	/** Flag for following mode activated or not. */
+	protected AtomicBoolean mFollowingActivated = new AtomicBoolean(false); 
 	
 	
 	@Override
@@ -698,6 +704,24 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
      */
     public int getNetworkMethod(){
     	return mNetworkMethod;
+    }
+    
+
+    /**
+     * TODO
+     * @return
+     */
+    public boolean getFollowingActivated(){
+    	return mFollowingActivated.get();
+    }
+    
+    
+    /**
+     * TODO
+     * @param value
+     */
+    public void setFollowingActivated(boolean value){
+    	mFollowingActivated.set(value);
     }
     
     
