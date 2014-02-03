@@ -2,12 +2,16 @@ package fr.ece.ostis.speech;
 
 import java.util.ArrayList;
 
+import fr.ece.ostis.ui.NetworkWizardActivity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -69,10 +73,12 @@ public class SpeechRecognitionManager{
 			mIsCountDownOn = false;
 
 			// Cancel current listening
-			SpeechRecognitionManager.this.cancelListening();
+			mSpeechRecognizer.cancel();
 
 			// Launch new listening
-			if(mIsListening) SpeechRecognitionManager.this.startListening();
+			if(mIsListening){
+				startListening();
+			}
 			
 		}
 		
@@ -107,7 +113,7 @@ public class SpeechRecognitionManager{
 	 * TODO
 	 * @param callback
 	 */
-	protected void registerCallback(SpeechRecognitionResultsListener callback){
+	public void registerCallback(SpeechRecognitionResultsListener callback){
 		mResultsAvailableCallbacks.add(callback);
 	}
 	
@@ -116,7 +122,7 @@ public class SpeechRecognitionManager{
 	 * TODO
 	 * @param callback
 	 */
-	protected void unregisterCallback(SpeechRecognitionResultsListener callback){
+	public void unregisterCallback(SpeechRecognitionResultsListener callback){
 		mResultsAvailableCallbacks.remove(callback);
 	}
 	
@@ -126,13 +132,26 @@ public class SpeechRecognitionManager{
 	 */
 	public void startListening(){
 		
+		// Should be started on main thread
+		if(Looper.myLooper() != Looper.getMainLooper()){
+			Handler mainHandler = new Handler(mContext.getMainLooper());
+			Runnable myRunnable = new Runnable(){
+				@Override
+				public void run(){
+					startListening();
+				}
+			};
+			mainHandler.post(myRunnable);
+			return;
+		}
+		
 		// Workaround to turn off beep sound
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
 			mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
 		}
 		
 		// Start listening
-		if (!mIsListening){
+		//if (!mIsListening){
 			Log.i(mTag, "Starting listening");
 			mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 			mIsListening = true;
@@ -144,9 +163,9 @@ public class SpeechRecognitionManager{
 				mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
 			}
 			
-		}else{
+		/*}else{
 			Log.w(mTag, "Could not start listening, already listening !");
-		}
+		}*/
 		
 	}
 	
@@ -227,7 +246,7 @@ public class SpeechRecognitionManager{
 			}
 
 			// Cancel current listening
-			cancelListening();
+			mSpeechRecognizer.cancel();
 			
 			// Start listening again
 			startListening();

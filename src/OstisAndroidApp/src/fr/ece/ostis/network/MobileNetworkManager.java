@@ -3,6 +3,7 @@ package fr.ece.ostis.network;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,6 +51,10 @@ public class MobileNetworkManager extends NetworkManager{
 	protected static final int mMobileTimeoutSteps = 500;
 	
 	
+	/** Stores the addresses for hipri. */
+	protected ArrayList<Integer> mHipriAddresses = null;
+	
+	
 	/**
 	 * TODO
 	 * @param context
@@ -70,7 +75,7 @@ public class MobileNetworkManager extends NetworkManager{
 	 * @throws InvokeFailedException 
 	 * @throws TimeoutException
 	 */
-	public void enableMobileConnection() throws NullPointerException, InvokeFailedException, TimeoutException{
+	public void enableMobileConnectionSynchronous() throws NullPointerException, InvokeFailedException, TimeoutException{
 		
 		// Enable mobile data
 		setMobileDataEnabled(true);
@@ -99,7 +104,7 @@ public class MobileNetworkManager extends NetworkManager{
 	 * @throws InvokeFailedException 
 	 * @throws TimeoutException 
 	 */
-	public void disableMobileConnection() throws NullPointerException, InvokeFailedException, TimeoutException{
+	public void disableMobileConnectionSynchronous() throws NullPointerException, InvokeFailedException, TimeoutException{
 		
 		// Disable mobile data
 		setMobileDataEnabled(false);
@@ -247,8 +252,16 @@ public class MobileNetworkManager extends NetworkManager{
 	/**
 	 * TODO
 	 * @param addresses
+	 * @throws UnknownHostException 
 	 */
-	public void startHipri(final ArrayList<Integer> addresses){
+	public void startHipri(String... hosts) throws UnknownHostException{
+		
+		// Perform dns requests
+		if(mHipriAddresses == null) mHipriAddresses = new ArrayList<Integer>();
+		else mHipriAddresses.clear();
+		for(int i = 0; i < hosts.length; i++){
+			mHipriAddresses.add(lookupHost(hosts[i]));
+		}
 		
 		// Set enable flag
 		mHipriEnabled.set(true);
@@ -258,7 +271,7 @@ public class MobileNetworkManager extends NetworkManager{
 			@Override public void run(){
 				while(mHipriEnabled.get()){
 					try{
-						enableHipri(addresses);
+						enableHipri(mHipriAddresses);
 						Thread.sleep(20000);
 					}catch(InterruptedException e){
 						stopHipri(); // Or do nothing ?

@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.util.Log;
@@ -124,15 +125,15 @@ public class WifiNetworkManager extends NetworkManager{
 	 * @return
 	 */
 	public boolean isWifiConnected(){
-		NetworkInfo mWifi = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-		return mWifi.isConnected();
+		NetworkInfo wifiInfo = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+		return wifiInfo.isConnected();
 	}
 	
 	
 	/**
 	 * TODO
 	 */
-	public void enableWifi(){
+	public void enableWifiAsynchronous(){
 		setWifiEnabled(true);
 	}
 	
@@ -140,7 +141,7 @@ public class WifiNetworkManager extends NetworkManager{
 	/**
 	 * TODO
 	 */
-	public void disableWifi(){
+	public void disableWifiAsynchronous(){
 		setWifiEnabled(false);
 	}
 	
@@ -287,6 +288,40 @@ public class WifiNetworkManager extends NetworkManager{
 	
 	/**
 	 * TODO
+	 * @return
+	 * @throws Exception 
+	 * @see http://stackoverflow.com/questions/8811315/how-to-get-current-wifi-connection-info-in-android
+	 */
+	public String getCurrentSsid() throws Exception{
+		
+		// Ensure wifi is enabled and connected
+		if(!isWifiEnabled()) throw new WifiNotEnabledException();
+		if(!isWifiConnected()) throw new WifiNotConnectedException();
+		
+		// Retrieve info
+		WifiInfo connectionInfo = mWifiManager.getConnectionInfo();
+		
+		// Return if not null or throw exception
+		if(connectionInfo != null){
+			String retrievedSsid = "";
+			
+			// Strip quotes
+			if(connectionInfo.getSSID().startsWith("\"") && connectionInfo.getSSID().endsWith("\"")){
+				retrievedSsid = connectionInfo.getSSID().substring(1, connectionInfo.getSSID().length() - 1);
+			}else{
+				retrievedSsid = connectionInfo.getSSID();
+			}
+			
+			if(retrievedSsid.length() > 0) return retrievedSsid;
+		}
+		
+		throw new Exception("Unabled to retrieve information on current wifi network.");
+		
+	}
+	
+	
+	/**
+	 * TODO
 	 * @author Nicolas Schurando
 	 * @version 2014-01-30
 	 */
@@ -294,6 +329,18 @@ public class WifiNetworkManager extends NetworkManager{
 		private static final long serialVersionUID = -2693396693905205724L;
 		public WifiNotEnabledException(){ super(); }
 		public WifiNotEnabledException(String detailMessage){ super(detailMessage); }
+	}
+	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-01-31
+	 */
+	public class WifiNotConnectedException extends Exception{
+		private static final long serialVersionUID = 3732781232713416439L;
+		public WifiNotConnectedException(){ super(); }
+		public WifiNotConnectedException(String detailMessage){ super(detailMessage); }
 	}
 	
 }

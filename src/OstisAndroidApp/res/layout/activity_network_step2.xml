@@ -16,28 +16,10 @@
         android:layout_alignParentTop="true"
         android:text="Configurez votre drone pour se connecter au point d&apos;accès. Remarque, si votre drone est déjà configuré ignorez cette étape." />
 
-    <Button
-        android:id="@+id/buttonGallery"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:minWidth="120dp"
-        android:text="Précédent" />
-
-    <Button
-        android:id="@+id/buttonNext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:minWidth="120dp"
-        android:text="Suivant" />
-
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/buttonGallery"
+        android:layout_above="@+id/buttonPrev"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/textViewInfo"
@@ -47,7 +29,7 @@
         <ListView
             android:id="@+id/listViewNetworks"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
             android:visibility="invisible" >
@@ -63,5 +45,14 @@
             android:visibility="visible" />
 
     </FrameLayout>
+
+    <Button
+        android:id="@+id/buttonPrev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:minWidth="120dp"
+        android:text="Précédent" />
 
 </RelativeLayout>

@@ -12,6 +12,7 @@ import android.util.Log;
 /**
  * TODO
  * @see http://stackoverflow.com/questions/7048922/android-2-3-wifi-hotspot-api
+ * @see http://stackoverflow.com/questions/14917450/create-an-access-point-with-the-nexus-7
  * @author Nicolas Schurando
  * @version 2014-01-29
  */
@@ -23,11 +24,11 @@ public class WifiAPNetworkManager extends NetworkManager{
 
 	
 	/** TODO */
-	protected static final String mAccessPointName = "OstisAP";
+	protected static String mAccessPointName = "OstisDefaultAP";
 	
 	
 	/** TODO */
-	protected static final int mAccessPointChannel = 9;
+	protected static int mAccessPointChannel = -1;
 	
 	
 	/** TODO */
@@ -87,7 +88,9 @@ public class WifiAPNetworkManager extends NetworkManager{
 	 * Enables the wifi access point.
 	 * @throws TimeoutException 
 	 */
-	public void enableWifiAp() throws TimeoutException{
+	public void enableWifiApSynchronous(String name, int channel) throws TimeoutException{
+		mAccessPointName = name;
+		mAccessPointChannel = channel;
 		setWifiApEnabled(true);
 	}
 	
@@ -96,7 +99,7 @@ public class WifiAPNetworkManager extends NetworkManager{
 	 * Disables the wifi access point.
 	 * @throws TimeoutException 
 	 */
-	public void disableWifiAp() throws TimeoutException{
+	public void disableWifiApSynchronous() throws TimeoutException{
 		setWifiApEnabled(false);
 	}
 	
@@ -108,9 +111,6 @@ public class WifiAPNetworkManager extends NetworkManager{
 	 * @throws TimeoutException 
 	 */
 	protected void setWifiApEnabled(boolean enabled) throws TimeoutException{
-		
-		// Log
-		Log.d(mTag, "setWifiApEnabled " + String.valueOf(enabled));
 
 		// Create a wifi configuration for the access point
 		WifiConfiguration wifiConfiguration = new WifiConfiguration();
@@ -118,10 +118,13 @@ public class WifiAPNetworkManager extends NetworkManager{
 		wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
 		
 		// Try to specify channel for the wifi configuration
-		try{
-			WifiConfiguration.class.getField("channel").setInt(wifiConfiguration, mAccessPointChannel);
-		}catch(Exception e){
-			Log.w(mTag, e);
+		if(mAccessPointChannel > 0){
+			try{
+				WifiConfiguration.class.getField("channel").setInt(wifiConfiguration, mAccessPointChannel);
+			}catch(Exception e){
+				Log.w(mTag, e);
+				mAccessPointChannel = -1;
+			}
 		}
 
 		// Remember wireless current state
@@ -132,7 +135,7 @@ public class WifiAPNetworkManager extends NetworkManager{
 		// Disable wireless
 		if(enabled && mWifiManager.getConnectionInfo() != null){
 			Log.d(mTag, "Wifi disabling");
-			mWifiNetworkManager.disableWifi();
+			mWifiNetworkManager.disableWifiAsynchronous();
 			mWifiNetworkManager.waitForWifiDisabled();
 			Log.d(mTag, "Wifi disabled");
 		}
@@ -181,8 +184,7 @@ public class WifiAPNetworkManager extends NetworkManager{
 			
 			// Enable wifi if it was enabled beforehand
 			if(mWifiStatePrevious == WifiManager.WIFI_STATE_ENABLED || mWifiStatePrevious == WifiManager.WIFI_STATE_ENABLING || mWifiStatePrevious == WifiManager.WIFI_STATE_UNKNOWN){
-				Log.d(mTag, "enable wifi: calling");
-				mWifiNetworkManager.enableWifi();
+				mWifiNetworkManager.enableWifiAsynchronous();
 			}
 
 			// Reset flag
@@ -208,8 +210,6 @@ public class WifiAPNetworkManager extends NetworkManager{
 		}
 
 		if(state >= 10) state -= 10;
-
-		Log.d(mTag, "getWifiAPState.state " + String.valueOf(state));
 		
 		return state;
 		

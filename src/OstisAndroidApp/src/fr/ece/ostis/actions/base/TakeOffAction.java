@@ -37,6 +37,7 @@ public class TakeOffAction extends BaseAction {
 		// TODO Implement lift-off base function
         drone.clearEmergencySignal();
         drone.trim();
+        drone.waitForReady(5000);
 		drone.takeOff();
 		
 	}

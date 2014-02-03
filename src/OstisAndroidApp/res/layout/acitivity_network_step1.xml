@@ -17,47 +17,40 @@
         android:layout_alignParentTop="true"
         android:layout_marginBottom="10dp"
         android:fillViewport="true" >
+	
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
-	    <RadioGroup
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:id="@+id/radioGroupMethod" >
-	
-	        <LinearLayout
-	            android:layout_width="match_parent"
-	            android:layout_height="match_parent"
-	            android:orientation="vertical" >
-	
-	            <RadioButton
-	                android:id="@+id/radioButtonMethod1"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:text="Méthode 1"
-	                android:textAppearance="?android:attr/textAppearanceLarge"
-           			android:checked="true" />
-	
-	            <TextView
-	                android:layout_width="match_parent"
-	                android:layout_height="wrap_content"
-	                android:layout_margin="10dp"
-	                android:text="Cette méthode fait appel à des fonctions bien particulières pour établir à la fois une connexion Wi-Fi au drone, et 3G au service de reconnaissance vocale de Google. Il se peut que cette méthode ne convienne pas à votre téléphone ou votre version d&apos;Android, mais cest celle qui nécessite le moins de configuration de votre part." />
-	
-	            <RadioButton
-	                android:id="@+id/radioButtonMethod2"
-	                android:layout_width="wrap_content"
-	                android:layout_height="wrap_content"
-	                android:text="Méthode 2"
-	                android:textAppearance="?android:attr/textAppearanceLarge" />
-	
-	            <TextView
-	                android:layout_width="match_parent"
-	                android:layout_height="wrap_content"
-	                android:layout_margin="10dp"
-	                android:text="Cette méthode déclenche un point d&apos;acces sans fil sur votre téléphone, et envoie un fichier de congifuration sur votre AR.Drone pour le faire se connecter au point d&apos;accès en question. Verifiez auprès de votre opérateur que cela n&apos;engendrera pas de surcout." />
-	            
-	        </LinearLayout>
-	    
-		</RadioGroup>
+            <RadioButton
+                android:id="@+id/radioButtonMethod1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Méthode 1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+          			android:checked="true" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Cette méthode fait appel à des fonctions bien particulières pour établir à la fois une connexion Wi-Fi au drone, et 3G au service de reconnaissance vocale de Google. Il se peut que cette méthode ne convienne pas à votre téléphone ou votre version d&apos;Android, mais cest celle qui nécessite le moins de configuration de votre part." />
+
+            <RadioButton
+                android:id="@+id/radioButtonMethod2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Méthode 2"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="Cette méthode déclenche un point d&apos;acces sans fil sur votre téléphone, et envoie un fichier de congifuration sur votre AR.Drone pour le faire se connecter au point d&apos;accès en question. Verifiez auprès de votre opérateur que cela n&apos;engendrera pas de surcout." />
+            
+        </LinearLayout>
 	
 	</ScrollView>
 

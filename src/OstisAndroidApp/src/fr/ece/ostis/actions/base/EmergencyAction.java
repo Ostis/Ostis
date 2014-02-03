@@ -23,8 +23,8 @@ public class EmergencyAction extends BaseAction {
 		super("Emergency");
 		mNameTable.put(Locale.FRENCH, "Signal d'urgence");
 		mNameTable.put(Locale.ENGLISH, "Emergency signal");
-		mVocalCommandTable.put(Locale.FRENCH, "arret d'urgence");
-		mVocalCommandTable.put(Locale.ENGLISH, "emergency stop");
+		mVocalCommandTable.put(Locale.FRENCH, "stop");
+		mVocalCommandTable.put(Locale.ENGLISH, "stop");
 		mDescriptionTable.put(Locale.FRENCH, "Arret d'urgence.");
 		mDescriptionTable.put(Locale.ENGLISH, "Emergency stop.");
 	}

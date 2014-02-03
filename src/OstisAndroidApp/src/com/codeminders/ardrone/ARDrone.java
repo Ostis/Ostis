@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import android.util.Log;
+
 import com.codeminders.ardrone.commands.ConfigureCommand;
 import com.codeminders.ardrone.commands.ControlCommand;
 import com.codeminders.ardrone.commands.EmergencyCommand;
@@ -285,14 +287,10 @@ public class ARDrone
     {
         synchronized(state_mutex)
         {
-            try
-            {
+
                 if(state != State.DISCONNECTED)
                     doDisconnect();
-            } catch(IOException e)
-            {
-                // Ignoring exceptions on disconnection
-            }
+            
             log.log(Level.FINE ,"State changed from " + state + " to " + State.ERROR + " with exception ", ex);
             state = State.ERROR;
             state_mutex.notifyAll();
@@ -404,23 +402,20 @@ public class ARDrone
     }
 
     public void disconnect() throws IOException
-    {
-        try
-        {
+    {  
             doDisconnect();
-        } finally
-        {
             changeState(State.DISCONNECTED);
-        }
     }
 
-    private void doDisconnect() throws IOException
+    private void doDisconnect()
     {
         if(cmd_queue != null)
             cmd_queue.add(new QuitCommand());
 
-        if(drone_nav_channel_processor != null)
+        if(drone_nav_channel_processor != null){
             drone_nav_channel_processor.finish();
+            Log.d("ARDrone", "drone_nav_channel_processor.finish() called");
+        }
 
         if(drone_video_channel_processor != null)
             drone_video_channel_processor.finish();

@@ -12,8 +12,10 @@ import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.network.MobileNetworkManager;
 import fr.ece.ostis.network.WifiAPNetworkManager;
 import fr.ece.ostis.network.WifiNetworkManager;
+import fr.ece.ostis.speech.SpeechRecognitionManager;
 import fr.ece.ostis.speech.SpeechRecognitionResultsListener;
 import fr.ece.ostis.ui.HomeActivity;
+import fr.ece.ostis.utils.TelnetManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -31,7 +33,7 @@ import android.util.Log;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-30
+ * @version 2014-02-03
  */
 public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener{
 	
@@ -82,6 +84,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected WifiAPNetworkManager mWifiAPNetworkManager = null;
 	
 	
+	/** Reference to the speech recognition manager. */
+	protected SpeechRecognitionManager mSpeechRecognitionManager = null;
+	
+	
 	/** Reference to the notification manager. */
 	protected NotificationManager mNotificationManager = null;
 	
@@ -102,6 +108,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected static final int mNotificationId = 123456;
 	
 	
+	/** TODO */
+	public static final String mAccessPointName = "OstisAP";
+	
+	
+	/** TODO */
+	public static final int mAccessPointChannel = 9;
+	
+	
 	@Override
 	public void onCreate(){
 		
@@ -115,6 +129,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		mWifiNetworkManager = new WifiNetworkManager(this);
 		mWifiAPNetworkManager = new WifiAPNetworkManager(this, mWifiNetworkManager);
 		mNotificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		mSpeechRecognitionManager = new SpeechRecognitionManager(this);
+		
+		// Perform network cleanup just in case
+		try{
+			mWifiAPNetworkManager.disableWifiApSynchronous();
+		}catch(Exception e){
+			Log.w(mTag, "Failed to cleanup access point at service startup.", e);
+		}
 		
 	}
 	
@@ -327,7 +349,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * @author Nicolas Schurando
 	 * @version 2014-01-30
 	 */
-	protected class DroneConnectionTask extends AsyncTask<byte[], Integer, Boolean>{
+	protected class DroneConnectionTask extends AsyncTask<String, Integer, Boolean>{
 
 		
 		/** Log tag */
@@ -335,13 +357,13 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		
 		
 		@Override
-		protected Boolean doInBackground(byte[]... ips){
+		protected Boolean doInBackground(String... ips){
 			
-			byte[] droneIp = ips[0];
+			String droneIp = ips[0];
 			
 			try{
 				
-				OstisService.mDrone = new ARDrone(InetAddress.getByAddress(droneIp), 10000, 60000);
+				OstisService.mDrone = new ARDrone(InetAddress.getByName(droneIp), 10000, 60000);
 				OstisService.mDrone.connect();
 				OstisService.mDrone.clearEmergencySignal();
 				OstisService.mDrone.trim();
@@ -352,14 +374,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 				return true;
 				
 			}catch(Exception e){
-				Log.w(mTag, "Failed to connect to drone.", e);
+				Log.e(mTag, "Failed to connect to drone.", e);
 				
 				try{
 					
-					OstisService.mDrone.clearEmergencySignal();
 					OstisService.mDrone.clearImageListeners();
 					OstisService.mDrone.clearNavDataListeners();
 					OstisService.mDrone.clearStatusChangeListeners();
+					OstisService.mDrone.clearEmergencySignal();
 					OstisService.mDrone.disconnect();
 					
 				}catch(Exception e2){
@@ -383,10 +405,50 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/**
 	 * TODO
+	 * @param ip
+	 * @throws Exception 
 	 */
-	public void doDroneConnect(){
+	public void doDroneConnectSynchronous(String ip) throws Exception{
+		
+		mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
+		
+		try{
+			mDrone = new ARDrone(InetAddress.getByName(ip), 10000, 60000);
+			mDrone.connect();
+			mDrone.clearEmergencySignal();
+			mDrone.trim();
+			mDrone.waitForReady(10000);
+			mDrone.playLED(1, 10, 4);
+			mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
+			mDrone.setCombinedYawMode(true);
+			mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
+		}catch(Exception e){
+			Log.e(mTag, "Failed to connect to drone.", e);
+			mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+			
+			try{
+				mDrone.clearNavDataListeners();
+				mDrone.clearStatusChangeListeners();
+				mDrone.clearImageListeners();
+				mDrone.clearEmergencySignal();
+				mDrone.disconnect();
+			}catch(Exception e2){
+				Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
+			}
+
+			throw new Exception("Connection to drone failed.");
+		}
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 * @deprecated Task should be executed from outside the service.
+	 */
+	public void doDroneConnectAsynchronous(String ip){
 		Log.i(mTag, "Connecting to drone.");
-		(new DroneConnectionTask()).execute(new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1});
+		(new DroneConnectionTask()).execute(ip);
 		mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
 	}	
 	
@@ -467,6 +529,29 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/**
 	 * TODO
+	 * @throws Exception 
+	 */
+	public void pushDroneApConfiguration(String ip) throws Exception{
+		
+		// TODO Ensure that wifi or wifiap is activated and connected
+		// ...
+		
+		// TODO Retrieve or set ap ip config
+		// ...
+		
+		// Push conig to the drone
+		if(TelnetManager.executeRemotely(ip, 23,
+				"iwconfig ath0 mode managed essid " + mAccessPointName + "\n" +
+				"ifconfig ath0 192.168.1.11 netmask 255.255.255.0 up" + "\n" +
+				"route add default gw 192.168.1.1" + "\n") != true){
+			throw new Exception("Unable to push access point configuration to drone.");
+		}
+		
+	}
+	
+	
+	/**
+	 * TODO
 	 * @param listener
 	 */
 	public void registerDroneStatusChangedListener(OnDroneStatusChangedListener listener){
@@ -482,9 +567,41 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		mDroneStatusChangedListeners.remove(listener);
 	}
 
+	
+	/**
+	 * TODO
+	 */
+	public void activateSpeechResultsToActionMatching(){
+		mSpeechRecognitionManager.registerCallback(this);
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	public void desactivateSpeechResultsToActionMatching(){
+		mSpeechRecognitionManager.unregisterCallback(this);
+	}
 
+	
+	/**
+	 * TODO
+	 */
+	public void startSpeechRecognition(){
+		mSpeechRecognitionManager.startListening();
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	public void stopSpeechRecognition(){
+		mSpeechRecognitionManager.cancelListening();
+	}
+
+	
 	@Override
-	public void onSpeechRecognitionResultsAvailable(ArrayList<String> sentences) {
+	public void onSpeechRecognitionResultsAvailable(ArrayList<String> sentences){
 
     	// Log
         Log.i(mTag, "Received speech recognition results.");
@@ -513,8 +630,35 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * TODO
 	 * @return
 	 */
+	public MobileNetworkManager getMobileNetworkManager(){
+		return mMobileNetworkManager;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
 	public WifiNetworkManager getWifiNetworkManager(){
 		return mWifiNetworkManager;
+	}
+	
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public WifiAPNetworkManager getWifiAPNetworkManager(){
+		return mWifiAPNetworkManager;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public ARDrone getDrone(){
+		return mDrone;
 	}
 	
 	
@@ -542,11 +686,18 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     /**
      * TODO
      * @param method
-     * @throws Exception
      */
-    public void setNetworkMethod(int method) throws Exception{
-    	if(mNetworkMethod != NETWORK_METHOD_UNKNOWN) throw new Exception("Network method already set.");
+    public void setNetworkMethod(int method){
     	mNetworkMethod = method;
+    }
+
+
+    /**
+     * TODO
+     * @return
+     */
+    public int getNetworkMethod(){
+    	return mNetworkMethod;
     }
     
     

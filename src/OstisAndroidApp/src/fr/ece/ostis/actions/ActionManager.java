@@ -174,17 +174,13 @@ public class ActionManager{
 		try{
 			for (Action action : mBaseActionTable.values()){
 				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
-				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-					//action.run(mDrone);
-					//Log.d("ActionManager", "runCommand : " + command);
+				if (mSpeechComparator.areSimilar(command, "drone " + action.getVocalCommand(mLocale))){
 					return action;
 				}
 			}
 			for (Action action : mComposedActionTable.values()){
 				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
-				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
-					//action.run(mDrone);
-					//Log.d("ActionManager", "runCommand : " + command);
+				if (mSpeechComparator.areSimilar(command, "drone " + action.getVocalCommand(mLocale))){
 					return action;
 				}
 			}
