@@ -5,6 +5,8 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.*;
 
 
 import android.graphics.PointF;
+import android.util.Log;
+
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
 
 
@@ -35,6 +37,8 @@ public class Tracker {
         //cvCvtColor(thresholdImage, bgr565Image, CV_GRAY2BGR565);
         //image.copyPixelsFromBuffer(bgr565Image.getByteBuffer());
         
+        Log.d("Tracker", "Position calculated: " + position.toString());
+        
         return position;
     }
 
@@ -59,5 +63,6 @@ public class Tracker {
         cvCvtColor(rgbImage, hsvImage, CV_RGB2HSV);
         cvInRangeS(hsvImage, cvScalar(hueLowerR, 100, 100, 0), cvScalar(hueUpperR, 255, 255, 0), thresholdImage);
         cvSmooth(thresholdImage, thresholdImage, CV_MEDIAN, 13);
+        Log.d("Tracker", "Threshold image generated !");
     }
 }
