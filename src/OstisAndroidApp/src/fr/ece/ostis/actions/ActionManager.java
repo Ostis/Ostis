@@ -15,6 +15,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import fr.ece.ostis.actions.base.EmergencyAction;
 import fr.ece.ostis.actions.base.LandAction;
+import fr.ece.ostis.actions.base.MoveForwardAction;
+import fr.ece.ostis.actions.base.MoveLeftAction;
 import fr.ece.ostis.actions.base.TakeOffAction;
 import fr.ece.ostis.speech.SpeechComparator;
 
@@ -70,6 +72,10 @@ public class ActionManager{
 		mBaseActionTable.put(landAction.getId(), landAction);
 		BaseAction emergencyAction = new EmergencyAction();
 		mBaseActionTable.put(emergencyAction.getId(), emergencyAction);
+		BaseAction moveLeftAction = new MoveLeftAction();
+		mBaseActionTable.put(moveLeftAction.getId(), moveLeftAction);
+		BaseAction moveForwardAction = new MoveForwardAction();
+		mBaseActionTable.put(moveForwardAction.getId(), moveForwardAction);
 		
 	}
 	

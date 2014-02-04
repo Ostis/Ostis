@@ -1,5 +1,7 @@
 package fr.ece.ostis.ui;
 
+import java.io.IOException;
+
 import com.codeminders.ardrone.DroneVideoListener;
 
 import fr.ece.ostis.R;
@@ -9,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 
 /**
@@ -47,6 +50,24 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.fly, menu);
 		return true;
+	}
+
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_emergency_stop:
+				try {
+					mService.getDrone().sendEmergencySignal();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
 
 

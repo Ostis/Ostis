@@ -12,7 +12,7 @@ import fr.ece.ostis.actions.BaseAction;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-24
+ * @version 2014-02-04
  */
 public class EmergencyAction extends BaseAction {
 
@@ -30,12 +30,14 @@ public class EmergencyAction extends BaseAction {
 		mDescriptionTable.put(Locale.ENGLISH, "Emergency stop.");
 	}
 	
-	@Override public void run(ARDrone drone, OstisService ostisService) throws IOException{
+	
+	@Override
+	public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
 		
-		// TODO Implement lit-off base function
+		// Emergency base function
 		drone.sendEmergencySignal();
 		
 	}
