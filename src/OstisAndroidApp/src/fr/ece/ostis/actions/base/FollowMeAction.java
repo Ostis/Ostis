@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.AsyncTask;
+import android.util.Log;
+
 import com.codeminders.ardrone.ARDrone;
 import com.codeminders.ardrone.DroneVideoListener;
 import com.googlecode.javacv.cpp.opencv_core.CvSize;
@@ -56,6 +58,8 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
 		if(ostisService == null) throw new NullPointerException("OstisService reference has not been passed properly.");
+		
+		ostisService.setFollowingActivated(true);
 		
 		// Register as image listener
 		drone.addImageListener(this);
@@ -107,6 +111,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 				mBitmap = b;
 				mIsNewBitmapAvailable.set(true);
 			}
+			Log.d("FollowMeAction", "New Bitmap generated !");
 		}
 		
 	}
@@ -147,8 +152,10 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			while(mOstisService.getFollowingActivated()) {
 				
 				if (mIsNewBitmapAvailable.get()) {
+					Log.d("FollowMeAction", "Analizing image");
 					followTag();
 				} else {
+					Log.d("FollowMeAction", "No new image : don't move !");
 					try {
 						try {
 							mDrone.move(0, 0, 0, 0);
@@ -191,6 +198,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			}
 			
 			try {
+				Log.d("FollowMeAction", "Moving !");
 				mDrone.move(0, pitchMove, 0, yawMove);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -202,6 +210,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		@Override
 		protected void onPostExecute(Void param){
 			mDrone.removeImageListener(mDroneVideoListener);
+			Log.d("FollowMeAction", "Stopping following action");
 		}
 		
 	}
