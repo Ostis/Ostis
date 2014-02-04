@@ -21,17 +21,15 @@ import fr.ece.ostis.tracking.Tracker;
 
 /**
  * TODO
- * @author Nicolas Schurando
- * @version 2014-02-03
+ * @author Paul Bouillon
+ * @version 2014-02-04
  */
 public class FollowMeAction extends BaseAction implements DroneVideoListener{
 
 	
 	protected AtomicBoolean mIsNewBitmapAvailable;
-	
 	protected Bitmap mBitmap;
 	protected IplImage mBGR565Image;
-	
 	protected final Object mBitmapLock = new Object();
 	
 	
@@ -62,6 +60,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		// Register as image listener
 		drone.addImageListener(this);
 		
+		// TODO
 		(new Follower(drone, ostisService, this)).execute();
 		
 	}
@@ -104,8 +103,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		@Override
 		protected void onPostExecute(Void param){
 			synchronized(mBitmapLock) {
-				if(mBitmap != null)
-					mBitmap.recycle();
+				if(mBitmap != null) mBitmap.recycle();
 				mBitmap = b;
 				mIsNewBitmapAvailable.set(true);
 			}
@@ -113,17 +111,36 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		
 	}
 	
-	private class Follower extends AsyncTask< Void, Void, Void> {
+	
+	/**
+	 * TODO
+	 * @author Paul Bouillon
+	 * @version 2014-02-04
+	 */
+	protected class Follower extends AsyncTask<Void, Void, Void> {
 		
 		protected ARDrone mDrone;
 		protected OstisService mOstisService;
 		protected DroneVideoListener mDroneVideoListener;
 		
-		public Follower(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener) {
+		protected final float yawTrackingP = 0.75f;
+		protected final float pitchTrackingP = 0.42f;
+		protected final float pitchTrackingI = 0.0011f;
+		protected float pitchE = 0;
+		
+		
+		/**
+		 * TODO
+		 * @param drone
+		 * @param ostisService
+		 * @param droneVideoListener
+		 */
+		public Follower(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener){
 			mDrone = drone;
 			mOstisService = ostisService;
 			mDroneVideoListener = droneVideoListener;
 		}
+		
 		
 		@Override
 		protected Void doInBackground(Void... params) {
@@ -131,18 +148,17 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 				
 				if (mIsNewBitmapAvailable.get()) {
 					followTag();
-				}
-				
-				else {
+				} else {
 					try {
 						try {
 							mDrone.move(0, 0, 0, 0);
+							// TODO Add mDrone.hover ?
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						Thread.sleep(10);
-					} catch (InterruptedException e) {
+						Thread.sleep(30);
+					}catch(InterruptedException e){
 						e.printStackTrace();
 					}
 				}
@@ -151,16 +167,10 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			return null;
 		}
 		
-		@Override
-		protected void onPostExecute(Void param){
-			mDrone.removeImageListener(mDroneVideoListener);
-		}
 		
-		protected final float yawTrackingP = 0.75f;
-		protected final float pitchTrackingP = 0.42f;
-		protected final float pitchTrackingI = 0.0011f;
-		protected float pitchE = 0;
-		
+		/**
+		 * TODO
+		 */
 		protected void followTag() {
 			
 			synchronized (mBitmapLock) {
@@ -178,15 +188,20 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 				
 				pitchE = pitchE + tagPosition.y;
 				pitchMove = (pitchTrackingP * tagPosition.y )  + (pitchTrackingI * pitchE);
-				
 			}
 			
 			try {
-				mDrone.move(0,pitchMove,0, yawMove);
+				mDrone.move(0, pitchMove, 0, yawMove);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+		
+		
+		@Override
+		protected void onPostExecute(Void param){
+			mDrone.removeImageListener(mDroneVideoListener);
 		}
 		
 	}

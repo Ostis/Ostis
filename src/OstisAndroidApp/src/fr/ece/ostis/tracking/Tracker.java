@@ -7,9 +7,16 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.*;
 import android.graphics.PointF;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
 
+
+/**
+ * TODO
+ * @author Paul Bouillon
+ * @version 2014-02-04
+ */
 public class Tracker {
-    static int hueLowerR = 160;
-    static int hueUpperR = 180;
+	
+    static int hueLowerR = 0;
+    static int hueUpperR = 45;
     
     public static final int AR_VIDEO_WIDTH = 320;
     public static final int AR_VIDEO_HEIGHT = 240;

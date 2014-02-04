@@ -8,7 +8,7 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:layout_margin="5dp"
-        android:src="@drawable/icon_info" />
+        android:src="@drawable/icon_wifi" />
 
     <TextView
         android:id="@+id/textViewName"

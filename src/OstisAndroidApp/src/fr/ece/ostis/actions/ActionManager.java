@@ -2,9 +2,9 @@ package fr.ece.ostis.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Locale;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,6 +14,7 @@ import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import fr.ece.ostis.actions.base.EmergencyAction;
+import fr.ece.ostis.actions.base.FollowMeAction;
 import fr.ece.ostis.actions.base.LandAction;
 import fr.ece.ostis.actions.base.MoveForwardAction;
 import fr.ece.ostis.actions.base.MoveLeftAction;
@@ -24,17 +25,21 @@ import fr.ece.ostis.speech.SpeechComparator;
 /**
  * TODO
  * @author Paul Bouillon
- * @version 2014-02-03
+ * @version 2014-02-04
  */
 public class ActionManager{
 	
 	
-	/** TODO */
-	private Hashtable<String, ComposedAction> mComposedActionTable;
+	/** Log tag. */
+	protected final static String mTag = "ActionManager";
 	
 	
 	/** TODO */
-	private Hashtable<String, BaseAction> mBaseActionTable;
+	private HashMap<String, ComposedAction> mComposedActionTable;
+	
+	
+	/** TODO */
+	private HashMap<String, BaseAction> mBaseActionTable;
 	
 	
 	/** TODO */
@@ -59,8 +64,8 @@ public class ActionManager{
 		
 		mLocale = locale;
 		mContext = context;
-		mComposedActionTable = new Hashtable<String, ComposedAction>();
-		mBaseActionTable = new Hashtable<String, BaseAction>();
+		mComposedActionTable = new HashMap<String, ComposedAction>();
+		mBaseActionTable = new HashMap<String, BaseAction>();
 		mSpeechComparator = new SpeechComparator(mLocale);
 		
 		/*
@@ -76,6 +81,8 @@ public class ActionManager{
 		mBaseActionTable.put(moveLeftAction.getId(), moveLeftAction);
 		BaseAction moveForwardAction = new MoveForwardAction();
 		mBaseActionTable.put(moveForwardAction.getId(), moveForwardAction);
+		BaseAction followMeAction = new FollowMeAction();
+		mBaseActionTable.put(followMeAction.getId(), followMeAction);
 		
 	}
 	
@@ -84,7 +91,7 @@ public class ActionManager{
 	 * TODO
 	 * @return
 	 */
-	public Hashtable<String, ComposedAction> getComposedActionTable(){
+	public HashMap<String, ComposedAction> getComposedActionTable(){
 		return mComposedActionTable;
 	}
 	
@@ -102,7 +109,7 @@ public class ActionManager{
 	 * TODO
 	 * @return
 	 */
-	public Hashtable<String, BaseAction> getBaseActionTable(){
+	public HashMap<String, BaseAction> getBaseActionTable(){
 		return mBaseActionTable;
 	}
 	
@@ -118,10 +125,29 @@ public class ActionManager{
 	
 	/**
 	 * TODO
+	 * @return
+	 */
+	public ArrayList<Action> getActions(){
+		ArrayList<Action> actions = new ArrayList<Action>();
+		
+		for(HashMap.Entry<String, BaseAction> action : mBaseActionTable.entrySet()){
+			actions.add(action.getValue());
+		}
+		
+		for(HashMap.Entry<String, ComposedAction> action : mComposedActionTable.entrySet()){
+			actions.add(action.getValue());
+		}
+		
+		return actions;
+	}
+	
+	
+	/**
+	 * TODO
 	 * @param ids
 	 * @return
 	 */
-	public ArrayList<Action> getActions(ArrayList<String> ids){
+	protected ArrayList<Action> getActions(ArrayList<String> ids){
 		ArrayList<Action> actions = new ArrayList<Action>();
 		for (String id : ids)
 			actions.add(getAction(id));
@@ -177,14 +203,14 @@ public class ActionManager{
 	public Action matchCommandToRun(String command){
 		try{
 			for (Action action : mBaseActionTable.values()){
-				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
-				if (mSpeechComparator.areSimilar(command, "drone " + action.getVocalCommand(mLocale))){
+				Log.i(mTag, "Matching " + command + " <-> " + action.getVocalCommand(mLocale) + " ?");
+				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
 					return action;
 				}
 			}
 			for (Action action : mComposedActionTable.values()){
-				Log.d("ActionManager", "runCommand : " + command + " <-> " + action.getVocalCommand(mLocale));
-				if (mSpeechComparator.areSimilar(command, "drone " + action.getVocalCommand(mLocale))){
+				Log.i(mTag, "Matching " + command + " <-> " + action.getVocalCommand(mLocale) + " ?");
+				if (mSpeechComparator.areSimilar(command, action.getVocalCommand(mLocale))){
 					return action;
 				}
 			}

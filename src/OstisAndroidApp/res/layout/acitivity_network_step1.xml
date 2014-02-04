@@ -41,6 +41,7 @@
                 android:id="@+id/radioButtonMethod2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:enabled="false"
                 android:text="Méthode 2"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -48,6 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:enabled="false"
                 android:text="Cette méthode déclenche un point d&apos;acces sans fil sur votre téléphone, et envoie un fichier de congifuration sur votre AR.Drone pour le faire se connecter au point d&apos;accès en question. Verifiez auprès de votre opérateur que cela n&apos;engendrera pas de surcout." />
             
         </LinearLayout>

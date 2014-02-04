@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.codeminders.ardrone.ARDrone;
+import com.codeminders.ardrone.ARDrone.State;
 import com.codeminders.ardrone.NavData;
 import com.codeminders.ardrone.NavDataListener;
 
@@ -120,6 +121,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/** Flag for following mode activated or not. */
 	protected AtomicBoolean mFollowingActivated = new AtomicBoolean(false); 
+	
+	
+	/** Stores the last navdata. */
+	protected NavData mLastNavData = null;
 	
 	
 	@Override
@@ -623,6 +628,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					}catch(Exception e){
 						Log.e(mTag, "Could not run matched action", e);
 						// TODO Auto-generated catch block
+					}finally{
+						if(mDrone.getState() == State.DISCONNECTED){
+							doDroneDisconnect();
+						}
 					}
 					return;
 				}
@@ -631,6 +640,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		
 	}
 	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public SpeechRecognitionManager getSpeechRecognitionManager(){
+		return mSpeechRecognitionManager;
+	}
 	
 	/**
 	 * TODO
@@ -735,6 +752,26 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Obtain / Release wakelock according to is flying
 		if(!mWakeLock.isHeld() && nd.isFlying()) acquireWakeLock();
 		else if(!nd.isFlying() && !mWakeLock.isHeld()) releaseWakeLock();
+		
+		// TODO Monitor the battery
+		// ...
+		
+		// Store last data
+		mLastNavData = nd;
+	}
+
+
+	@Override
+	public void onReadyForSpeech(){}
+
+
+	@Override
+	public void onError(){}
+
+
+	@Override
+	public void onEndOfSpeech() {
+		// TODO Auto-generated method stub
 		
 	}
     

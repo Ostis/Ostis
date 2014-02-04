@@ -67,7 +67,7 @@ public class SpeechRecognitionManager{
 		@Override public void onFinish(){
 			
 			// Log
-			Log.d("SpeechRecognitionService/CountDownTimer", "onFinish");
+			//Log.d(mTag + "/CountDownTimer", "onFinish");
 			
 			// Reset flags
 			mIsCountDownOn = false;
@@ -205,7 +205,7 @@ public class SpeechRecognitionManager{
 
 		@Override
 		public void onBeginningOfSpeech(){
-			Log.d(mTag, "onBeginningOfSpeech");
+			//Log.d(mTag, "onBeginningOfSpeech");
 		}
 
 		
@@ -215,7 +215,11 @@ public class SpeechRecognitionManager{
 		
 		@Override
 		public void onEndOfSpeech(){
-			Log.d(mTag, "onEndOfSpeech");
+			//Log.d(mTag, "onEndOfSpeech");
+			
+			// Warn clients
+			for (SpeechRecognitionResultsListener callback: mResultsAvailableCallbacks)
+				if(callback != null) callback.onError();
 		}
 
 		
@@ -225,18 +229,18 @@ public class SpeechRecognitionManager{
 		 */
 		@Override
 		public void onError(int error){
-			Log.d(mTag, "onError");
+			Log.i(mTag, "Speech recognition error.");
 			switch(error){
-				case SpeechRecognizer.ERROR_AUDIO: Log.e(mTag, "Audio recording error."); break;
-				case SpeechRecognizer.ERROR_CLIENT: Log.e(mTag, "Other client side errors."); break;
-				case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: Log.e(mTag, "Insufficient permissions"); break;
-				case SpeechRecognizer.ERROR_NETWORK: Log.e(mTag, "Other network related errors."); break;
-				case SpeechRecognizer.ERROR_NETWORK_TIMEOUT: Log.e(mTag, "Network operation timed out."); break;
-				case SpeechRecognizer.ERROR_NO_MATCH: Log.e(mTag, "No recognition result matched."); break;
-				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: Log.e(mTag, "RecognitionService busy."); break;
-				case SpeechRecognizer.ERROR_SERVER: Log.e(mTag, "Server sends error status."); break;
-				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: Log.e(mTag, "No speech input"); break;
-				default: Log.e(mTag, "Unknown error " + String.valueOf(error)); break;
+				case SpeechRecognizer.ERROR_AUDIO: Log.w(mTag, "Audio recording error."); break;
+				case SpeechRecognizer.ERROR_CLIENT: Log.w(mTag, "Other client side errors."); break;
+				case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS: Log.w(mTag, "Insufficient permissions"); break;
+				case SpeechRecognizer.ERROR_NETWORK: Log.w(mTag, "Other network related errors."); break;
+				case SpeechRecognizer.ERROR_NETWORK_TIMEOUT: Log.w(mTag, "Network operation timed out."); break;
+				case SpeechRecognizer.ERROR_NO_MATCH: Log.w(mTag, "No recognition result matched."); break;
+				case SpeechRecognizer.ERROR_RECOGNIZER_BUSY: Log.w(mTag, "RecognitionService busy."); break;
+				case SpeechRecognizer.ERROR_SERVER: Log.w(mTag, "Server sends error status."); break;
+				case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: Log.w(mTag, "No speech input"); break;
+				default: Log.w(mTag, "Unknown error " + String.valueOf(error)); break;
 			}
 			
 			// Stop the countdown timer
@@ -247,6 +251,10 @@ public class SpeechRecognitionManager{
 
 			// Cancel current listening
 			mSpeechRecognizer.cancel();
+			
+			// Warn clients
+			for (SpeechRecognitionResultsListener callback: mResultsAvailableCallbacks)
+				if(callback != null) callback.onError();
 			
 			// Start listening again
 			startListening();
@@ -260,19 +268,24 @@ public class SpeechRecognitionManager{
 		
 		@Override
 		public void onPartialResults(Bundle partialResults){
-			Log.d(mTag, "onPartialResults");
+			//Log.i(mTag, "onPartialResults");
 		}
 		
 		
 		@Override
 		public void onReadyForSpeech(Bundle params){
-			Log.d(mTag, "onReadyForSpeech");
+			//Log.d(mTag, "onReadyForSpeech");
 			
 			// Speech input will be processed, so there is no need for count down anymore
 			if (mIsCountDownOn){
 				mIsCountDownOn = false;
 				if(mNoSpeechCountDown != null) mNoSpeechCountDown.cancel();
 			}
+			
+			// Warn clients
+			for (SpeechRecognitionResultsListener callback: mResultsAvailableCallbacks)
+				if(callback != null) callback.onReadyForSpeech();
+			
 		}
 		
 		
@@ -280,7 +293,7 @@ public class SpeechRecognitionManager{
 		public void onResults(Bundle results){
 			
 			// Log
-			Log.d("SpeechRecognitionService", "onResults");
+			Log.i(mTag, "Speech recognition results available.");
 			
 			// Extract results
 			ArrayList<String> sentences = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);

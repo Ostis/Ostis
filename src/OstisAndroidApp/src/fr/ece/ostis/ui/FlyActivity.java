@@ -1,10 +1,13 @@
 package fr.ece.ostis.ui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import com.codeminders.ardrone.DroneVideoListener;
 
+import fr.ece.ostis.OnDroneStatusChangedListener;
 import fr.ece.ostis.R;
+import fr.ece.ostis.speech.SpeechRecognitionResultsListener;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
@@ -13,13 +16,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-31
+ * @version 2014-02-03
  */
-public class FlyActivity extends ConnectedActivity implements DroneVideoListener{
+public class FlyActivity extends ConnectedActivity implements DroneVideoListener, SpeechRecognitionResultsListener, OnDroneStatusChangedListener{
 
 	
 	/** Log tag. */
@@ -27,7 +31,12 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 
 	
 	/** Image view for displaying camera feed. */
-	protected ImageView mImageViewCamera = null; 
+	protected ImageView mImageViewCamera = null;
+	
+	protected ImageView mImageViewSpeechStatus = null;
+	protected TextView mTextViewSpeechStatus = null;
+	protected ImageView mImageViewDroneStatus = null;
+	protected TextView mTextViewDroneStatus = null;
 	
 	
 	@Override
@@ -41,6 +50,10 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 		
 		// Find controls
 		mImageViewCamera = (ImageView) findViewById(R.id.imageViewCamera);
+		mImageViewSpeechStatus = (ImageView) findViewById(R.id.imageViewSpeechStatus);
+		mTextViewSpeechStatus = (TextView) findViewById(R.id.textViewSpeechStatus);
+		mImageViewDroneStatus = (ImageView) findViewById(R.id.ImageViewDroneStatus);
+		mTextViewDroneStatus = (TextView) findViewById(R.id.TextViewDroneStatus);
 		
 	}
 
@@ -69,8 +82,8 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 	            return super.onOptionsItemSelected(item);
 	    }
 	}
-
-
+	
+	
 	@Override
 	protected void onBoundToOstisService(){
 		// TODO Auto-generated method stub
@@ -80,6 +93,9 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 		
 		// Activate speech results <-> actio matching
 		mService.activateSpeechResultsToActionMatching();
+		
+		// Register to speech status
+		mService.getSpeechRecognitionManager().registerCallback(this);
 		
 	}
 
@@ -135,13 +151,62 @@ public class FlyActivity extends ConnectedActivity implements DroneVideoListener
 		@Override
 		protected void onPostExecute(Void param){
 			if(mImageViewCamera != null){
-				((BitmapDrawable) mImageViewCamera.getDrawable()).getBitmap().recycle(); 
+				//((BitmapDrawable) mImageViewCamera.getDrawable()).getBitmap().recycle(); 
 				mImageViewCamera.setImageBitmap(b);
 			}else{
 				Log.w(mTag, "Could not find image view to display camera feed.");
 			}
 		}
 		
+	}
+
+
+	@Override
+	public void onSpeechRecognitionResultsAvailable(ArrayList<String> sentences) {
+		mImageViewSpeechStatus.setImageResource(R.drawable.icon_alert);
+		mTextViewSpeechStatus.setText("Please wait");
+	}
+
+
+	@Override
+	public void onReadyForSpeech(){
+		mImageViewSpeechStatus.setImageResource(R.drawable.icon_tick);
+		mTextViewSpeechStatus.setText("Ready for order");
+	}
+
+
+	@Override
+	public void onError(){
+		mImageViewSpeechStatus.setImageResource(R.drawable.icon_alert);
+		mTextViewSpeechStatus.setText("Please wait");
+	}
+
+
+	@Override
+	public void onEndOfSpeech() {
+		mImageViewSpeechStatus.setImageResource(R.drawable.icon_alert);
+		mTextViewSpeechStatus.setText("Please wait");
+	}
+
+
+	@Override
+	public void onDroneConnected(){
+		mImageViewDroneStatus.setImageResource(R.drawable.icon_tick);
+		mTextViewDroneStatus.setText("Connected");
+	}
+
+
+	@Override
+	public void onDroneConnectionFailed(){
+		mImageViewDroneStatus.setImageResource(R.drawable.icon_cross);
+		mTextViewDroneStatus.setText("Connection failed");
+	}
+
+
+	@Override
+	public void onDroneDisconnected() {
+		mImageViewDroneStatus.setImageResource(R.drawable.icon_cross);
+		mTextViewDroneStatus.setText("Disconnected");
 	}
 	
 }

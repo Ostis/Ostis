@@ -147,7 +147,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 		
 		// Setup list view
 		mWifiNetworks = new ArrayList<HashMap<String, Object>>();
-		mListViewNetworksAdapter = new SimpleAdapter(this, mWifiNetworks, R.layout.activty_network_wifi, new String[] { WifiNetworkManager.KEY_NETWORK_SSID }, new int[] { R.id.textViewName });
+		mListViewNetworksAdapter = new SimpleAdapter(this, mWifiNetworks, R.layout.list_wifi_network, new String[] { WifiNetworkManager.KEY_NETWORK_SSID }, new int[] { R.id.textViewName });
 		mListViewNetworks.setAdapter(mListViewNetworksAdapter);
 		mListViewNetworks.setOnItemClickListener(new OnItemClickListener(){
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id){
@@ -385,7 +385,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 				retryCounter = 0;
 				while(true){
 					try{
-						Thread.sleep(500);
+						Thread.sleep(1000);
 						String currentSsid = wifiNetworkManager.getCurrentSsid();
 						if(currentSsid.equals(targetedSsid)) break;
 					}catch(Exception e2){
@@ -402,16 +402,21 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 				publishProgress(progressBundle);
 				
 				// Connect to drone
-				retryCounter = 0;
+				retryTimeCounter = System.currentTimeMillis();
 				while(true){
 					try{
+						Thread.sleep(1000);
+						Log.d(mTag, "Connecting to drone ...");
 						mService.doDroneConnectSynchronous("192.168.1.1");
+						Log.d(mTag, "Connected to drone, breaking retry loop ...");
 						break;
 					}catch(Exception e2){
 						Log.w(mTag, "Connection to drone failed.", e2);
 					}
-					retryCounter++;
-					if(retryCounter >= 3) throw new TimeoutException("Unable to connect to drone.");
+
+					// Abort if more than 20 seconds elapsed
+					if(System.currentTimeMillis() - retryTimeCounter >= 20000)
+						throw new TimeoutException("Waiting for drone timed out.");
 				}
 				
 				// Publish progress

@@ -36,8 +36,11 @@ public class HomeActivity extends ConnectedActivity{
 		// Set layout
 		setContentView(R.layout.activity_home);
 		
-		// Add on click listeners
+		// Find controls
 		mButtonFly = (Button) findViewById(R.id.buttonFly);
+		mButtonConfig = (Button) findViewById(R.id.buttonConfig);
+		
+		// Add on click listeners
 		mButtonFly.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v){
@@ -54,6 +57,15 @@ public class HomeActivity extends ConnectedActivity{
 				}
 			}
 		});
+		mButtonConfig.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mBound){
+					Intent intent = new Intent(HomeActivity.this, ActionsListActivity.class);
+					startActivity(intent);
+				}
+			}
+		});
 	}
 
 
@@ -64,7 +76,8 @@ public class HomeActivity extends ConnectedActivity{
         
         // Enable buttons
         if(mButtonFly != null) mButtonFly.setEnabled(true);
-        
+        if(mButtonConfig != null) mButtonConfig.setEnabled(true);
+ 
 	}
 
 
@@ -73,6 +86,7 @@ public class HomeActivity extends ConnectedActivity{
 
         // Disable buttons
         if(mButtonFly != null) mButtonFly.setEnabled(false);
+        if(mButtonConfig != null) mButtonConfig.setEnabled(false);
 		
 	}
 

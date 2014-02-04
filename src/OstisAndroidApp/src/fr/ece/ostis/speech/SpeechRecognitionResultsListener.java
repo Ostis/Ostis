@@ -6,4 +6,10 @@ public interface SpeechRecognitionResultsListener {
 
 	void onSpeechRecognitionResultsAvailable(ArrayList<String> sentences);
 	
+	void onReadyForSpeech();
+	
+	void onEndOfSpeech();
+	
+	void onError();
+	
 }
