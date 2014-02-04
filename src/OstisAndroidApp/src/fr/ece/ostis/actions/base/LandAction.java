@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
 
+import fr.ece.ostis.OstisService;
 import fr.ece.ostis.actions.BaseAction;
 
 
@@ -19,8 +20,8 @@ public class LandAction extends BaseAction {
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public LandAction(){
-		super("Land");
+	public LandAction(OstisService ostisService){
+		super("Land", ostisService);
 		mNameTable.put(Locale.FRENCH, "Atterrissage");
 		mNameTable.put(Locale.ENGLISH, "Land");
 		mVocalCommandTable.put(Locale.FRENCH, "attéris");

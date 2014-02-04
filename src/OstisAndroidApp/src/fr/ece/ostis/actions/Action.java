@@ -6,6 +6,8 @@ import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
 
+import fr.ece.ostis.OstisService;
+
 
 /**
  * TODO
@@ -21,6 +23,8 @@ public abstract class Action{
 	protected Hashtable<Locale, String> mNameTable;
 	protected Hashtable<Locale, String> mVocalCommandTable;
 	protected Hashtable<Locale, String> mDescriptionTable;
+	
+	protected OstisService mOstisService;
 
 	/**
 	 * TODO
@@ -28,8 +32,9 @@ public abstract class Action{
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public Action(String id) {
+	public Action(String id, OstisService ostisService) {
 		mId = id;
+		mOstisService = ostisService;
 		mNameTable = new Hashtable<Locale, String>();
 		mVocalCommandTable = new Hashtable<Locale, String>();
 		mDescriptionTable = new Hashtable<Locale, String>();

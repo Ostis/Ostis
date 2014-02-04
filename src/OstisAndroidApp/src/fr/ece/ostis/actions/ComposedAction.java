@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.codeminders.ardrone.ARDrone;
 
+import fr.ece.ostis.OstisService;
+
 
 /**
  * TODO
@@ -23,8 +25,8 @@ public class ComposedAction extends Action{
 	 * TODO
 	 * @param actions
 	 */
-	public ComposedAction(){
-		super(generateId());
+	public ComposedAction(OstisService ostisService){
+		super(generateId(), ostisService);
 		mActionList = new ArrayList<Action>();
 	}
 	
@@ -36,8 +38,8 @@ public class ComposedAction extends Action{
 	 * @param vocalCommands
 	 * @param actions
 	 */
-	public ComposedAction(String id){
-		super(id);
+	public ComposedAction(String id, OstisService ostisService){
+		super(id, ostisService);
 		mActionList = new ArrayList<Action>();
 	}
 	

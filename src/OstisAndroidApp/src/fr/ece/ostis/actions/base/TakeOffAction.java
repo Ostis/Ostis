@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
 
+import fr.ece.ostis.OstisService;
 import fr.ece.ostis.actions.BaseAction;
 
 
@@ -19,8 +20,8 @@ public class TakeOffAction extends BaseAction {
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public TakeOffAction(){
-		super("Takeoff");
+	public TakeOffAction(OstisService ostisService){
+		super("TakeOff", ostisService);
 		mNameTable.put(Locale.FRENCH, "Decollage");
 		mNameTable.put(Locale.ENGLISH, "TakeOff");
 		mVocalCommandTable.put(Locale.FRENCH, "décolle");

@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import com.codeminders.ardrone.ARDrone;
 
+import fr.ece.ostis.OstisService;
 import fr.ece.ostis.actions.BaseAction;
 
 
@@ -19,8 +20,8 @@ public class EmergencyAction extends BaseAction {
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public EmergencyAction(){
-		super("Emergency");
+	public EmergencyAction(OstisService ostisService){
+		super("Emergency", ostisService);
 		mNameTable.put(Locale.FRENCH, "Signal d'urgence");
 		mNameTable.put(Locale.ENGLISH, "Emergency signal");
 		mVocalCommandTable.put(Locale.FRENCH, "stop");
