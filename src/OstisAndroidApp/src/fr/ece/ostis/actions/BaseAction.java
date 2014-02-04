@@ -1,7 +1,5 @@
 package fr.ece.ostis.actions;
 
-import fr.ece.ostis.OstisService;
-
 /**
  * TODO
  * @author Nicolas Schurando
@@ -14,7 +12,7 @@ public abstract class BaseAction extends Action {
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public BaseAction(String id, OstisService ostisService) {
-		super(id, ostisService);
+	public BaseAction(String id) {
+		super(id);
 	}
 }

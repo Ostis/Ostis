@@ -619,7 +619,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 				if(actionMatched != null){
 					Log.d("OstisService", "Running action " + actionMatched.getId());
 					try{
-						actionMatched.run(mDrone);
+						actionMatched.run(mDrone, this);
 					}catch(Exception e){
 						Log.e(mTag, "Could not run matched action", e);
 						// TODO Auto-generated catch block

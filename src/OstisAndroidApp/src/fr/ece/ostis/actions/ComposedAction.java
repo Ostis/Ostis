@@ -25,8 +25,8 @@ public class ComposedAction extends Action{
 	 * TODO
 	 * @param actions
 	 */
-	public ComposedAction(OstisService ostisService){
-		super(generateId(), ostisService);
+	public ComposedAction(){
+		super(generateId());
 		mActionList = new ArrayList<Action>();
 	}
 	
@@ -38,8 +38,8 @@ public class ComposedAction extends Action{
 	 * @param vocalCommands
 	 * @param actions
 	 */
-	public ComposedAction(String id, OstisService ostisService){
-		super(id, ostisService);
+	public ComposedAction(String id){
+		super(id);
 		mActionList = new ArrayList<Action>();
 	}
 	
@@ -117,10 +117,10 @@ public class ComposedAction extends Action{
 	 * @param drone
 	 * @throws IOException 
 	 */
-	@Override public void run(ARDrone drone) throws IOException{
+	@Override public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		for(Action action : mActionList)
 			if(action != null)
-				action.run(drone);
+				action.run(drone, ostisService);
 	}
 	
 }

@@ -23,8 +23,6 @@ public abstract class Action{
 	protected Hashtable<Locale, String> mNameTable;
 	protected Hashtable<Locale, String> mVocalCommandTable;
 	protected Hashtable<Locale, String> mDescriptionTable;
-	
-	protected OstisService mOstisService;
 
 	/**
 	 * TODO
@@ -32,9 +30,8 @@ public abstract class Action{
 	 * @param name
 	 * @param vocalCommands
 	 */
-	public Action(String id, OstisService ostisService) {
+	public Action(String id) {
 		mId = id;
-		mOstisService = ostisService;
 		mNameTable = new Hashtable<Locale, String>();
 		mVocalCommandTable = new Hashtable<Locale, String>();
 		mDescriptionTable = new Hashtable<Locale, String>();
@@ -170,7 +167,7 @@ public abstract class Action{
 	 * Executes the given action.
 	 * @throws IOException 
 	 */
-	public abstract void run(ARDrone drone) throws IOException;
+	public abstract void run(ARDrone drone, OstisService ostisService) throws IOException;
 	
 	
 	/**

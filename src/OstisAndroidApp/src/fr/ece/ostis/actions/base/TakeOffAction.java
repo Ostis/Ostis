@@ -20,8 +20,8 @@ public class TakeOffAction extends BaseAction {
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public TakeOffAction(OstisService ostisService){
-		super("TakeOff", ostisService);
+	public TakeOffAction(){
+		super("TakeOff");
 		mNameTable.put(Locale.FRENCH, "Decollage");
 		mNameTable.put(Locale.ENGLISH, "TakeOff");
 		mVocalCommandTable.put(Locale.FRENCH, "décolle");
@@ -30,7 +30,7 @@ public class TakeOffAction extends BaseAction {
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone lift off.");
 	}
 	
-	@Override public void run(ARDrone drone) throws IOException{
+	@Override public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");

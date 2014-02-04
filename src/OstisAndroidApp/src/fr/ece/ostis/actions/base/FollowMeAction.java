@@ -38,8 +38,8 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public FollowMeAction(OstisService ostisService){
-		super("FollowMe", ostisService);
+	public FollowMeAction(){
+		super("FollowMe");
 		mNameTable.put(Locale.FRENCH, "Suis moi");
 		mNameTable.put(Locale.ENGLISH, "Follow me");
 		mVocalCommandTable.put(Locale.FRENCH, "suis moi");
@@ -53,17 +53,17 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 	
 	
 	@Override
-	public void run(ARDrone drone) throws IOException{
+	public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
+		if(ostisService == null) throw new NullPointerException("OstisService reference has not been passed properly.");
 		
 		// Register as image listener
 		drone.addImageListener(this);
 		
-		(new Follower(drone)).execute();
+		(new Follower(drone, ostisService, this)).execute();
 		
-		// TODO remove image listener on end of task
 	}
 
 	
@@ -107,8 +107,8 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 				if(mBitmap != null)
 					mBitmap.recycle();
 				mBitmap = b;
+				mIsNewBitmapAvailable.set(true);
 			}
-			mIsNewBitmapAvailable.set(true);
 		}
 		
 	}
@@ -116,9 +116,13 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 	private class Follower extends AsyncTask< Void, Void, Void> {
 		
 		protected ARDrone mDrone;
+		protected OstisService mOstisService;
+		protected DroneVideoListener mDroneVideoListener;
 		
-		public Follower(ARDrone drone) {
+		public Follower(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener) {
 			mDrone = drone;
+			mOstisService = ostisService;
+			mDroneVideoListener = droneVideoListener;
 		}
 		
 		@Override
@@ -127,7 +131,6 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 				
 				if (mIsNewBitmapAvailable.get()) {
 					followTag();
-					mIsNewBitmapAvailable.set(false);
 				}
 				
 				else {
@@ -148,6 +151,11 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			return null;
 		}
 		
+		@Override
+		protected void onPostExecute(Void param){
+			mDrone.removeImageListener(mDroneVideoListener);
+		}
+		
 		protected final float yawTrackingP = 0.75f;
 		protected final float pitchTrackingP = 0.42f;
 		protected final float pitchTrackingI = 0.0011f;
@@ -158,6 +166,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			synchronized (mBitmapLock) {
 				if (mBitmap == null) return;
 				mBitmap.copyPixelsToBuffer(mBGR565Image.getByteBuffer());
+				mIsNewBitmapAvailable.set(false);
 			}
 			PointF tagPosition = Tracker.getTagPosition(mBGR565Image);
 			

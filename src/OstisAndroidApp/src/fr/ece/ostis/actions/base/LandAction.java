@@ -20,8 +20,8 @@ public class LandAction extends BaseAction {
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public LandAction(OstisService ostisService){
-		super("Land", ostisService);
+	public LandAction(){
+		super("Land");
 		mNameTable.put(Locale.FRENCH, "Atterrissage");
 		mNameTable.put(Locale.ENGLISH, "Land");
 		mVocalCommandTable.put(Locale.FRENCH, "attéris");
@@ -30,7 +30,7 @@ public class LandAction extends BaseAction {
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone land.");
 	}
 	
-	@Override public void run(ARDrone drone) throws IOException{
+	@Override public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");

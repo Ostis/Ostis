@@ -9,10 +9,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import fr.ece.ostis.OstisService;
 import fr.ece.ostis.actions.base.EmergencyAction;
 import fr.ece.ostis.actions.base.LandAction;
 import fr.ece.ostis.actions.base.TakeOffAction;
@@ -44,7 +44,7 @@ public class ActionManager{
 	
 	
 	/** TODO */
-	private OstisService mOstisService;
+	private Context mContext;
 	
 	
 	/**
@@ -53,10 +53,10 @@ public class ActionManager{
 	 * @param locale
 	 * @param drone
 	 */
-	public ActionManager(OstisService ostisService, Locale locale){
+	public ActionManager(Context context, Locale locale){
 		
 		mLocale = locale;
-		mOstisService = ostisService;
+		mContext = context;
 		mComposedActionTable = new Hashtable<String, ComposedAction>();
 		mBaseActionTable = new Hashtable<String, BaseAction>();
 		mSpeechComparator = new SpeechComparator(mLocale);
@@ -64,11 +64,11 @@ public class ActionManager{
 		/*
 		 * TODO : Declare/initialize/add baseActions here
 		 */
-		BaseAction liftOffAction = new TakeOffAction(mOstisService);
+		BaseAction liftOffAction = new TakeOffAction();
 		mBaseActionTable.put(liftOffAction.getId(), liftOffAction);
-		BaseAction landAction = new LandAction(mOstisService);
+		BaseAction landAction = new LandAction();
 		mBaseActionTable.put(landAction.getId(), landAction);
-		BaseAction emergencyAction = new EmergencyAction(mOstisService);
+		BaseAction emergencyAction = new EmergencyAction();
 		mBaseActionTable.put(emergencyAction.getId(), emergencyAction);
 		
 	}
@@ -208,7 +208,7 @@ public class ActionManager{
 				jsonActions.put(jsonObject);
 			}
 			
-			Editor preferencesEditor = PreferenceManager.getDefaultSharedPreferences(mOstisService).edit();
+			Editor preferencesEditor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
 			preferencesEditor.putString("composedActions", jsonActions.toString());
 			preferencesEditor.commit();
 			return true;
@@ -226,7 +226,7 @@ public class ActionManager{
 	public boolean loadComposedActions(){
 		try{
 			mComposedActionTable.clear();
-			String actionsString = PreferenceManager.getDefaultSharedPreferences(mOstisService).getString("composedActions", "nothing");
+			String actionsString = PreferenceManager.getDefaultSharedPreferences(mContext).getString("composedActions", "nothing");
 			JSONArray jsonComposedActions = new JSONArray(actionsString);
 			int numberOfActions = jsonComposedActions.length();
 			Hashtable<String, ArrayList<String>> corresTable = new Hashtable<String, ArrayList<String>>();
@@ -239,7 +239,7 @@ public class ActionManager{
 				for (int j = 0; j < jsonActionsId.length(); j++)
 					actionsId.add(jsonActionsId.getString(j));
 				corresTable.put(id, actionsId);
-				ComposedAction composedAction = new ComposedAction(id, mOstisService);
+				ComposedAction composedAction = new ComposedAction(id);
 				JSONArray jsonKeys = jsonObject.getJSONArray("vocalCommandKeys");
 				JSONArray jsonValues = jsonObject.getJSONArray("vocalCommandValues");
 				for (int j = 0; j < jsonKeys.length(); j++)
