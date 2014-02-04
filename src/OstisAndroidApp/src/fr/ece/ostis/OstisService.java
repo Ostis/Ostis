@@ -127,6 +127,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected NavData mLastNavData = null;
 	
 	
+	/** Monitoring thread. */
+	protected Thread mThread = null;
+	
+	
 	@Override
 	public void onCreate(){
 		
@@ -515,6 +519,34 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			else Log.w(mTag, "Drone status changed listener is null.");
 		}
 		
+		// Start pinger thread
+		mThread = new Thread(new Runnable(){
+			
+			protected boolean mPreviouslyOk = false;
+			
+			@Override
+			public void run(){
+				while(true){
+					if(mDrone != null){
+						Log.d(mTag, "Pinger thread reports drone status = " + mDrone.getState());
+						/*if(mPreviouslyOk && mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
+							Log.d(mTag, "Pinger thread reports drone disconnected or error.");
+							onDroneDisconnected();
+							return;
+						}else if(mDrone.getState() == State.*/
+					}else{
+						Log.d(mTag, "Pinger thread reports drone is null");
+					}
+					try {
+						Thread.sleep(1000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+						return;
+					}
+				}
+			}
+		});
+		mThread.start();
 	}
 	
 	
@@ -532,6 +564,26 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Warn clients
 		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
 			if(callback != null) callback.onDroneConnectionFailed();
+			else Log.w(mTag, "Drone status changed listener is null.");
+		}
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void onDroneDisconnected(){
+		
+		// Log
+		Log.w(mTag, "Disconnected from drone.");
+		
+		// Update local variable
+		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		
+		// Warn clients
+		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+			if(callback != null) callback.onDroneDisconnected();
 			else Log.w(mTag, "Drone status changed listener is null.");
 		}
 		
@@ -627,9 +679,9 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 						actionMatched.run(mDrone, this);
 					}catch(Exception e){
 						Log.e(mTag, "Could not run matched action", e);
-						// TODO Auto-generated catch block
 					}finally{
-						if(mDrone.getState() == State.DISCONNECTED){
+						Log.d(mTag, "Drone state is " + mDrone.getState());
+						if(mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
 							doDroneDisconnect();
 						}
 					}
