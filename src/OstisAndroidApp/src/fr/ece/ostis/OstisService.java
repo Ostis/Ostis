@@ -1,6 +1,8 @@
 package fr.ece.ostis;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -556,24 +558,54 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		mThread = new Thread(new Runnable(){
 			
 			protected boolean mPreviouslyOk = false;
+			protected long mInitialTime;
 			
 			@Override
 			public void run(){
 				while(true){
+					
+					// Store initial time
+					mInitialTime = System.currentTimeMillis();
+					
+					// Check drone status
 					if(mDrone != null){
 						Log.d(mTag, "Pinger thread reports drone status = " + mDrone.getState());
-						/*if(mPreviouslyOk && mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
-							Log.d(mTag, "Pinger thread reports drone disconnected or error.");
-							onDroneDisconnected();
+						if(mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
+							Log.i(mTag, "Pinger thread reports drone disconnected or is in error state.");
+							if(mPreviouslyOk) onDroneDisconnected();
 							return;
-						}else if(mDrone.getState() == State.*/
+						}else if(mDrone.getState() == State.TAKING_OFF || mDrone.getState() == State.DEMO || mDrone.getState() == State.LANDING){
+							mPreviouslyOk = true;
+						}
 					}else{
-						Log.d(mTag, "Pinger thread reports drone is null");
+						Log.w(mTag, "Pinger thread reports drone is null");
+						return;
 					}
+					
+					// Is drone reachable
 					try {
-						Thread.sleep(1000);
+						if(InetAddress.getByName("192.168.1.1").isReachable(1000) != true){ // TODO Implement variable ip.
+							Log.i(mTag, "Pinger thread reports drone no longer reachable.");
+							Handler mainHandler = new Handler(OstisService.this.getMainLooper());
+							Runnable myRunnable = new Runnable(){
+								@Override
+								public void run(){
+									onDroneDisconnected();
+								}
+							};
+							mainHandler.post(myRunnable);
+							return;
+						}
+					}catch(UnknownHostException e1){
+						Log.w(mTag, e1);
+					}catch(IOException e1){
+						Log.w(mTag, e1);
+					}
+					
+					// Sleep
+					try{
+						Thread.sleep(Math.max(500, 2000 - (System.currentTimeMillis() - mInitialTime)));
 					}catch (InterruptedException e){
-						e.printStackTrace();
 						return;
 					}
 				}
@@ -928,6 +960,21 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			}
 		}
 		
+	}
+	
+	
+	// TODO REMOVE, FOR DEBUG ONLY
+	public void debugToggleTracking(boolean activated){
+		if(activated){
+			Action action = mActionManager.getAction("FollowMe");
+			try {
+				action.run(mDrone, this);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			setFollowingActivated(false);
+		}
 	}
     
 }

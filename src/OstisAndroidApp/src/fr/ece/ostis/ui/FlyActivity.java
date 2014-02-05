@@ -12,8 +12,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 /**
  * TODO
@@ -33,6 +36,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 	protected TextView mTextViewSpeechStatus = null;
 	protected ImageView mImageViewDroneStatus = null;
 	protected TextView mTextViewDroneStatus = null;
+	protected ToggleButton mToggleButtonTracking = null;
 	
 	
 	@Override
@@ -49,7 +53,18 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		mImageViewSpeechStatus = (ImageView) findViewById(R.id.imageViewSpeechStatus);
 		mTextViewSpeechStatus = (TextView) findViewById(R.id.textViewSpeechStatus);
 		mImageViewDroneStatus = (ImageView) findViewById(R.id.ImageViewDroneStatus);
-		mTextViewDroneStatus = (TextView) findViewById(R.id.TextViewDroneStatus);
+		mTextViewDroneStatus = (TextView) findViewById(R.id.textViewDroneStatus);
+		mToggleButtonTracking = (ToggleButton) findViewById(R.id.toggleButtonTracking);
+		
+		// Set listeners on controls
+		mToggleButtonTracking.setOnClickListener(new OnClickListener(){
+			
+			@Override
+			public void onClick(View v){
+				if(mBound) mService.debugToggleTracking(mToggleButtonTracking.isChecked());
+			}
+		});
+		
 		
 	}
 
