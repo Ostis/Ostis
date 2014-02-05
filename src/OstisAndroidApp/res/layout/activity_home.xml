@@ -24,6 +24,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:drawableLeft="@drawable/icon_plane"
                 android:enabled="false"
                 android:text="Pilotage" />
 
@@ -32,6 +33,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:drawableLeft="@drawable/icon_polaroid"
                 android:enabled="false"
                 android:text="Médias" />
             
@@ -46,14 +48,16 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:drawableLeft="@drawable/icon_mic"
                 android:enabled="false"
-                android:text="Configuration" />
+                android:text="Config" />
 
             <Button
                 android:id="@+id/buttonAbout"
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
+                android:drawableLeft="@drawable/icon_about"
                 android:enabled="false"
                 android:text="A propos" />
             
