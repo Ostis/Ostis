@@ -49,10 +49,12 @@ public class HomeActivity extends ConnectedActivity{
 						// If connected to drone, go directly to fly view
 						Intent intent = new Intent(HomeActivity.this, FlyActivity.class);
 						startActivity(intent);
+						overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 					}else{
 						// Else go to network wizard
 						Intent intent = new Intent(HomeActivity.this, NetworkWizardActivity.class);
 						startActivity(intent);
+						overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 					}
 				}
 			}

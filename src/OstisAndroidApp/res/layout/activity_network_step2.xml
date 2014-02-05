@@ -14,7 +14,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:text="Configurez votre drone pour se connecter au point d&apos;accès. Remarque, si votre drone est déjà configuré ignorez cette étape." />
+        android:text="@string/method_hipri_step2" />
 
     <FrameLayout
         android:layout_width="wrap_content"
@@ -52,7 +52,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:minWidth="120dp"
+        android:drawableLeft="@drawable/icon_arrow_prev"
+        android:minWidth="130dp"
         android:text="@string/button_prev" />
 
 </RelativeLayout>

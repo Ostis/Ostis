@@ -62,7 +62,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:minWidth="120dp"
+        android:drawableRight="@drawable/icon_arrow_next"
+        android:minWidth="130dp"
         android:text="@string/button_next" />
 
 </RelativeLayout>

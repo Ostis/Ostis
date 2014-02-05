@@ -30,9 +30,10 @@
     <string name="button_next">Next</string>
     <string name="method_ap_title">Access point method</string>
     <string name="method_ap_description">This method sets up a WiFi access point on your phone, and configures your drone so it connects to that particular access point. Please check that your mobile operator won\'t charge you for this.</string>
+    <string name="method_ap_step2">Select your drone in the list below in order to configure it to connect to the access point of your mobile. Please note that if it has already been configurated, it won\'t show up in the list, and you will have to reboot it.</string>
     <string name="method_hipri_title">High priority method</string>
     <string name="method_hipri_description">This method uses complicated Android features to enable WiFi and 3G connectivity at the same time. It might not work depending on your phone, or your version of Android.</string>
-    
+    <string name="method_hipri_step2">Select your drone in the list below in order to connect to it. If it doesn\'t show up, please ensure that it has the latest firmware. Only open wifi networks are displayed.</string>
 
     <!-- Actions list activity -->
     <string name="title_activity_actions_list">Actions</string>
