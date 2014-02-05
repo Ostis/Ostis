@@ -24,7 +24,7 @@ public class TakeOffAction extends BaseAction {
 		super("TakeOff");
 		mNameTable.put(Locale.FRENCH, "Decollage");
 		mNameTable.put(Locale.ENGLISH, "TakeOff");
-		mVocalCommandTable.put(Locale.FRENCH, "décolle");
+		mVocalCommandTable.put(Locale.FRENCH, "décollage");
 		mVocalCommandTable.put(Locale.ENGLISH, "takeoff");
 		mDescriptionTable.put(Locale.FRENCH, "Permet au drone de decoller.");
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone lift off.");

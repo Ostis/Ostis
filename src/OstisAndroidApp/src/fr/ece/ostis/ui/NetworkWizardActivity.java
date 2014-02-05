@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-import fr.ece.ostis.OnDroneStatusChangedListener;
+import fr.ece.ostis.DroneStatusChangedListener;
 import fr.ece.ostis.OstisService;
 import fr.ece.ostis.R;
 import fr.ece.ostis.network.MobileNetworkManager;
@@ -37,9 +37,9 @@ import android.widget.SimpleAdapter;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-31
+ * @version 2014-02-05
  */
-public class NetworkWizardActivity extends ConnectedActivity implements OnWifiScanResultsUpdatedListener, OnDroneStatusChangedListener{
+public class NetworkWizardActivity extends ConnectedActivity implements OnWifiScanResultsUpdatedListener, DroneStatusChangedListener{
 
 	
 	/** Stores the current step of the wizard. */
@@ -178,6 +178,12 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 			mWifiScanCountDown.start();
 		}
 		
+	}
+
+
+	@Override
+	protected void onBeforeUnbindFromOstisService() {
+		// TODO Auto-generated method stub
 	}
 
 	

@@ -91,7 +91,9 @@ public class SpeechComparator {
 		soundex = soundex.toUpperCase();
 		soundex = soundex.replaceAll("[^A-Z]","");
 
-		String soundexBack = soundex;// on sauve le code (utilisé pour les mots très courts)
+		return soundex;
+		
+		/*String soundexBack = soundex;// on sauve le code (utilisé pour les mots très courts)
 
 		soundex = soundex.replaceAll( "O[O]+", "OU"); 	// pré traitement OO... -> OU
 		soundex = soundex.replaceAll( "SAOU", "SOU"); 	// pré traitement SAOU -> SOU
@@ -364,7 +366,7 @@ public class SpeechComparator {
 		if (soundex.length()>1)
 			return soundex;
 		else
-			return "";
+			return "";*/
 	}
 
 }

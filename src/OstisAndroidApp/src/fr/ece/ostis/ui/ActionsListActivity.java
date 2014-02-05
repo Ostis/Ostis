@@ -21,6 +21,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v4.app.NavUtils;
 
+
+/**
+ * TODO
+ * @author Nicolas Schurando
+ * @version 2014-05-02
+ */
 public class ActionsListActivity extends ConnectedActivity{
 
 	protected LanguageManager mLanguageManager = null;
@@ -61,7 +67,6 @@ public class ActionsListActivity extends ConnectedActivity{
 		mActionListView.setAdapter(mAdapter);
 	}
 
-
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
@@ -89,13 +94,17 @@ public class ActionsListActivity extends ConnectedActivity{
 	}
 
 
-
 	@Override
 	protected void onBoundToOstisService(){
 		// TODO Auto-generated method stub
 	}
 
 
+	@Override
+	protected void onBeforeUnbindFromOstisService(){
+		// TODO Auto-generated method stub
+	}
+	
 
 	@Override
 	protected void onUnboundFromOstisService(){

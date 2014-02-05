@@ -12,7 +12,7 @@ import android.widget.Button;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-30
+ * @version 2014-05-02
  */
 public class HomeActivity extends ConnectedActivity{
 
@@ -78,6 +78,13 @@ public class HomeActivity extends ConnectedActivity{
         if(mButtonFly != null) mButtonFly.setEnabled(true);
         if(mButtonConfig != null) mButtonConfig.setEnabled(true);
  
+	}
+
+
+	@Override
+	protected void onBeforeUnbindFromOstisService() {
+		// TODO Auto-generated method stub
+		
 	}
 
 

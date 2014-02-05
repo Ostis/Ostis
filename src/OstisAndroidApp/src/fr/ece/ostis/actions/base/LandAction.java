@@ -24,7 +24,7 @@ public class LandAction extends BaseAction {
 		super("Land");
 		mNameTable.put(Locale.FRENCH, "Atterrissage");
 		mNameTable.put(Locale.ENGLISH, "Land");
-		mVocalCommandTable.put(Locale.FRENCH, "attéris");
+		mVocalCommandTable.put(Locale.FRENCH, "attérissage");
 		mVocalCommandTable.put(Locale.ENGLISH, "land");
 		mDescriptionTable.put(Locale.FRENCH, "Permet au drone d'attérir.");
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone land.");
