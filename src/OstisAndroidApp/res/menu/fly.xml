@@ -8,8 +8,13 @@
 
     <item
         android:id="@+id/action_emergency_stop"
-        android:showAsAction="always|withText"
+        android:showAsAction="always"
         android:title="Stop"
         android:icon="@drawable/ic_fly_stop"/>
+    
+    <item android:id="@+id/action_debug_takeoff" android:title="Takeoff" android:showAsAction="never"></item>
+    <item android:id="@+id/action_debug_land" android:title="Land" android:showAsAction="never"></item>
+    <item android:id="@+id/action_debug_tracking_on" android:title="Tracking on" android:showAsAction="never"></item>
+    <item android:id="@+id/action_debug_tracking_off" android:title="Tracking off" android:showAsAction="never"></item>
 
 </menu>

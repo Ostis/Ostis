@@ -2,35 +2,42 @@ package fr.ece.ostis.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 
-import javax.xml.datatype.Duration;
-
+import fr.ece.ostis.ActionExecutedListener;
 import fr.ece.ostis.DroneBatteryChangedListener;
 import fr.ece.ostis.DroneFrameReceivedListener;
 import fr.ece.ostis.DroneStatusChangedListener;
+import fr.ece.ostis.OstisService;
 import fr.ece.ostis.R;
+import fr.ece.ostis.actions.Action;
+import fr.ece.ostis.lang.LanguageManager;
 import fr.ece.ostis.speech.SpeechRecognitionResultsListener;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 /**
  * TODO
  * @author Nicolas Schurando
  * @version 2014-02-05
  */
-public class FlyActivity extends ConnectedActivity implements SpeechRecognitionResultsListener, DroneStatusChangedListener, DroneBatteryChangedListener, DroneFrameReceivedListener{
+public class FlyActivity extends ConnectedActivity implements SpeechRecognitionResultsListener, DroneStatusChangedListener, DroneBatteryChangedListener, DroneFrameReceivedListener, ActionExecutedListener{
 
 	
 	/** Log tag. */
@@ -41,14 +48,25 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 	protected Menu mMenu = null;
 	
 	
+	/** List of last executed actions. */
+	protected ArrayList<Action> mLastActions = new ArrayList<Action>();
+	
+	
+	/** Reference to the language manager. */
+	protected LanguageManager mLanguageManager = null;
+	
+	
+	/** Reference to the adapter. */
+	protected ActionListAdapterItem mListViewActionsAdapter = null;
+	
+	
 	/* Controls. */
 	protected ImageView mImageViewCamera = null;
 	protected ImageView mImageViewSpeechStatus = null;
 	protected TextView mTextViewSpeechStatus = null;
 	protected ImageView mImageViewDroneStatus = null;
 	protected TextView mTextViewDroneStatus = null;
-	protected ToggleButton mToggleButtonTracking = null;
-	protected ToggleButton mToggleButtonTakeOff = null;
+	protected ListView mListViewActions = null;
 	
 	
 	@Override
@@ -66,26 +84,15 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		mTextViewSpeechStatus = (TextView) findViewById(R.id.textViewSpeechStatus);
 		mImageViewDroneStatus = (ImageView) findViewById(R.id.ImageViewDroneStatus);
 		mTextViewDroneStatus = (TextView) findViewById(R.id.textViewDroneStatus);
-		mToggleButtonTracking = (ToggleButton) findViewById(R.id.toggleButtonTracking);
-		mToggleButtonTakeOff = (ToggleButton ) findViewById(R.id.toggleButtonTakeOff);
+		mListViewActions = (ListView) findViewById(R.id.listViewActions);
 		
-		// Set listeners on controls
-		mToggleButtonTracking.setOnClickListener(new OnClickListener(){
-			
-			@Override
-			public void onClick(View v){
-				if(mBound) mService.debugToggleTracking(mToggleButtonTracking.isChecked());
-			}
-		});
+		// Instantiate language manager
+		mLanguageManager = new LanguageManager();
 		
-		mToggleButtonTakeOff.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				if (mBound) mService.debugToggleTakeOff(mToggleButtonTakeOff.isChecked());
-			}
-		});
+		// Instantiate adapter
+		mListViewActionsAdapter = new ActionListAdapterItem(this, R.layout.list_action, mLastActions);
+		mListViewActions.setAdapter(mListViewActionsAdapter);
+		
 	}
 
 	
@@ -98,17 +105,17 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.fly, menu);
 		
+		// Ask for current battery state
+		onDroneBatteryChanged(mService.getDroneBattery());
+		
 		// Return
 		return true;
 		
 	}
-	
-	
-	/*@Override
-	public boolean onPrepareOptionsMenu(Menu menu){
-		
-	}*/
 
+	/*@Override
+	public boolean onPrepareOptionsMenu(Menu menu)*/
+	
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
@@ -118,6 +125,18 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 					if(mBound && mService != null) mService.getDrone().sendEmergencySignal();
 				}catch (IOException e){}
 	            return true;
+	        case R.id.action_debug_takeoff:
+	        	if (mBound) mService.debugToggleTakeOff(true);
+	        	return true;
+	        case R.id.action_debug_land:
+	        	if (mBound) mService.debugToggleTakeOff(false);
+	        	return true;
+	        case R.id.action_debug_tracking_on:
+	        	if(mBound && mService != null) mService.debugToggleTracking(true);
+	        	return true;
+	        case R.id.action_debug_tracking_off:
+	        	if(mBound && mService != null) mService.debugToggleTracking(false);
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -141,6 +160,10 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		mService.registerStatusChangedListener(this);
 		mService.registerFrameReceivedListener(this);
 		mService.registerBatteryChangedListener(this);
+		mService.registerActionExecutedListener(this);
+		
+		// Ask for current battery state
+		onDroneBatteryChanged(mService.getDroneBattery());
 		
 		// Activate speech results <-> action matching
 		mService.activateSpeechResultsToActionMatching();
@@ -158,6 +181,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		mService.unregisterFrameReceivedListener(this);
 		mService.unregisterStatusChangedListener(this);
 		mService.unregisterBatteryChangedListener(this);
+		mService.unregisterActionExecutedListener(this);
 		
 		// Desactivate speech results <-> action matching
 		mService.desactivateSpeechResultsToActionMatching();
@@ -246,16 +270,101 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 
 
 	@Override
-	public void onDroneBatteryChanged(int level){
-	    MenuItem item = mMenu.findItem(R.id.action_battery_level);
-	    item.setTitle(String.valueOf(level) + " %");
+	public void onDroneBatteryChanged(final int level){
+	    if(mMenu != null){
+			Handler mainHandler = new Handler(this.getMainLooper());
+			Runnable myRunnable = new Runnable(){
+				@Override
+				public void run(){
+			    	MenuItem item = mMenu.findItem(R.id.action_battery_level);
+			    	item.setTitle(String.valueOf(level) + " %");
+				}
+			};
+			mainHandler.post(myRunnable);
+	    }
 	}
 
 
 	@Override
-	public void onDroneBatteryTooLow(int level){
-		Toast toast = Toast.makeText(this, "Battery too low !", Toast.LENGTH_SHORT);
-		toast.show();
+	public void onDroneBatteryTooLow(final int level){
+		Handler mainHandler = new Handler(this.getMainLooper());
+		Runnable myRunnable = new Runnable(){
+			@Override
+			public void run(){
+				Toast toast = Toast.makeText(FlyActivity.this, "Battery too low !", Toast.LENGTH_SHORT);
+				toast.show();
+			}
+		};
+		mainHandler.post(myRunnable);
+	}
+
+
+	@Override
+	public void onActionExecuted(final Action action){
+		
+		Handler mainHandler = new Handler(this.getMainLooper());
+		Runnable myRunnable = new Runnable(){
+			@Override
+			public void run(){
+		
+				// Prevent control not fetched
+				if(mListViewActions == null || mListViewActionsAdapter == null) return;
+				
+				// Add and notify
+				mLastActions.add(action);
+				mListViewActionsAdapter.notifyDataSetChanged();
+				
+			}
+		};
+		mainHandler.post(myRunnable);
+
+	}
+	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-02-05
+	 */
+	protected class ActionListAdapterItem extends ArrayAdapter<Action>{
+
+	    Context mContext;
+	    int mLayoutResourceId;
+	    ArrayList<Action> mData = null;
+
+	    
+	    public ActionListAdapterItem(Context context, int layoutResourceId, ArrayList<Action> data){
+	        super(context, layoutResourceId, data);
+	        mContext = context;
+	        mData = data;
+	        mLayoutResourceId = layoutResourceId;
+	    }
+
+	    
+	    @Override
+	    public View getView(int position, View convertView, ViewGroup parent){
+	    	
+            // Inflate the layout if not already created
+	        if(convertView == null){
+	            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+	            convertView = inflater.inflate(mLayoutResourceId, parent, false);
+	        }
+
+	        // action based on the position
+	        Action action = mData.get(position);
+
+	        // get the TextView and then set the text (item name) and tag (item ID) values
+	        TextView textViewName = (TextView) convertView.findViewById(R.id.textViewName);
+	        TextView textViewCommand = (TextView) convertView.findViewById(R.id.textViewCommand);
+	        TextView textViewDescription = (TextView) convertView.findViewById(R.id.textViewDescription);
+	        textViewName.setText(action.getName(mLanguageManager.getCurrentLocale()));
+	        textViewCommand.setText("\" " + action.getVocalCommand(mLanguageManager.getCurrentLocale()) + " \"");
+	        textViewDescription.setText(action.getDescription(mLanguageManager.getCurrentLocale()));
+
+	        // Return view
+	        return convertView;
+	    }
+
 	}
 	
 }

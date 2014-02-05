@@ -29,29 +29,26 @@
 
         <ImageView
             android:id="@+id/imageViewSpeechStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/icon_info" />
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Voice" />
+
+        <TextView
+            android:id="@+id/textViewSpeechStatus"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical|left"
+            android:text="Waiting for speech status" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Voice" />
-
-            <TextView
-                android:id="@+id/textViewSpeechStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:gravity="center_vertical|left"
-                android:text="Waiting for speech status" />
-        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -64,64 +61,39 @@
 
         <ImageView
             android:id="@+id/ImageViewDroneStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:src="@drawable/icon_info" />
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:text="Drone" />
+
+        <TextView
+            android:id="@+id/textViewDroneStatus"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="vertical" >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Drone" />
-
-            <TextView
-                android:id="@+id/textViewDroneStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:gravity="center_vertical|left"
-                android:text="Waiting for drone status" />
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical|left"
+            android:text="Waiting for drone status" />
 
     </LinearLayout>
 
-    <ToggleButton
-        android:id="@+id/toggleButtonTracking"
-        android:layout_width="wrap_content"
+    <ListView
+        android:id="@+id/listViewActions"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="ToggleButton" />
+        android:layout_above="@+id/LinearLayoutDrone"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/imageViewCamera"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp" >
 
-    <ToggleButton
-        android:id="@+id/toggleButtonTakeOff"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/toggleButtonTracking"
-        android:layout_below="@+id/toggleButtonTracking" />
-
-    <TextView
-        android:id="@+id/textView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/toggleButtonTracking"
-        android:layout_alignBottom="@+id/toggleButtonTracking"
-        android:layout_alignLeft="@+id/LinearLayoutDrone"
-        android:layout_marginLeft="16dp"
-        android:text="FollowMe" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/toggleButtonTakeOff"
-        android:layout_alignBottom="@+id/toggleButtonTakeOff"
-        android:layout_alignLeft="@+id/textView1"
-        android:text="TakeOff / Land" />
+    </ListView>
 
 </RelativeLayout>

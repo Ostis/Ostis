@@ -479,6 +479,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 			}else{
 				Intent intent = new Intent(NetworkWizardActivity.this, FlyActivity.class);
 				startActivity(intent);
+				overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);  
 			}
 			
 			// Dismiss dialog
@@ -675,6 +676,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 			}else{
 				Intent intent = new Intent(NetworkWizardActivity.this, FlyActivity.class);
 				startActivity(intent);
+				overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);  
 			}
 			
 			// Dismiss dialog

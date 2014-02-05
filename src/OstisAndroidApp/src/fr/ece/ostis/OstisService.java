@@ -11,8 +11,6 @@ import com.codeminders.ardrone.ARDrone.State;
 import com.codeminders.ardrone.DroneVideoListener;
 import com.codeminders.ardrone.NavData;
 import com.codeminders.ardrone.NavDataListener;
-import com.codeminders.ardrone.data.navdata.FlyingState;
-
 import fr.ece.ostis.actions.Action;
 import fr.ece.ostis.actions.ActionManager;
 import fr.ece.ostis.lang.LanguageManager;
@@ -71,6 +69,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     protected ArrayList<DroneStatusChangedListener> mDroneStatusChangedListeners = new ArrayList<DroneStatusChangedListener>();
     protected ArrayList<DroneFrameReceivedListener> mDroneFrameReceivedListeners = new ArrayList<DroneFrameReceivedListener>();
     protected ArrayList<DroneBatteryChangedListener> mDroneBatteryChangedListeners = new ArrayList<DroneBatteryChangedListener>();
+    protected ArrayList<ActionExecutedListener> mActionExecutedListeners = new ArrayList<ActionExecutedListener>();
     
     
 	/** Reference to the javadrone api */
@@ -294,6 +293,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					OstisService.mDrone.clearStatusChangeListeners();
 					OstisService.mDrone.clearEmergencySignal();
 					OstisService.mDrone.disconnect();
+					OstisService.mDrone = null;
 					
 				}catch(Exception e2){
 					Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
@@ -348,6 +348,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 				mDrone.clearImageListeners();
 				mDrone.clearEmergencySignal();
 				mDrone.disconnect();
+				mDrone = null;
 			}catch(Exception e2){
 				Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
 			}
@@ -399,6 +400,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Try to disconnect
 		try{
 			mDrone.disconnect();
+			mDrone = null;
 		}catch(Exception e){
 			Log.w("OstisService", "Failed to disconnect drone.", e);
 		}
@@ -627,6 +629,24 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	public void unregisterStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.remove(listener);
 	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void registerActionExecutedListener(ActionExecutedListener listener){
+		mActionExecutedListeners.add(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void unregisterActionExecutedListener(ActionExecutedListener listener){
+		mActionExecutedListeners.remove(listener);
+	}
 
 	
 	/**
@@ -675,6 +695,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					Log.d("OstisService", "Running action " + actionMatched.getId());
 					try{
 						actionMatched.run(mDrone, this);
+						for(ActionExecutedListener callback: mActionExecutedListeners){
+							if(callback != null) callback.onActionExecuted(actionMatched);
+							else Log.w(mTag, "Action executed listener is null.");
+						}
 					}catch(Exception e){
 						Log.e(mTag, "Could not run matched action", e);
 					}finally{
@@ -806,21 +830,17 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		if((mWakeLock == null || !mWakeLock.isHeld()) && nd.isFlying()) acquireWakeLock();
 		else if(!nd.isFlying() && (mWakeLock != null && mWakeLock.isHeld())) releaseWakeLock();
 		
-		// TODO REMOVE DEBUG
-		Log.d(mTag, "DEBUG BATTERY = " + nd.getBattery());
-		Log.d(mTag, "DEBUG BATTERY IS TOO LOW = " + nd.isBatteryTooLow());
-		
 		// Monitor the battery state
 		if(mLastNavData != null && nd.getBattery() != mLastNavData.getBattery()){
 			for(DroneBatteryChangedListener callback: mDroneBatteryChangedListeners){
 				if(callback != null) callback.onDroneBatteryChanged(nd.getBattery());
-				else Log.w(mTag, "Drone frame received listener is null.");
+				else Log.w(mTag, "Battery changed listener is null.");
 			}
 		}
 		if(nd.isBatteryTooLow() && mLastNavData != null && !mLastNavData.isBatteryTooLow()){
 			for(DroneBatteryChangedListener callback: mDroneBatteryChangedListeners){
 				if(callback != null) callback.onDroneBatteryTooLow(nd.getBattery());
-				else Log.w(mTag, "Drone frame received listener is null.");
+				else Log.w(mTag, "Battery changed  listener is null.");
 			}
 		}
 		
@@ -838,10 +858,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 
 
 	@Override
-	public void onEndOfSpeech() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void onEndOfSpeech(){ }
 
 
 	@Override
@@ -864,7 +881,16 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		public int w;
 		public int h;
 
-		
+		/**
+		 * TODO
+		 * @param x
+		 * @param y
+		 * @param width
+		 * @param height
+		 * @param arr
+		 * @param off
+		 * @param scan
+		 */
 		public CameraFrameReceiver(int x, int y, int width, int height, int[] arr, int off, int scan){
 			super();
 			rgbArray = arr;
@@ -895,7 +921,28 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	}
 	
 	
-	// TODO REMOVE, FOR DEBUG ONLY
+	/**
+	 * TODO
+	 * @return
+	 */
+	public int getDroneBattery(){
+		return (mLastNavData != null)?mLastNavData.getBattery():-1;
+	}
+	
+	
+	/**
+	 * TODO
+	 * @return
+	 */
+	public float getDroneAltitude(){
+		return (mLastNavData != null)?mLastNavData.getAltitude():-1;
+	}
+	
+	
+	/**
+	 * TODO REMOVE, FOR DEBUG ONLY
+	 * @param activated
+	 */
 	public void debugToggleTracking(boolean activated){
 		if(activated){
 			Action action = mActionManager.getAction("FollowMe");
@@ -909,24 +956,29 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		}
 	}
     
-	// TODO REMOVE, FOR DEBUG ONLY
-		public void debugToggleTakeOff(boolean activated){
-			if(activated){
-				try {
-					mDrone.clearEmergencySignal();
-				    mDrone.trim();
-				    mDrone.waitForReady(5000);
-				    mDrone.takeOff();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}else{
-				try {
-					mDrone.land();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+	
+	/**
+	 * TODO REMOVE, FOR DEBUG ONLY
+	 * @param activated
+	 */
+	public void debugToggleTakeOff(boolean activated){
+		if(activated){
+			try {
+				mDrone.clearEmergencySignal();
+			    mDrone.trim();
+			    mDrone.waitForReady(5000);
+			    mDrone.takeOff();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else{
+			try {
+				mDrone.land();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
+	}
+	
 }
