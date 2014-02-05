@@ -23,10 +23,21 @@
     <string name="home_menu_medias">Gallery</string>
     <string name="home_menu_commands">Commands</string>
     <string name="home_menu_about">About</string>
+    
+    <!-- Network wizard activity -->
+    <string name="title_activity_network_wizard">Connect to drone</string>
+    <string name="button_prev">Previous</string>
+    <string name="button_next">Next</string>
+    <string name="method_ap_title">Access point method</string>
+    <string name="method_ap_description">This method sets up a WiFi access point on your phone, and configures your drone so it connects to that particular access point. Please check that your mobile operator won\'t charge you for this.</string>
+    <string name="method_hipri_title">High priority method</string>
+    <string name="method_hipri_description">This method uses complicated Android features to enable WiFi and 3G connectivity at the same time. It might not work depending on your phone, or your version of Android.</string>
+    
 
+    <!-- Actions list activity -->
+    <string name="title_activity_actions_list">Actions</string>
+    
     <!-- Fly activity -->
     <string name="title_activity_fly">In flight</string>
-    <string name="title_activity_actions_list">ActionsListActivity</string>
-    <string name="hello_world">Hello world!</string>
 
 </resources>

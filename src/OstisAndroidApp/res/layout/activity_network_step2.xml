@@ -53,6 +53,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:minWidth="120dp"
-        android:text="Précédent" />
+        android:text="@string/button_prev" />
 
 </RelativeLayout>

@@ -57,12 +57,13 @@ public class HomeActivity extends ConnectedActivity{
 				}
 			}
 		});
-		mButtonConfig.setOnClickListener(new OnClickListener() {
+		mButtonConfig.setOnClickListener(new OnClickListener(){
 			@Override
-			public void onClick(View v) {
+			public void onClick(View v){
 				if(mBound){
 					Intent intent = new Intent(HomeActivity.this, ActionsListActivity.class);
 					startActivity(intent);
+					overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 				}
 			}
 		});
