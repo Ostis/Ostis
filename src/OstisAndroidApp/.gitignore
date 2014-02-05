@@ -15,7 +15,6 @@ ehthumbs.db
 Thumbs.db
 
 # built application files
-*.apk
 *.ap_
 
 # files for the dex VM
@@ -42,7 +41,9 @@ proguard/
 *.pydevproject
 .project
 .metadata
-bin/**
+bin/
+!*.apk
+!bin/*.apk
 tmp/**
 obj/**
 tmp/**/*
