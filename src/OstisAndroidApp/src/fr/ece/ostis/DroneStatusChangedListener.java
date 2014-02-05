@@ -1,10 +1,14 @@
 package fr.ece.ostis;
 
-public interface OnDroneStatusChangedListener {
+public interface DroneStatusChangedListener {
 
 	
 	abstract void onDroneConnected();
+	
+	
 	abstract void onDroneConnectionFailed();
+	
+	
 	abstract void onDroneDisconnected();
 	
 	

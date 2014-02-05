@@ -24,7 +24,7 @@ public class MoveLeftAction extends BaseAction {
 		super("MoveLeft");
 		mNameTable.put(Locale.FRENCH, "Tourner à gauche");
 		mNameTable.put(Locale.ENGLISH, "Turn left");
-		mVocalCommandTable.put(Locale.FRENCH, "tourne à gauche");
+		mVocalCommandTable.put(Locale.FRENCH, "virage à gauche");
 		mVocalCommandTable.put(Locale.ENGLISH, "turn left");
 		mDescriptionTable.put(Locale.FRENCH, "Fait tourner le drone à gauche.");
 		mDescriptionTable.put(Locale.ENGLISH, "Turns the drone left.");
@@ -38,9 +38,9 @@ public class MoveLeftAction extends BaseAction {
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
 		
 		// Move left
-        drone.move(0, 0, 0, -5);
+        drone.move(0, 0, 0, -10);
         try {
-			Thread.sleep(500);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

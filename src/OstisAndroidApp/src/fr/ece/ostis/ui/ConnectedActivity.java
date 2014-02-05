@@ -123,7 +123,13 @@ public abstract class ConnectedActivity extends Activity{
     	}
     }
 	
+	
+	/**
+	 * TODO
+	 */
+	protected abstract void onBeforeUnbindFromOstisService();
 
+	
 	/**
 	 * TODO
 	 */
@@ -134,7 +140,8 @@ public abstract class ConnectedActivity extends Activity{
     		// Log
     		Log.i(mTag, "Unbinding from ostis service.");
     		
-    		// TODO Warn service or remove callbacks ?
+    		// Warn service or remove callbacks
+    		onBeforeUnbindFromOstisService();
     		
     		// Unbind from service
             unbindService(mOstisServiceConnection);
