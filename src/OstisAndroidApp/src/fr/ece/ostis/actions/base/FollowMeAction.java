@@ -120,6 +120,9 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 		}
 	}
 	
+	/**
+	 * TODO
+	 */
 	@Override
 	public void onDroneFrameReceived(Bitmap b) {
 		// TODO Auto-generated method stub
@@ -135,7 +138,7 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 	 * TODO
 	 */
 	protected final float yawTrackingP = 1f;
-	protected final float pitchTrackingP = 0.42f;
+	protected final float pitchTrackingP = -0.082f;
 	protected long time = -1;
 	
 	
@@ -192,8 +195,8 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 			Log.d(mTag, "Tag detected !! Position: " + tagPosition.toString());
 			yawMove = yawTrackingP * tagPosition.x;
 			
-			if (tagPosition.y > 0)
-				pitchMove = pitchTrackingP * -0.20f;
+			if (tagPosition.y > -0.3f)
+				pitchMove = pitchTrackingP;
 			
 			try {
 				Log.d(mTag, "Moving !");
