@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -37,6 +38,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 	protected ImageView mImageViewDroneStatus = null;
 	protected TextView mTextViewDroneStatus = null;
 	protected ToggleButton mToggleButtonTracking = null;
+	protected ToggleButton mToggleButtonTakeOff = null;
 	
 	
 	@Override
@@ -55,6 +57,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		mImageViewDroneStatus = (ImageView) findViewById(R.id.ImageViewDroneStatus);
 		mTextViewDroneStatus = (TextView) findViewById(R.id.textViewDroneStatus);
 		mToggleButtonTracking = (ToggleButton) findViewById(R.id.toggleButtonTracking);
+		mToggleButtonTakeOff = (ToggleButton ) findViewById(R.id.toggleButtonTakeOff);
 		
 		// Set listeners on controls
 		mToggleButtonTracking.setOnClickListener(new OnClickListener(){
@@ -65,7 +68,14 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 			}
 		});
 		
-		
+		mToggleButtonTakeOff.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (mBound) mService.debugToggleTakeOff(mToggleButtonTakeOff.isChecked());
+			}
+		});
 	}
 
 	

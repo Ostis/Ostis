@@ -977,4 +977,24 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		}
 	}
     
+	// TODO REMOVE, FOR DEBUG ONLY
+		public void debugToggleTakeOff(boolean activated){
+			if(activated){
+				try {
+					mDrone.clearEmergencySignal();
+				    mDrone.trim();
+				    mDrone.waitForReady(5000);
+				    mDrone.takeOff();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else{
+				try {
+					mDrone.land();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 }

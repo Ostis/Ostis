@@ -150,7 +150,7 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 		
 		try {
 			Log.d("FollowMeAction", "Moving !");
-			drone.move(0, /*pitchMove*/0, 0, yawMove);
+			drone.move(0, pitchMove, 0, yawMove);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
