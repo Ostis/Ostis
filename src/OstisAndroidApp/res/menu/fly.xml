@@ -1,6 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/action_battery_level"
+        android:showAsAction="always|withText"
+        android:title="\? %"
+        android:icon="@drawable/ic_fly_battery"/>
+
+    <item
         android:id="@+id/action_emergency_stop"
         android:showAsAction="always|withText"
         android:title="Stop"

@@ -82,6 +82,13 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 	}
 
 	
+	@Override
+	public void onBackPressed(){
+		finish();
+		overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);   
+	}
+	
+	
 	/**
 	 * TODO
 	 */
@@ -339,7 +346,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 				publishProgress(progressBundle);
 				
 				// Stop wifi, wifi ap and connect to 3G
-				wifiAPNetworkManager.disableWifiApSynchronous();
+				wifiAPNetworkManager.disableWifiApSynchronous(); // Throws exception
 				wifiNetworkManager.disableWifiAsynchronous();
 				wifiNetworkManager.waitForWifiDisabled(); // Throws exception
 				mobileNetworkManager.enableMobileConnectionSynchronous();
@@ -388,7 +395,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 				
 				// Connect to drone wifi
 				wifiNetworkManager.connectToOpenNetwork(targetedSsid);
-				retryCounter = 0;
+				retryTimeCounter = System.currentTimeMillis();
 				while(true){
 					try{
 						Thread.sleep(1000);
@@ -397,8 +404,11 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 					}catch(Exception e2){
 						Log.w(mTag, "Unable to retrieve current ssid.", e2);
 					}
-					retryCounter++;
-					if(retryCounter >= 40) throw new TimeoutException("Unable to connect to network " + targetedSsid + ".");
+					
+					// Abort if more than 20 seconds elapsed
+					if(System.currentTimeMillis() - retryTimeCounter >= 20000)
+						throw new TimeoutException("Unable to connect to network " + targetedSsid + ".");
+					
 				}
 				
 				// Publish progress
@@ -423,6 +433,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 					// Abort if more than 20 seconds elapsed
 					if(System.currentTimeMillis() - retryTimeCounter >= 20000)
 						throw new TimeoutException("Waiting for drone timed out.");
+					
 				}
 				
 				// Publish progress
@@ -452,8 +463,6 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 		
 		@Override
 		protected void onPostExecute(Void result){
-			
-			for(int i = 0; i < 10; i++) Log.d(mTag, "ON POST EXECUTE");
 			
 			// TODO Handle exception
 			if(mException != null){

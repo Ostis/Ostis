@@ -25,7 +25,7 @@ import android.support.v4.app.NavUtils;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-05-02
+ * @version 2014-02-05
  */
 public class ActionsListActivity extends ConnectedActivity{
 

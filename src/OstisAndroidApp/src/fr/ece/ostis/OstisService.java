@@ -11,6 +11,7 @@ import com.codeminders.ardrone.ARDrone.State;
 import com.codeminders.ardrone.DroneVideoListener;
 import com.codeminders.ardrone.NavData;
 import com.codeminders.ardrone.NavDataListener;
+import com.codeminders.ardrone.data.navdata.FlyingState;
 
 import fr.ece.ostis.actions.Action;
 import fr.ece.ostis.actions.ActionManager;
@@ -69,6 +70,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     /* Service clients. */
     protected ArrayList<DroneStatusChangedListener> mDroneStatusChangedListeners = new ArrayList<DroneStatusChangedListener>();
     protected ArrayList<DroneFrameReceivedListener> mDroneFrameReceivedListeners = new ArrayList<DroneFrameReceivedListener>();
+    protected ArrayList<DroneBatteryChangedListener> mDroneBatteryChangedListeners = new ArrayList<DroneBatteryChangedListener>();
     
     
 	/** Reference to the javadrone api */
@@ -595,6 +597,24 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * TODO
 	 * @param listener
 	 */
+	public void registerBatteryChangedListener(DroneBatteryChangedListener listener){
+		mDroneBatteryChangedListeners.add(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void unregisterBatteryChangedListener(DroneBatteryChangedListener listener){
+		mDroneBatteryChangedListeners.remove(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
 	public void registerStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.add(listener);
 	}
@@ -786,8 +806,23 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		if((mWakeLock == null || !mWakeLock.isHeld()) && nd.isFlying()) acquireWakeLock();
 		else if(!nd.isFlying() && (mWakeLock != null && mWakeLock.isHeld())) releaseWakeLock();
 		
-		// TODO Monitor the battery
-		// ...
+		// TODO REMOVE DEBUG
+		Log.d(mTag, "DEBUG BATTERY = " + nd.getBattery());
+		Log.d(mTag, "DEBUG BATTERY IS TOO LOW = " + nd.isBatteryTooLow());
+		
+		// Monitor the battery state
+		if(mLastNavData != null && nd.getBattery() != mLastNavData.getBattery()){
+			for(DroneBatteryChangedListener callback: mDroneBatteryChangedListeners){
+				if(callback != null) callback.onDroneBatteryChanged(nd.getBattery());
+				else Log.w(mTag, "Drone frame received listener is null.");
+			}
+		}
+		if(nd.isBatteryTooLow() && mLastNavData != null && !mLastNavData.isBatteryTooLow()){
+			for(DroneBatteryChangedListener callback: mDroneBatteryChangedListeners){
+				if(callback != null) callback.onDroneBatteryTooLow(nd.getBattery());
+				else Log.w(mTag, "Drone frame received listener is null.");
+			}
+		}
 		
 		// Store last data
 		mLastNavData = nd;

@@ -3,6 +3,9 @@ package fr.ece.ostis.ui;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.xml.datatype.Duration;
+
+import fr.ece.ostis.DroneBatteryChangedListener;
 import fr.ece.ostis.DroneFrameReceivedListener;
 import fr.ece.ostis.DroneStatusChangedListener;
 import fr.ece.ostis.R;
@@ -19,6 +22,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 /**
@@ -26,12 +30,16 @@ import android.widget.ToggleButton;
  * @author Nicolas Schurando
  * @version 2014-02-05
  */
-public class FlyActivity extends ConnectedActivity implements SpeechRecognitionResultsListener, DroneStatusChangedListener, DroneFrameReceivedListener{
+public class FlyActivity extends ConnectedActivity implements SpeechRecognitionResultsListener, DroneStatusChangedListener, DroneBatteryChangedListener, DroneFrameReceivedListener{
 
 	
 	/** Log tag. */
 	protected static final String mTag = "FlyActivity";
 
+	
+	/** Reference to the menu to change the battery level. */
+	protected Menu mMenu = null;
+	
 	
 	/* Controls. */
 	protected ImageView mImageViewCamera = null;
@@ -83,27 +91,46 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
+		
+		// Store the reference
+		mMenu = menu;
+		
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.fly, menu);
+		
+		// Return
 		return true;
+		
 	}
+	
+	
+	/*@Override
+	public boolean onPrepareOptionsMenu(Menu menu){
+		
+	}*/
 
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
-	    // Handle presses on the action bar items
-	    switch (item.getItemId()) {
+	    switch(item.getItemId()) {
 	        case R.id.action_emergency_stop:
-				try {
-					mService.getDrone().sendEmergencySignal();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				try{
+					if(mBound && mService != null) mService.getDrone().sendEmergencySignal();
+				}catch (IOException e){}
 	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
+	}
+
+	
+	@Override
+	public void onBackPressed(){
+		// TODO DEBUG REMOVE
+		mService.doDroneDisconnect();
+		
+		finish();
+		overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);   
 	}
 	
 	
@@ -113,6 +140,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		// Register service callbacks
 		mService.registerStatusChangedListener(this);
 		mService.registerFrameReceivedListener(this);
+		mService.registerBatteryChangedListener(this);
 		
 		// Activate speech results <-> action matching
 		mService.activateSpeechResultsToActionMatching();
@@ -129,6 +157,7 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		// Unregister callabacks
 		mService.unregisterFrameReceivedListener(this);
 		mService.unregisterStatusChangedListener(this);
+		mService.unregisterBatteryChangedListener(this);
 		
 		// Desactivate speech results <-> action matching
 		mService.desactivateSpeechResultsToActionMatching();
@@ -213,6 +242,20 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 		}else{
 			Log.w(mTag, "Could not find image view to display camera feed.");
 		}
+	}
+
+
+	@Override
+	public void onDroneBatteryChanged(int level){
+	    MenuItem item = mMenu.findItem(R.id.action_battery_level);
+	    item.setTitle(String.valueOf(level) + " %");
+	}
+
+
+	@Override
+	public void onDroneBatteryTooLow(int level){
+		Toast toast = Toast.makeText(this, "Battery too low !", Toast.LENGTH_SHORT);
+		toast.show();
 	}
 	
 }

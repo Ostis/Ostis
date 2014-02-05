@@ -12,7 +12,7 @@ import android.widget.Button;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-05-02
+ * @version 2014-02-05
  */
 public class HomeActivity extends ConnectedActivity{
 
