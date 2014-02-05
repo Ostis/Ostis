@@ -12,7 +12,7 @@ import fr.ece.ostis.actions.BaseAction;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-01-24
+ * @version 2014-02-05
  */
 public class LandAction extends BaseAction {
 
@@ -24,9 +24,9 @@ public class LandAction extends BaseAction {
 		super("Land");
 		mNameTable.put(Locale.FRENCH, "Atterrissage");
 		mNameTable.put(Locale.ENGLISH, "Land");
-		mVocalCommandTable.put(Locale.FRENCH, "attérissage");
+		mVocalCommandTable.put(Locale.FRENCH, "atterrissage");
 		mVocalCommandTable.put(Locale.ENGLISH, "land");
-		mDescriptionTable.put(Locale.FRENCH, "Permet au drone d'attérir.");
+		mDescriptionTable.put(Locale.FRENCH, "Permet au drone d'atterrir.");
 		mDescriptionTable.put(Locale.ENGLISH, "Lets the drone land.");
 	}
 	
