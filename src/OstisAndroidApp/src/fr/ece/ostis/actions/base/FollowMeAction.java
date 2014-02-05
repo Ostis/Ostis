@@ -16,6 +16,7 @@ import com.codeminders.ardrone.DroneVideoListener;
 import com.googlecode.javacv.cpp.opencv_core.CvSize;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 
+import fr.ece.ostis.DroneFrameReceivedListener;
 import fr.ece.ostis.OstisService;
 import fr.ece.ostis.actions.BaseAction;
 import fr.ece.ostis.tracking.Tracker;
@@ -26,7 +27,7 @@ import fr.ece.ostis.tracking.Tracker;
  * @author Paul Bouillon
  * @version 2014-02-04
  */
-public class FollowMeAction extends BaseAction implements DroneVideoListener{
+public class FollowMeAction extends BaseAction implements DroneFrameReceivedListener{
 
 	
 	protected AtomicBoolean mIsNewBitmapAvailable;
@@ -70,83 +71,41 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		ostisService.setFollowingActivated(true);
 		
 		// Register as image listener
-		drone.addImageListener(this);
+		mOstisService.registerFrameReceivedListener(this);
 		
-		final DroneVideoListener dvl = this;
-		// TODO
-		//(new Follower(drone, ostisService, this)).execute();
+		final DroneFrameReceivedListener droneFrameRL = this;
 		
 		new Thread(
 			new Runnable() { 
 				public void run() {
-					follow(mDrone, mOstisService, dvl); 
+					follow(mDrone, mOstisService, droneFrameRL); 
 				}
 			}).start();
 		
 	}
-
 	
 	@Override
-	public void frameReceived(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize){
-		Log.d("BitmapCreator", "New frame received");
-		(new BitmapCreator(startX, startY, w, h, rgbArray, offset, scansize)).execute(); 
+	public void onDroneFrameReceived(Bitmap b) {
+		// TODO Auto-generated method stub
+		synchronized(mBitmapLock) {
+			Log.d("FollowMeAction", "Setting new Bitmap");
+			//if(mBitmap != null) mBitmap.recycle();
+			mBitmap = b;
+		}
+		mIsNewBitmapAvailable.set(true);
 	}
 	
-
-	protected class BitmapCreator extends AsyncTask<Void, Integer, Void>{
-		
-		public Bitmap b;
-		public int[]rgbArray;
-		public int offset;
-		public int scansize;
-		public int w;
-		public int h;
-
-		
-		public BitmapCreator(int x, int y, int width, int height, int[] arr, int off, int scan){
-			super();
-			rgbArray = arr;
-			offset = off;
-			scansize = scan;
-			w = width;
-			h = height;
-		}
-		
-		
-		@Override
-		protected Void doInBackground(Void... params){
-			Log.d("BitmapCreator", "Doing work...");
-			b = Bitmap.createBitmap(rgbArray, offset, scansize, w, h, Bitmap.Config.RGB_565);
-			b.setDensity(100);
-			Log.d("BitmapCreator", "Work finished !");
-			return null;
-		}
-		
-		
-		@Override
-		protected void onPostExecute(Void param){
-			Log.d("BitmapCreator", "Entering onPostExecute");
-			synchronized(mBitmapLock) {
-				Log.d("BitmapCreator", "Into Lock");
-				if(mBitmap != null) mBitmap.recycle();
-				mBitmap = b;
-			}
-			mIsNewBitmapAvailable.set(true);
-			Log.d("FollowMeAction", "New Bitmap generated !");
-		}
-		
-	}
 	
 	protected final float yawTrackingP = 0.75f;
 	protected final float pitchTrackingP = 0.42f;
 	protected final float pitchTrackingI = 0.0011f;
 	protected float pitchE = 0;
 	
-	protected void follow(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener){
+	protected void follow(ARDrone drone, OstisService ostisService, DroneFrameReceivedListener droneFrameRL){
 		while(ostisService.getFollowingActivated()) {
 			
 			if (mIsNewBitmapAvailable.get()) {
-				Log.d("FollowMeAction", "Analizing image");
+				Log.d("FollowMeAction", "New image, launching follow action");
 				followTag(drone);
 			} else {
 				Log.d("FollowMeAction", "No new image : don't move !");
@@ -165,13 +124,13 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			}
 			
 		}
-		drone.removeImageListener(droneVideoListener);
+		ostisService.unregisterFrameReceivedListener(droneFrameRL);
 	}
 	
 	protected void followTag(ARDrone drone) {
 		
 		synchronized (mBitmapLock) {
-			Log.d("Follower", "Into Lock");
+			Log.d("Follower", "Creating IplImage");
 			if (mBitmap == null) return;
 			mBitmap.copyPixelsToBuffer(mBGR565Image.getByteBuffer());
 		}
@@ -197,6 +156,9 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			e.printStackTrace();
 		}
 	}
+
+
+	
 	
 	/**
 	 * TODO
