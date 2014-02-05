@@ -7,6 +7,8 @@ import fr.ece.ostis.DroneFrameReceivedListener;
 import fr.ece.ostis.DroneStatusChangedListener;
 import fr.ece.ostis.R;
 import fr.ece.ostis.speech.SpeechRecognitionResultsListener;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -187,6 +189,19 @@ public class FlyActivity extends ConnectedActivity implements SpeechRecognitionR
 	public void onDroneDisconnected() {
 		mImageViewDroneStatus.setImageResource(R.drawable.icon_cross);
 		mTextViewDroneStatus.setText("Disconnected");
+		
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder.setTitle("Connection lost");
+		alertDialogBuilder.setMessage("Connection to drone was lost, you will be redirected to the previous screen.");
+		alertDialogBuilder.setCancelable(false);
+		alertDialogBuilder.setPositiveButton("I understand", new DialogInterface.OnClickListener(){
+			public void onClick(DialogInterface dialog, int id){
+				FlyActivity.this.finish();
+			}
+		});
+
+		AlertDialog alertDialog = alertDialogBuilder.create();
+		alertDialog.show();
 	}
 
 

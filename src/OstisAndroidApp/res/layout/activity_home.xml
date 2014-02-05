@@ -24,7 +24,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
-                android:drawableLeft="@drawable/icon_home_plane"
+                android:drawableLeft="@drawable/ic_home_plane"
                 android:enabled="false"
                 android:text="Pilotage" />
 
@@ -33,7 +33,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
-                android:drawableLeft="@drawable/icon_home_polaroid"
+                android:drawableLeft="@drawable/ic_home_polaroid"
                 android:enabled="false"
                 android:text="Médias" />
             
@@ -48,7 +48,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
-                android:drawableLeft="@drawable/icon_home_microphone"
+                android:drawableLeft="@drawable/ic_home_microphone"
                 android:enabled="false"
                 android:text="Config" />
 
@@ -57,7 +57,7 @@
                 android:layout_width="140dp"
                 android:layout_height="60dp"
                 android:layout_margin="5dp"
-                android:drawableLeft="@drawable/icon_home_about"
+                android:drawableLeft="@drawable/ic_home_about"
                 android:enabled="false"
                 android:text="A propos" />
             
