@@ -17,8 +17,8 @@ import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
  */
 public class Tracker {
 	
-    static int hueLowerR = 0;
-    static int hueUpperR = 45;
+    static int hueLowerR = 160;
+    static int hueUpperR = 180;
     
     public static final int AR_VIDEO_WIDTH = 320;
     public static final int AR_VIDEO_HEIGHT = 240;
