@@ -105,4 +105,23 @@
         android:layout_alignLeft="@+id/toggleButtonTracking"
         android:layout_below="@+id/toggleButtonTracking" />
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/toggleButtonTracking"
+        android:layout_alignBottom="@+id/toggleButtonTracking"
+        android:layout_alignLeft="@+id/LinearLayoutDrone"
+        android:layout_marginLeft="16dp"
+        android:text="FollowMe" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/toggleButtonTakeOff"
+        android:layout_alignBottom="@+id/toggleButtonTakeOff"
+        android:layout_alignLeft="@+id/textView1"
+        android:text="TakeOff / Land" />
+
 </RelativeLayout>
