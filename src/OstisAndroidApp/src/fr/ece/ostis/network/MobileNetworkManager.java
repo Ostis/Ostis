@@ -18,7 +18,7 @@ import android.util.Log;
  * TODO
  * @see http://stackoverflow.com/questions/2513713/how-to-use-3g-connection-in-android-application-instead-of-wi-fi/4756630#4756630
  * @author Nicolas Schurando
- * @version 2014-01-29
+ * @version 2014-02-05
  */
 public class MobileNetworkManager extends NetworkManager{
 	
@@ -185,9 +185,9 @@ public class MobileNetworkManager extends NetworkManager{
 		
 		// Don't do anything if we are connecting. On the other hand re-new connection if we are connected.
 		State state = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
-		Log.d("NetworkManager", "Hipri state: " + state);
+		Log.d(mTag, "Hipri state = " + state);
 		if(state.compareTo(State.CONNECTING) == 0){
-			Log.d("NetworkManager", "Hipri already connecting, no need to go further.");
+			Log.d(mTag, "Hipri already connecting, no need to go further.");
 			return;
 		}
 		
@@ -196,24 +196,24 @@ public class MobileNetworkManager extends NetworkManager{
 		//setWifiDns("8.8.8.8");
 		
 		// (Re-)Activate mobile connection in addition to other connection already activated
-		Log.d("NetworkManager", "Starting to use Hipri profile.");
+		Log.i(mTag, "Starting to use Hipri profile.");
 		int resultInt = mConnectivityManager.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE, "enableHIPRI");
 		switch(resultInt){
 		
 			case -1: // -1 means errors
-				Log.e("NetworkManager", "Hipri request failed.");
+				Log.e(mTag, "Hipri request failed.");
 				throw new Exception("Could not start using hipri profile, system failed.");
 				
 			case 0: // 0 means already enabled
-				Log.e("NetworkManager", "Hipri already enabled, no need to perform additional network settings.");
+				Log.w(mTag, "Hipri already enabled, no need to perform additional network settings.");
 				return;
 				
 			case 1: // 1 means enabled
-				Log.e("NetworkManager", "Hipri sucessfully enabled.");
+				Log.i(mTag, "Hipri sucessfully enabled.");
 				break;
 				
 			default: // Other values can be returned, because this method is vendor specific
-				Log.e("NetworkManager", "Hipri request result code is unknown : " + String.valueOf(resultInt));
+				Log.e(mTag, "Hipri request result code is unknown : " + String.valueOf(resultInt));
 				throw new Exception("Could not start using hipri profile, the result was unexcepted.");
 		}
 		
@@ -230,9 +230,9 @@ public class MobileNetworkManager extends NetworkManager{
 		// Add routes
 		for (int address : addresses){
 			if(mConnectivityManager.requestRouteToHost(ConnectivityManager.TYPE_MOBILE_HIPRI, address)){
-				Log.d("NetworkManager", "Route to host " + String.valueOf(address) + " added.");
+				Log.i(mTag, "Route to host " + String.valueOf(address) + " added.");
 			}else{
-				Log.e("NetworkManager", "Route to host " + String.valueOf(address) + " failed.");
+				Log.e(mTag, "Route to host " + String.valueOf(address) + " failed.");
 				throw new Exception("Could not add a route for host " + String.valueOf(address) + ", hipri will not work.");
 			}
 		}

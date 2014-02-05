@@ -80,7 +80,7 @@
                 android:text="Drone" />
 
             <TextView
-                android:id="@+id/TextViewDroneStatus"
+                android:id="@+id/textViewDroneStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"
@@ -88,5 +88,13 @@
                 android:text="Waiting for drone status" />
         </LinearLayout>
     </LinearLayout>
+
+    <ToggleButton
+        android:id="@+id/toggleButtonTracking"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="ToggleButton" />
 
 </RelativeLayout>
