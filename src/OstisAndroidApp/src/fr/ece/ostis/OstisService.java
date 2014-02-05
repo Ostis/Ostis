@@ -135,10 +135,6 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected Thread mThread = null;
 	
 	
-	/** Last bitmap */
-	protected Bitmap mLastBitmap = null;
-	
-	
 	@Override
 	public void onCreate(){
 		
@@ -850,15 +846,6 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     }
     
     
-    /**
-     * Returns the last bitmap received from the drone.
-     * @return a Bitmap received from the drone.
-     */
-    public Bitmap getLastBitmap(){
-    	return mLastBitmap;
-    }
-    
-    
 	@Override
 	public void navDataReceived(NavData nd){
 		
@@ -933,7 +920,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		
 		
 		@Override
-		protected void onPostExecute(Void param){
+		protected void onPostExecute(Void param){			
 			// Warn clients
 			for(DroneFrameReceivedListener callback: mDroneFrameReceivedListeners){
 				if(callback != null) callback.onDroneFrameReceived(b);
