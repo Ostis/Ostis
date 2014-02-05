@@ -3,15 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="right"
-    android:padding="5dp" >
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp" >
 
     <TextView
         android:id="@+id/textViewName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
         android:layout_toLeftOf="@+id/textViewCommand"
+        android:layout_toRightOf="@+id/imageView1"
         android:ellipsize="end"
         android:singleLine="true"
         android:text="Name of the action" />
@@ -19,13 +21,13 @@
     <TextView
         android:id="@+id/textViewDescription"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/textViewName"
-        android:layout_marginLeft="5dp"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/imageView1"
         android:text="Description of the action" />
 
     <TextView
@@ -37,5 +39,16 @@
         android:layout_alignParentTop="true"
         android:layout_marginLeft="10dp"
         android:text="Command" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_action" />
 
 </RelativeLayout>

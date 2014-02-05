@@ -41,7 +41,7 @@ import android.util.Log;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-02-03
+ * @version 2014-02-05
  */
 public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener, DroneVideoListener{
 	
@@ -137,6 +137,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected Thread mThread = null;
 	
 	
+	/** Drone ip. */
+	protected String mDroneIp = null;
+	
+	
 	@Override
 	public void onCreate(){
 		
@@ -195,17 +199,17 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected void showNotification(){
 		
 		// In this sample, we'll use the same text for the ticker and the expanded notification
-        CharSequence text = getText(R.string.notification_description);
+        CharSequence tickerText = getText(R.string.notification_description);
 
         // Set the icon, scrolling text and timestamp
-        Notification notification = new Notification(R.drawable.icon_info, text, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        Notification notification = new Notification(R.drawable.ic_notif, tickerText, System.currentTimeMillis());
+        //notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
 
         // The PendingIntent to launch our activity if the user selects this notification
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, HomeActivity.class), 0);
 
         // Set the info for the views that show in the notification panel.
-        notification.setLatestEventInfo(this, getText(R.string.notification_title), text, contentIntent);
+        notification.setLatestEventInfo(this, getText(R.string.notification_title), tickerText, contentIntent);
 
         // Send the notification.
         mNotificationManager.notify(mNotificationId, notification);
@@ -250,125 +254,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/**
 	 * TODO
-	 */
-	protected void prepareNetwork(){
-		
-		// Launch task
-		/*new PrepareNetworkTask().execute(
-				"8.8.8.8",
-				"google.com",
-				"m.google.com",
-				"web.google.com",
-				"dl-ssl.google.com",
-				"dl-ssl.l.google.com",
-				"mobile.google.com",
-				"mobile.l.google.com");*/
-		
-	}
-
-	
-	/*protected class PrepareNetworkTask extends AsyncTask<String, Void, Void>{
-	
-		private Exception mException = null;
-		
-		protected Void doInBackground(String... hosts){
-			
-			// Step 1 : Connect to mobile network
-			try {
-				Log.d("OstisService", "prepareNetwork -> disabling wifi");
-				mWifiNetworkManager.disableWifi();
-				Log.d("OstisService", "prepareNetwork -> wifi disabled");
-				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_DISCONNECTED, NetworkManager.STATUS_DISCONNECTED);
-				Log.d("OstisService", "prepareNetwork -> enabling mobile");
-				mMobileNetworkManager.enableMobileConnection();
-				Log.d("OstisService", "prepareNetwork -> mobile enabled");
-				OstisService.this.publishNetworkStatus(NetworkManager.STATUS_CONNECTED, NetworkManager.STATUS_DISCONNECTED);
-			}catch(InvokeFailedException e){
-				e.printStackTrace();
-				mException = e;
-				return null;
-			}catch(TimeoutException e){
-				e.printStackTrace();
-				mException = e;
-				return null;
-			}
-			
-			// Step 2 : Retrieve IP addresses
-			Log.d("OstisService", "prepareNetwork -> starting lookup");
-			ArrayList<Integer> addresses = new ArrayList<Integer>();
-			for(int i = 0; i < hosts.length; i++){
-				try {
-					addresses.add(mNetworkManager.lookupHost(hosts[i]));
-				}catch(UnknownHostException e){
-					e.printStackTrace();
-					mException = e;
-					return null;
-				}catch(Exception e){
-					e.printStackTrace();
-					mException = e;
-					return null;
-				}
-			    if(isCancelled()) break;
-			}
-			Log.d("OstisService", "prepareNetwork -> lookup finished");
-			
-			// Step 3 : Stop normal mobile network and start hipri mobile network
-			Log.d("OstisService", "prepareNetwork -> starting hipri");
-			mNetworkManager.startHipri(addresses);
-			Log.d("OstisService", "prepareNetwork -> hipri started");
-			
-			// Step 4 : Start Wi-Fi
-			Log.d("OstisService", "prepareNetwork -> enabling wifi");
-			mNetworkManager.enableWifi();
-			Log.d("OstisService", "prepareNetwork -> wifi enabled");
-			OstisService.this.publishNetworkStatus(NetworkManager.STATUS_CONNECTED, NetworkManager.STATUS_CONNECTED);
-			Log.d("OstisService", "prepareNetwork -> obtaining wifi lock");
-			mNetworkManager.acquireWifiLock(); // TODO Release wakelock at some point
-			Log.d("OstisService", "prepareNetwork -> wifi wake locked");
-			
-			// Return
-			return null;
-			
-		}
-		
-		protected void onPostExecute(ArrayList<Integer> addresses){
-			if(mException != null){
-				// TODO : handle exception
-			}else{
-			    // TODO : send a message to client to indicate that the config is okay
-			}
-		}
-		
-	}*/
-	
-	
-	/*/**
-	 * 
-	 *
-	protected void restoreNetwork(){
-		
-		mNetworkManager.disableWifi();
-		mNetworkManager.stopHipri();
-		try {
-			mNetworkManager.enableMobileConnection();
-		} catch (NullPointerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvokeFailedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}*/
-	
-	
-	/**
-	 * TODO
 	 * @author Nicolas Schurando
-	 * @version 2014-01-30
+	 * @version 2014-02-05
 	 */
 	protected class DroneConnectionTask extends AsyncTask<String, Integer, Boolean>{
 
@@ -383,7 +270,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			String droneIp = ips[0];
 			
 			try{
-				
+				mDroneIp = droneIp;
+				mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
 				OstisService.mDrone = new ARDrone(InetAddress.getByName(droneIp), 10000, 60000);
 				OstisService.mDrone.connect();
 				OstisService.mDrone.clearEmergencySignal();
@@ -415,18 +303,11 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		}
 
 		protected void onPostExecute(final Boolean success){
-			/*Handler mainHandler = new Handler(OstisService.this.getMainLooper());
-			Runnable myRunnable = new Runnable(){
-				@Override
-				public void run(){*/
-					if(success.booleanValue()){
-						onDroneConnected();
-					}else{
-						onDroneConnectionFailed();
-					}
-				/*}
-			};
-			mainHandler.post(myRunnable);*/
+			if(success.booleanValue()){
+				onDroneConnected();
+			}else{
+				onDroneConnectionFailed();
+			}
 		}
 	}
 	
@@ -451,6 +332,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
 			mDrone.setCombinedYawMode(true);
 			
+			mDroneIp = ip;
 			mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
 			
 			onDroneConnected();
@@ -559,6 +441,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			
 			protected boolean mPreviouslyOk = false;
 			protected long mInitialTime;
+			protected int mUnreachableCounter = 0;
 			
 			@Override
 			public void run(){
@@ -571,7 +454,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					if(mDrone != null){
 						Log.d(mTag, "Pinger thread reports drone status = " + mDrone.getState());
 						if(mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
-							Log.i(mTag, "Pinger thread reports drone disconnected or is in error state.");
+							Log.w(mTag, "Pinger thread reports drone disconnected or is in error state.");
 							if(mPreviouslyOk) onDroneDisconnected();
 							return;
 						}else if(mDrone.getState() == State.TAKING_OFF || mDrone.getState() == State.DEMO || mDrone.getState() == State.LANDING){
@@ -584,17 +467,23 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					
 					// Is drone reachable
 					try {
-						if(InetAddress.getByName("192.168.1.1").isReachable(1000) != true){ // TODO Implement variable ip.
-							Log.i(mTag, "Pinger thread reports drone no longer reachable.");
-							Handler mainHandler = new Handler(OstisService.this.getMainLooper());
-							Runnable myRunnable = new Runnable(){
-								@Override
-								public void run(){
-									onDroneDisconnected();
-								}
-							};
-							mainHandler.post(myRunnable);
-							return;
+						if(InetAddress.getByName(mDroneIp).isReachable(2000) != true){
+							mUnreachableCounter++;
+							Log.w(mTag, "Pinger thread failed to reach drone " + mUnreachableCounter + "/3");
+							if(mUnreachableCounter >= 3){
+								Log.w(mTag, "Pinger thread reports drone no longer reachable.");
+								Handler mainHandler = new Handler(OstisService.this.getMainLooper());
+								Runnable myRunnable = new Runnable(){
+									@Override
+									public void run(){
+										onDroneDisconnected();
+									}
+								};
+								mainHandler.post(myRunnable);
+								return;
+							}
+						}else{
+							mUnreachableCounter = 0;
 						}
 					}catch(UnknownHostException e1){
 						Log.w(mTag, e1);
@@ -604,7 +493,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 					
 					// Sleep
 					try{
-						Thread.sleep(Math.max(500, 2000 - (System.currentTimeMillis() - mInitialTime)));
+						Thread.sleep(Math.max(0, 1000 - (System.currentTimeMillis() - mInitialTime)));
 					}catch (InterruptedException e){
 						return;
 					}
@@ -624,8 +513,9 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Log
 		Log.w(mTag, "Connection to drone failed.");
 		
-		// Update local variable
+		// Update local variables
 		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		mDroneIp = null;
 		
 		// Warn clients
 		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
@@ -646,6 +536,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		
 		// Update local variable
 		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		mDroneIp = null;
+		
+		// Hide notification
+		if(mNotificationShown) hideNotification();
 		
 		// Warn clients
 		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
@@ -882,8 +776,11 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	public void navDataReceived(NavData nd){
 		
 		// Hide / Display service notification according to is flying
-		if(!mNotificationShown && nd.isFlying()) showNotification();
-		else if(mNotificationShown) hideNotification();
+		if(mNotificationShown){
+			if(!nd.isFlying()) hideNotification();
+		}else{
+			if(nd.isFlying()) showNotification();
+		}
 		
 		// Obtain / Release wakelock according to is flying
 		if((mWakeLock == null || !mWakeLock.isHeld()) && nd.isFlying()) acquireWakeLock();

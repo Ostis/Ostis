@@ -24,6 +24,20 @@
     <string name="home_menu_commands">Commandes</string>
     <string name="home_menu_about">A propos</string>
     
+    <!-- Network wizard activity -->
+    <string name="title_activity_network_wizard">Connexion au drone</string>
+    <string name="button_prev">Précédent</string>
+    <string name="button_next">Suivant</string>
+    <string name="method_ap_title">Méthode point d\'accès</string>
+    <string name="method_ap_description">Cette méthode déclenche un point d\'acces sans fil sur votre téléphone, et envoie un fichier de congifuration sur votre AR.Drone pour le faire se connecter au point d\'accès en question. Verifiez auprès de votre opérateur que cela n\'engendrera pas de surcout.</string>
+    <string name="method_ap_step2">Sélectionnez votre drone dans la liste des réseaux ci-dessous pour le configurer à se connecter au point d\'accès du téléphone. Remarque, si votre drone est déjà configuré, vous pouvez le redémarrer.</string>
+    <string name="method_hipri_title">Méthode haute priorité</string>
+    <string name="method_hipri_description">Cette méthode fait appel à des fonctions bien particulières pour établir à la fois une connexion Wi-Fi au drone, et 3G au service de reconnaissance vocale de Google. Il se peut que cette méthode ne convienne pas à votre téléphone ou votre version d\'Android, mais cest celle qui nécessite le moins de configuration de votre part.</string>
+    <string name="method_hipri_step2">Sélectionnez votre drone dans la liste des réseaux ci-dessous pour vous y connecter. Si il n\'apparait pas, assurez-vous qu\'il possède bien le dernier firmware. Remarque, seuls les réseaux ouverts sont affichés.</string>
+    
+    <!-- Actions list activity -->
+    <string name="title_activity_actions_list">Actions</string>
+    
     <!-- Fly activity -->
     <string name="title_activity_fly">En vol</string>
     

@@ -27,22 +27,22 @@
                 android:id="@+id/radioButtonMethod1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Méthode 1"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-          			android:checked="true" />
+                android:checked="true"
+                android:text="@string/method_hipri_title"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Cette méthode fait appel à des fonctions bien particulières pour établir à la fois une connexion Wi-Fi au drone, et 3G au service de reconnaissance vocale de Google. Il se peut que cette méthode ne convienne pas à votre téléphone ou votre version d&apos;Android, mais cest celle qui nécessite le moins de configuration de votre part." />
+                android:text="@string/method_hipri_description" />
 
             <RadioButton
                 android:id="@+id/radioButtonMethod2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:enabled="false"
-                android:text="Méthode 2"
+                android:text="@string/method_ap_title"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:enabled="false"
-                android:text="Cette méthode déclenche un point d&apos;acces sans fil sur votre téléphone, et envoie un fichier de congifuration sur votre AR.Drone pour le faire se connecter au point d&apos;accès en question. Verifiez auprès de votre opérateur que cela n&apos;engendrera pas de surcout." />
+                android:text="@string/method_ap_description" />
             
         </LinearLayout>
 	
@@ -62,6 +62,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="Suivant" />
+        android:drawableRight="@drawable/icon_arrow_next"
+        android:minWidth="130dp"
+        android:text="@string/button_next" />
 
 </RelativeLayout>

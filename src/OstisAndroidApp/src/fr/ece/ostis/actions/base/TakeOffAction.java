@@ -40,6 +40,7 @@ public class TakeOffAction extends BaseAction {
         drone.trim();
         drone.waitForReady(5000);
 		drone.takeOff();
+		drone.hover();
 		
 	}
 
