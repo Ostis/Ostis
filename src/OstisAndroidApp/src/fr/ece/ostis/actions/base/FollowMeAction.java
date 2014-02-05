@@ -30,9 +30,14 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 
 	
 	protected AtomicBoolean mIsNewBitmapAvailable;
+	protected AtomicBoolean mIs;
 	protected Bitmap mBitmap;
 	protected IplImage mBGR565Image;
 	protected final Object mBitmapLock = new Object();
+	
+	protected ARDrone mDrone;
+	protected OstisService mOstisService;
+	//protected final Thread 
 	
 	
 	/**
@@ -55,6 +60,9 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 	@Override
 	public void run(ARDrone drone, OstisService ostisService) throws IOException{
 		
+		mDrone = drone;
+		mOstisService = ostisService;
+		
 		// Ensure drone reference has been set
 		if(drone == null) throw new NullPointerException("Drone reference has not been passed properly.");
 		if(ostisService == null) throw new NullPointerException("OstisService reference has not been passed properly.");
@@ -64,14 +72,23 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		// Register as image listener
 		drone.addImageListener(this);
 		
+		final DroneVideoListener dvl = this;
 		// TODO
-		(new Follower(drone, ostisService, this)).execute();
+		//(new Follower(drone, ostisService, this)).execute();
+		
+		new Thread(
+			new Runnable() { 
+				public void run() {
+					follow(mDrone, mOstisService, dvl); 
+				}
+			}).start();
 		
 	}
 
 	
 	@Override
 	public void frameReceived(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize){
+		Log.d("BitmapCreator", "New frame received");
 		(new BitmapCreator(startX, startY, w, h, rgbArray, offset, scansize)).execute(); 
 	}
 	
@@ -98,30 +115,95 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		
 		@Override
 		protected Void doInBackground(Void... params){
+			Log.d("BitmapCreator", "Doing work...");
 			b = Bitmap.createBitmap(rgbArray, offset, scansize, w, h, Bitmap.Config.RGB_565);
 			b.setDensity(100);
+			Log.d("BitmapCreator", "Work finished !");
 			return null;
 		}
 		
 		
 		@Override
 		protected void onPostExecute(Void param){
+			Log.d("BitmapCreator", "Entering onPostExecute");
 			synchronized(mBitmapLock) {
+				Log.d("BitmapCreator", "Into Lock");
 				if(mBitmap != null) mBitmap.recycle();
 				mBitmap = b;
-				mIsNewBitmapAvailable.set(true);
 			}
+			mIsNewBitmapAvailable.set(true);
 			Log.d("FollowMeAction", "New Bitmap generated !");
 		}
 		
 	}
 	
+	protected final float yawTrackingP = 0.75f;
+	protected final float pitchTrackingP = 0.42f;
+	protected final float pitchTrackingI = 0.0011f;
+	protected float pitchE = 0;
+	
+	protected void follow(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener){
+		while(ostisService.getFollowingActivated()) {
+			
+			if (mIsNewBitmapAvailable.get()) {
+				Log.d("FollowMeAction", "Analizing image");
+				followTag(drone);
+			} else {
+				Log.d("FollowMeAction", "No new image : don't move !");
+				try {
+					try {
+						drone.move(0, 0, 0, 0);
+						// TODO Add mDrone.hover ?
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Thread.sleep(30);
+				}catch(InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+			
+		}
+		drone.removeImageListener(droneVideoListener);
+	}
+	
+	protected void followTag(ARDrone drone) {
+		
+		synchronized (mBitmapLock) {
+			Log.d("Follower", "Into Lock");
+			if (mBitmap == null) return;
+			mBitmap.copyPixelsToBuffer(mBGR565Image.getByteBuffer());
+		}
+		mIsNewBitmapAvailable.set(false);
+		PointF tagPosition = Tracker.getTagPosition(mBGR565Image);
+		
+		float yawMove = 0;
+		float pitchMove = 0;
+		
+		if(tagPosition.x > -4){
+			Log.d("FollowMeAction", "Tag detected !! Position: " + tagPosition.toString());
+			yawMove = yawTrackingP * tagPosition.x;
+			
+			pitchE = pitchE + tagPosition.y;
+			pitchMove = (pitchTrackingP * tagPosition.y )  + (pitchTrackingI * pitchE);
+		}
+		
+		try {
+			Log.d("FollowMeAction", "Moving !");
+			drone.move(0, pitchMove, 0, yawMove);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * TODO
 	 * @author Paul Bouillon
 	 * @version 2014-02-04
 	 */
+	/*
 	protected class Follower extends AsyncTask<Void, Void, Void> {
 		
 		protected ARDrone mDrone;
@@ -134,12 +216,7 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		protected float pitchE = 0;
 		
 		
-		/**
-		 * TODO
-		 * @param drone
-		 * @param ostisService
-		 * @param droneVideoListener
-		 */
+
 		public Follower(ARDrone drone, OstisService ostisService, DroneVideoListener droneVideoListener){
 			mDrone = drone;
 			mOstisService = ostisService;
@@ -175,16 +252,16 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 		}
 		
 		
-		/**
-		 * TODO
-		 */
+		
+		
 		protected void followTag() {
 			
 			synchronized (mBitmapLock) {
+				Log.d("Follower", "Into Lock");
 				if (mBitmap == null) return;
 				mBitmap.copyPixelsToBuffer(mBGR565Image.getByteBuffer());
-				mIsNewBitmapAvailable.set(false);
 			}
+			mIsNewBitmapAvailable.set(false);
 			PointF tagPosition = Tracker.getTagPosition(mBGR565Image);
 			
 			float yawMove = 0;
@@ -213,5 +290,5 @@ public class FollowMeAction extends BaseAction implements DroneVideoListener{
 			Log.d("FollowMeAction", "Stopping following action");
 		}
 		
-	}
+	}*/
 }

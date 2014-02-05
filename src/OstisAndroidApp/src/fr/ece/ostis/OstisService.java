@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.codeminders.ardrone.ARDrone;
 import com.codeminders.ardrone.ARDrone.State;
+import com.codeminders.ardrone.DroneVideoListener;
 import com.codeminders.ardrone.NavData;
 import com.codeminders.ardrone.NavDataListener;
 
@@ -25,8 +26,10 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -38,7 +41,7 @@ import android.util.Log;
  * @author Nicolas Schurando
  * @version 2014-02-03
  */
-public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener{
+public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener, DroneVideoListener{
 	
 	
 	/*
@@ -61,8 +64,9 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
     protected final IBinder mBinder = new OstisServiceBinder();
     
     
-    /** Service clients. */
-    protected ArrayList<OnDroneStatusChangedListener> mDroneStatusChangedListeners = new ArrayList<OnDroneStatusChangedListener>();
+    /* Service clients. */
+    protected ArrayList<DroneStatusChangedListener> mDroneStatusChangedListeners = new ArrayList<DroneStatusChangedListener>();
+    protected ArrayList<DroneFrameReceivedListener> mDroneFrameReceivedListeners = new ArrayList<DroneFrameReceivedListener>();
     
     
 	/** Reference to the javadrone api */
@@ -125,6 +129,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	/** Stores the last navdata. */
 	protected NavData mLastNavData = null;
+	
+	
+	/** Monitoring thread. */
+	protected Thread mThread = null;
 	
 	
 	@Override
@@ -404,12 +412,19 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			return false;
 		}
 
-		protected void onPostExecute(Boolean success){
-			if(success.booleanValue()){
-				onDroneConnected();
-			}else{
-				onDroneConnectionFailed();
-			}
+		protected void onPostExecute(final Boolean success){
+			/*Handler mainHandler = new Handler(OstisService.this.getMainLooper());
+			Runnable myRunnable = new Runnable(){
+				@Override
+				public void run(){*/
+					if(success.booleanValue()){
+						onDroneConnected();
+					}else{
+						onDroneConnectionFailed();
+					}
+				/*}
+			};
+			mainHandler.post(myRunnable);*/
 		}
 	}
 	
@@ -418,6 +433,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * TODO
 	 * @param ip
 	 * @throws Exception 
+	 * @deprecated Should may be replaced by async connection
 	 */
 	public void doDroneConnectSynchronous(String ip) throws Exception{
 		
@@ -432,7 +448,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			mDrone.playLED(1, 10, 4);
 			mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
 			mDrone.setCombinedYawMode(true);
+			
 			mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
+			
+			onDroneConnected();
 		}catch(Exception e){
 			Log.e(mTag, "Failed to connect to drone.", e);
 			mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
@@ -446,6 +465,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			}catch(Exception e2){
 				Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
 			}
+			
+			onDroneConnectionFailed();
 
 			throw new Exception("Connection to drone failed.");
 		}
@@ -472,7 +493,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Log
 		Log.i(mTag, "Disconnecting from drone.");
 		
+		// Prevent null pointer
 		if(mDrone == null) return;
+		
+		// Unregister callbacks
+		mDrone.removeImageListener(this);
+		mDrone.removeNavDataListener(this);
+		
+		// Try to clear drone state
 		try{
 			mDrone.clearEmergencySignal();
 			mDrone.clearImageListeners();
@@ -481,17 +509,22 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		}catch(Exception e){
 			Log.w(mTag, "Failed to clear drone state.", e);
 		}
+		
+		// Try to disconnect
 		try{
 			mDrone.disconnect();
 		}catch(Exception e){
 			Log.w("OstisService", "Failed to disconnect drone.", e);
 		}
 		
+		// Reset flag
 		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		
+		// Log
 		Log.i(mTag, "Disconnected from drone.");
 		
 		// Warn clients
-		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
 			if(callback != null) callback.onDroneDisconnected();
 			else Log.w(mTag, "Drone status changed listener is null.");
 		}
@@ -509,11 +542,44 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Update local variable
 		mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
 		
+		// Register callbacks
+		mDrone.addImageListener(this);
+		mDrone.addNavDataListener(this);
+		
 		// Warn clients
-		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
 			if(callback != null) callback.onDroneConnected();
 			else Log.w(mTag, "Drone status changed listener is null.");
 		}
+		
+		// Start pinger thread
+		mThread = new Thread(new Runnable(){
+			
+			protected boolean mPreviouslyOk = false;
+			
+			@Override
+			public void run(){
+				while(true){
+					if(mDrone != null){
+						Log.d(mTag, "Pinger thread reports drone status = " + mDrone.getState());
+						/*if(mPreviouslyOk && mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
+							Log.d(mTag, "Pinger thread reports drone disconnected or error.");
+							onDroneDisconnected();
+							return;
+						}else if(mDrone.getState() == State.*/
+					}else{
+						Log.d(mTag, "Pinger thread reports drone is null");
+					}
+					try {
+						Thread.sleep(1000);
+					}catch (InterruptedException e){
+						e.printStackTrace();
+						return;
+					}
+				}
+			}
+		});
+		mThread.start();
 		
 	}
 	
@@ -530,8 +596,28 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
 		
 		// Warn clients
-		for(OnDroneStatusChangedListener callback: mDroneStatusChangedListeners){
+		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
 			if(callback != null) callback.onDroneConnectionFailed();
+			else Log.w(mTag, "Drone status changed listener is null.");
+		}
+		
+	}
+	
+	
+	/**
+	 * TODO
+	 */
+	protected void onDroneDisconnected(){
+		
+		// Log
+		Log.w(mTag, "Disconnected from drone.");
+		
+		// Update local variable
+		mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
+		
+		// Warn clients
+		for(DroneStatusChangedListener callback: mDroneStatusChangedListeners){
+			if(callback != null) callback.onDroneDisconnected();
 			else Log.w(mTag, "Drone status changed listener is null.");
 		}
 		
@@ -565,7 +651,25 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * TODO
 	 * @param listener
 	 */
-	public void registerDroneStatusChangedListener(OnDroneStatusChangedListener listener){
+	public void registerFrameReceivedListener(DroneFrameReceivedListener listener){
+		mDroneFrameReceivedListeners.add(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void unregisterFrameReceivedListener(DroneFrameReceivedListener listener){
+		mDroneFrameReceivedListeners.remove(listener);
+	}
+	
+	
+	/**
+	 * TODO
+	 * @param listener
+	 */
+	public void registerStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.add(listener);
 	}
 	
@@ -574,7 +678,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	 * TODO
 	 * @param listener
 	 */
-	public void unregisterDroneStatusChangedListener(OnDroneStatusChangedListener listener){
+	public void unregisterStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.remove(listener);
 	}
 
@@ -627,9 +731,9 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 						actionMatched.run(mDrone, this);
 					}catch(Exception e){
 						Log.e(mTag, "Could not run matched action", e);
-						// TODO Auto-generated catch block
 					}finally{
-						if(mDrone.getState() == State.DISCONNECTED){
+						Log.d(mTag, "Drone state is " + mDrone.getState());
+						if(mDrone.getState() == State.DISCONNECTED || mDrone.getState() == State.ERROR){
 							doDroneDisconnect();
 						}
 					}
@@ -750,8 +854,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		else if(mNotificationShown) hideNotification();
 		
 		// Obtain / Release wakelock according to is flying
-		if(!mWakeLock.isHeld() && nd.isFlying()) acquireWakeLock();
-		else if(!nd.isFlying() && !mWakeLock.isHeld()) releaseWakeLock();
+		if((mWakeLock == null || !mWakeLock.isHeld()) && nd.isFlying()) acquireWakeLock();
+		else if(!nd.isFlying() && (mWakeLock != null && mWakeLock.isHeld())) releaseWakeLock();
 		
 		// TODO Monitor the battery
 		// ...
@@ -772,6 +876,57 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	@Override
 	public void onEndOfSpeech() {
 		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void frameReceived(int startX, int startY, int w, int h, int[] rgbArray, int offset, int scansize){
+		(new CameraFrameReceiver(startX, startY, w, h, rgbArray, offset, scansize)).execute();
+	}
+	
+	
+	/**
+	 * TODO
+	 * @author Nicolas Schurando
+	 * @version 2014-02-05
+	 */
+	protected class CameraFrameReceiver extends AsyncTask<Void, Integer, Void>{
+		
+		public Bitmap b;
+		public int[]rgbArray;
+		public int offset;
+		public int scansize;
+		public int w;
+		public int h;
+
+		
+		public CameraFrameReceiver(int x, int y, int width, int height, int[] arr, int off, int scan){
+			super();
+			rgbArray = arr;
+			offset = off;
+			scansize = scan;
+			w = width;
+			h = height;
+		}
+		
+		
+		@Override
+		protected Void doInBackground(Void... params){
+			b = Bitmap.createBitmap(rgbArray, offset, scansize, w, h, Bitmap.Config.RGB_565);
+			b.setDensity(100);
+			return null;
+		}
+		
+		
+		@Override
+		protected void onPostExecute(Void param){			
+			// Warn clients
+			for(DroneFrameReceivedListener callback: mDroneFrameReceivedListeners){
+				if(callback != null) callback.onDroneFrameReceived(b);
+				else Log.w(mTag, "Drone frame received listener is null.");
+			}
+		}
 		
 	}
     
