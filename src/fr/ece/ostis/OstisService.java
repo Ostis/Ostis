@@ -106,23 +106,23 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected boolean mNotificationShown = false;
 	
 
-	/** The selected method network. */
+	/** Stores the selected method network. */
 	protected int mNetworkMethod = NETWORK_METHOD_UNKNOWN;
 	
 	
-	/** Reference to the wakelock system. */
+	/** Reference to the wakelock. */
 	protected WakeLock mWakeLock = null;
 	
 	
-	/** Service notification id. */
+	/** Drone-is-flying notification id. */
 	protected static final int mNotificationId = 123456;
 	
 	
-	/** TODO */
+	/** The name of the access point that will be created in the ap method. */
 	public static final String mAccessPointName = "OstisAP";
 	
 	
-	/** TODO */
+	/** The channel for the access point, might not work on most of devices. */
 	public static final int mAccessPointChannel = 9;
 	
 	
@@ -134,11 +134,11 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected NavData mLastNavData = null;
 	
 	
-	/** Monitoring thread. */
+	/** Reference to the monitoring thread. */
 	protected Thread mThread = null;
 	
 	
-	/** Drone ip. */
+	/** Store the drone ip. */
 	protected String mDroneIp = null;
 	
 	
@@ -176,8 +176,10 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// Dismiss notification if displayed
 		if(mNotificationShown) hideNotification();
 		
-		// Restore network
-		/*restoreNetwork();*/
+		// Perform network cleanup just in case
+		mWifiNetworkManager.releaseWifiLock();
+		try{ mWifiAPNetworkManager.disableWifiApSynchronous(); }
+		catch(Exception e){ Log.w(mTag, "Failed to cleanup access point at service destroy.", e); }
 		
 		// Release wakelock if held
 		if(mWakeLock.isHeld()) releaseWakeLock();
@@ -195,7 +197,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 
 	
 	/**
-	 * TODO
+	 * Shows the drone-is-flying notification.
 	 */
 	protected void showNotification(){
 		
@@ -222,7 +224,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Hides the drone-is-flying notification.
 	 */
 	protected void hideNotification(){
 		
@@ -254,7 +256,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * AsynTask used to establish connection to the drone.
 	 * @author Nicolas Schurando
 	 * @version 2014-02-05
 	 */
@@ -267,9 +269,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		
 		@Override
 		protected Boolean doInBackground(String... ips){
-			
 			String droneIp = ips[0];
-			
 			try{
 				mDroneIp = droneIp;
 				mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
@@ -282,48 +282,36 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 				OstisService.mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
 				OstisService.mDrone.setCombinedYawMode(true);
 				return true;
-				
 			}catch(Exception e){
 				Log.e(mTag, "Failed to connect to drone.", e);
-				
 				try{
-					
 					OstisService.mDrone.clearImageListeners();
 					OstisService.mDrone.clearNavDataListeners();
 					OstisService.mDrone.clearStatusChangeListeners();
 					OstisService.mDrone.clearEmergencySignal();
 					OstisService.mDrone.disconnect();
 					OstisService.mDrone = null;
-					
 				}catch(Exception e2){
 					Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
 				}
-	
 			}
-			
 			return false;
 		}
 
 		protected void onPostExecute(final Boolean success){
-			if(success.booleanValue()){
-				onDroneConnected();
-			}else{
-				onDroneConnectionFailed();
-			}
+			if(success.booleanValue()) onDroneConnected();
+			else onDroneConnectionFailed();
 		}
 	}
 	
 	
 	/**
-	 * TODO
+	 * Connects to the drone synchronously, but still performs callbacks to warn clients.
 	 * @param ip
 	 * @throws Exception 
-	 * @deprecated Should may be replaced by async connection
 	 */
 	public void doDroneConnectSynchronous(String ip) throws Exception{
-		
 		mDroneConnectionStatus = DRONE_STATUS_CONNECTING;
-		
 		try{
 			mDrone = new ARDrone(InetAddress.getByName(ip), 10000, 60000);
 			mDrone.connect();
@@ -333,15 +321,12 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			mDrone.playLED(1, 10, 4);
 			mDrone.selectVideoChannel(ARDrone.VideoChannel.HORIZONTAL_ONLY);
 			mDrone.setCombinedYawMode(true);
-			
 			mDroneIp = ip;
 			mDroneConnectionStatus = DRONE_STATUS_CONNECTED;
-			
 			onDroneConnected();
 		}catch(Exception e){
 			Log.e(mTag, "Failed to connect to drone.", e);
 			mDroneConnectionStatus = DRONE_STATUS_DISCONNECTED;
-			
 			try{
 				mDrone.clearNavDataListeners();
 				mDrone.clearStatusChangeListeners();
@@ -352,18 +337,14 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			}catch(Exception e2){
 				Log.w(mTag, "Failed to clear drone state after connection failed.", e2);
 			}
-			
 			onDroneConnectionFailed();
-
 			throw new Exception("Connection to drone failed.");
 		}
-		
 	}
 	
 	
 	/**
-	 * TODO
-	 * @deprecated Task should be executed from outside the service.
+	 * Connects to the drone asynchronously by launching the DroneConnectionTask which will perform callbacks to warn clients.
 	 */
 	public void doDroneConnectAsynchronous(String ip){
 		Log.i(mTag, "Connecting to drone.");
@@ -373,7 +354,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Disconnects from the drone and performs callbacks to warn clients.
 	 */
 	public void doDroneDisconnect(){
 		
@@ -402,7 +383,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 			mDrone.disconnect();
 			mDrone = null;
 		}catch(Exception e){
-			Log.w("OstisService", "Failed to disconnect drone.", e);
+			Log.w("OstisService", "Failed to disconnect from drone.", e);
 		}
 		
 		// Reset flag
@@ -420,7 +401,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Called when connected to the drone, in order to set the flags, and warn clients.
 	 */
 	protected void onDroneConnected(){
 		
@@ -510,7 +491,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Called when the connection to the drone failed. Warns the clients.
 	 */
 	protected void onDroneConnectionFailed(){
 		
@@ -531,7 +512,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Called when disconnected from the drone.
 	 */
 	protected void onDroneDisconnected(){
 		
@@ -555,10 +536,11 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @throws Exception 
+	 * Executes commands on the drone via telnet to make it connect to a specified access point.
+	 * TODO Change the network values according to the hotspot settings on the phone.
+	 * @throws Exception when the command failed to be pushed to the drone.
 	 */
-	public void pushDroneApConfiguration(String ip) throws Exception{
+	public void pushDroneApConfiguration() throws Exception{
 		
 		// TODO Ensure that wifi or wifiap is activated and connected
 		// ...
@@ -567,7 +549,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 		// ...
 		
 		// Push conig to the drone
-		if(TelnetManager.executeRemotely(ip, 23,
+		if(TelnetManager.executeRemotely(mDroneIp, 23,
 				"iwconfig ath0 mode managed essid " + mAccessPointName + "\n" +
 				"ifconfig ath0 192.168.1.11 netmask 255.255.255.0 up" + "\n" +
 				"route add default gw 192.168.1.1" + "\n") != true){
@@ -578,8 +560,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Registers a frame-received listener.
+	 * @param listener An instance of a class implementing DroneFrameReceivedListener. 
 	 */
 	public void registerFrameReceivedListener(DroneFrameReceivedListener listener){
 		mDroneFrameReceivedListeners.add(listener);
@@ -587,8 +569,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Unregisters a frame-received listener.
+	 * @param listener An instance of a class implementing DroneFrameReceivedListener. 
 	 */
 	public void unregisterFrameReceivedListener(DroneFrameReceivedListener listener){
 		mDroneFrameReceivedListeners.remove(listener);
@@ -596,8 +578,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Registers a battery-changed listener.
+	 * @param listener An instance of a class implementing DroneBatteryChangedListener. 
 	 */
 	public void registerBatteryChangedListener(DroneBatteryChangedListener listener){
 		mDroneBatteryChangedListeners.add(listener);
@@ -605,8 +587,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Unregisters a battery-changed listener.
+	 * @param listener An instance of a class implementing DroneBatteryChangedListener. 
 	 */
 	public void unregisterBatteryChangedListener(DroneBatteryChangedListener listener){
 		mDroneBatteryChangedListeners.remove(listener);
@@ -614,8 +596,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Registers a drone-status-changed listener.
+	 * @param listener An instance of a class implementing DroneStatusChangedListener. 
 	 */
 	public void registerStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.add(listener);
@@ -623,8 +605,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Unregisters a drone-status-changed listener.
+	 * @param listener An instance of a class implementing DroneStatusChangedListener. 
 	 */
 	public void unregisterStatusChangedListener(DroneStatusChangedListener listener){
 		mDroneStatusChangedListeners.remove(listener);
@@ -632,8 +614,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Registers a action-executed listener.
+	 * @param listener An instance of a class implementing ActionExecutedListener. 
 	 */
 	public void registerActionExecutedListener(ActionExecutedListener listener){
 		mActionExecutedListeners.add(listener);
@@ -641,8 +623,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
-	 * @param listener
+	 * Unregisters a action-executed listener.
+	 * @param listener An instance of a class implementing ActionExecutedListener. 
 	 */
 	public void unregisterActionExecutedListener(ActionExecutedListener listener){
 		mActionExecutedListeners.remove(listener);
@@ -650,7 +632,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 
 	
 	/**
-	 * TODO
+	 * Registers the service as a speech-results listener.
 	 */
 	public void activateSpeechResultsToActionMatching(){
 		mSpeechRecognitionManager.registerCallback(this);
@@ -658,7 +640,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Unregisters the service as a speech-results listener.
 	 */
 	public void desactivateSpeechResultsToActionMatching(){
 		mSpeechRecognitionManager.unregisterCallback(this);
@@ -716,7 +698,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/**
-	 * TODO
+	 * Provides t
 	 * @return
 	 */
 	public SpeechRecognitionManager getSpeechRecognitionManager(){
