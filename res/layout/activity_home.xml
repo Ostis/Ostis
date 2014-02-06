@@ -26,7 +26,7 @@
                 android:layout_margin="5dp"
                 android:drawableLeft="@drawable/ic_home_plane"
                 android:enabled="false"
-                android:text="Pilotage" />
+                android:text="@string/home_menu_fly" />
 
             <Button
                 android:id="@+id/buttonGallery"
@@ -35,7 +35,7 @@
                 android:layout_margin="5dp"
                 android:drawableLeft="@drawable/ic_home_polaroid"
                 android:enabled="false"
-                android:text="Médias" />
+                android:text="@string/home_menu_medias" />
             
         </LinearLayout>
 
@@ -50,7 +50,7 @@
                 android:layout_margin="5dp"
                 android:drawableLeft="@drawable/ic_home_microphone"
                 android:enabled="false"
-                android:text="Config" />
+                android:text="@string/home_menu_commands" />
 
             <Button
                 android:id="@+id/buttonAbout"
@@ -59,7 +59,7 @@
                 android:layout_margin="5dp"
                 android:drawableLeft="@drawable/ic_home_about"
                 android:enabled="false"
-                android:text="A propos" />
+                android:text="@string/home_menu_about" />
             
         </LinearLayout>
         

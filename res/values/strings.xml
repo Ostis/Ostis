@@ -21,7 +21,7 @@
     <string name="title_activity_home">Home</string>
     <string name="home_menu_fly">Fly</string>
     <string name="home_menu_medias">Gallery</string>
-    <string name="home_menu_commands">Commands</string>
+    <string name="home_menu_commands">Actions</string>
     <string name="home_menu_about">About</string>
     
     <!-- Network wizard activity -->
