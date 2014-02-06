@@ -12,14 +12,12 @@ Needed :
 - AR.Drone
 - Android Smartphone (at least 4.0 version)
 
-First, download the OSTIS App on the Google Play Store
-
-Install it on your Smartphone
+First, download the OSTIS App on the Google Play Store and install it on your Smartphone.
 
 Then, the app will ask you to connect the smartphone to the drone by Wifi.
-Once the connection is done, the app will show you all the commands pre-recorded that you can use.
+Once the connection is done, the app will show you all the commands pre-recorded you can use.
 
-Finally you can ask the AR.Drone to do every loaded command.
+OSTIS is ready, you can now use this app to control your AR.Drone.
 
 Detailed installation instructions are yet to come in the wiki.
 
