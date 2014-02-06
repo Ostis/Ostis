@@ -23,7 +23,6 @@ public class ComposedAction extends Action{
 	
 	/**
 	 * TODO
-	 * @param actions
 	 */
 	public ComposedAction(){
 		super(generateId());
@@ -34,9 +33,6 @@ public class ComposedAction extends Action{
 	/**
 	 * TODO Docu
 	 * @param id
-	 * @param name
-	 * @param vocalCommands
-	 * @param actions
 	 */
 	public ComposedAction(String id){
 		super(id);

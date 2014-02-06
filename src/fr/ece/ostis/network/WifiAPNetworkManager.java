@@ -106,7 +106,7 @@ public class WifiAPNetworkManager extends NetworkManager{
 	
 	/**
 	 * Enables or disables the wifi access point.
-	 * @param true or false
+	 * @param enabled true to enable the accesspoint or false to disable it.
 	 * @return WifiAP state
 	 * @throws TimeoutException 
 	 */

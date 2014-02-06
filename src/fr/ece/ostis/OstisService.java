@@ -38,9 +38,9 @@ import android.util.Log;
 
 
 /**
- * TODO
+ * The android service that is the heart of the project. It connects to the drone, and instantiates the various managers.
  * @author Nicolas Schurando
- * @version 2014-02-05
+ * @version 2014-02-06
  */
 public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener, DroneVideoListener{
 	
@@ -52,9 +52,9 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	public static final int DRONE_STATUS_CONNECTING = 0;		// Drone status
 	public static final int DRONE_STATUS_DISCONNECTED = 1;		// Drone status
 	public static final int DRONE_STATUS_CONNECTED = 2;			// Drone status
-	public static final int NETWORK_METHOD_UNKNOWN = 0;			// Drone status
-	public static final int NETWORK_METHOD_AP = 1;				// Drone status
-	public static final int NETWORK_METHOD_HIPRI = 2;			// Drone status
+	public static final int NETWORK_METHOD_UNKNOWN = 0;			// Network method unknown
+	public static final int NETWORK_METHOD_AP = 1;				// Network method access point
+	public static final int NETWORK_METHOD_HIPRI = 2;			// Network method high priority
 	
 	
     /** Log tag. */

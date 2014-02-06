@@ -21,11 +21,11 @@ public class DesactivateTrackingAction extends BaseAction {
 	 */
 	public DesactivateTrackingAction(String id) {
 		super("DesactivateTracking");
-		mNameTable.put(Locale.FRENCH, "Arrêt du suivi");
+		mNameTable.put(Locale.FRENCH, "ArrÃªt du suivi");
 		mNameTable.put(Locale.ENGLISH, "Desactivate tracking");
-		mVocalCommandTable.put(Locale.FRENCH, "arrêt suivi");
+		mVocalCommandTable.put(Locale.FRENCH, "arrÃªt suivi");
 		mVocalCommandTable.put(Locale.ENGLISH, "desactivate tracking");
-		mDescriptionTable.put(Locale.FRENCH, "Ordonne au drone d'arrêter de suivre l'utilisateur.");
+		mDescriptionTable.put(Locale.FRENCH, "Ordonne au drone d'arrÃªter de suivre l'utilisateur.");
 		mDescriptionTable.put(Locale.ENGLISH, "Ask the drone to stop tracking the user.");
 	}
 
