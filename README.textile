@@ -21,3 +21,6 @@ OSTIS is ready, you can now use this app to control your AR.Drone.
 
 Detailed installation instructions are yet to come in the wiki.
 
+http://image.noelshack.com/fichiers/2014/06/1391707428-device-2014-02-05-224911.png
+![](http://www.casimages.com/img.php?i=140206060704195928.png)
+
