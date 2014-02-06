@@ -13,18 +13,18 @@ import fr.ece.ostis.actions.BaseAction;
  * @author Paul Bouillon
  * @version 2014-02-05
  */
-public class DesactivateTrackingAction extends BaseAction {
+public class LeaveMeAction extends BaseAction {
 	
 	/**
 	 * TODO
-	 * @param id
+	 * 
 	 */
-	public DesactivateTrackingAction(String id) {
+	public LeaveMeAction() {
 		super("DesactivateTracking");
 		mNameTable.put(Locale.FRENCH, "Arrêt du suivi");
 		mNameTable.put(Locale.ENGLISH, "Desactivate tracking");
-		mVocalCommandTable.put(Locale.FRENCH, "arrêt suivi");
-		mVocalCommandTable.put(Locale.ENGLISH, "desactivate tracking");
+		mVocalCommandTable.put(Locale.FRENCH, "lache moi");
+		mVocalCommandTable.put(Locale.ENGLISH, "leave me");
 		mDescriptionTable.put(Locale.FRENCH, "Ordonne au drone d'arrêter de suivre l'utilisateur.");
 		mDescriptionTable.put(Locale.ENGLISH, "Ask the drone to stop tracking the user.");
 	}

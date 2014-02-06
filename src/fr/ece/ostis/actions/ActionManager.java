@@ -16,9 +16,11 @@ import android.util.Log;
 import fr.ece.ostis.actions.base.EmergencyAction;
 import fr.ece.ostis.actions.base.FollowMeAction;
 import fr.ece.ostis.actions.base.LandAction;
+import fr.ece.ostis.actions.base.LeaveMeAction;
 import fr.ece.ostis.actions.base.MoveForwardAction;
-import fr.ece.ostis.actions.base.MoveLeftAction;
+import fr.ece.ostis.actions.base.TurnLeftAction;
 import fr.ece.ostis.actions.base.TakeOffAction;
+import fr.ece.ostis.actions.base.TurnRightAction;
 import fr.ece.ostis.speech.SpeechComparator;
 
 
@@ -77,13 +79,16 @@ public class ActionManager{
 		mBaseActionTable.put(landAction.getId(), landAction);
 		BaseAction emergencyAction = new EmergencyAction();
 		mBaseActionTable.put(emergencyAction.getId(), emergencyAction);
-		BaseAction moveLeftAction = new MoveLeftAction();
-		mBaseActionTable.put(moveLeftAction.getId(), moveLeftAction);
+		BaseAction turnLeftAction = new TurnLeftAction();
+		mBaseActionTable.put(turnLeftAction.getId(), turnLeftAction);
+		BaseAction turnRightAction = new TurnRightAction();
+		mBaseActionTable.put(turnRightAction.getId(), turnRightAction);
 		BaseAction moveForwardAction = new MoveForwardAction();
 		mBaseActionTable.put(moveForwardAction.getId(), moveForwardAction);
 		BaseAction followMeAction = new FollowMeAction();
 		mBaseActionTable.put(followMeAction.getId(), followMeAction);
-		
+		BaseAction leaveMeAction = new LeaveMeAction();
+		mBaseActionTable.put(leaveMeAction.getId(), leaveMeAction);
 	}
 	
 	

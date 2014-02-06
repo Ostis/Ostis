@@ -14,17 +14,17 @@ import fr.ece.ostis.actions.BaseAction;
  * @author Nicolas Schurando
  * @version 2014-02-04
  */
-public class MoveLeftAction extends BaseAction {
+public class TurnLeftAction extends BaseAction {
 
 	
 	/**
 	 * Public constructor which sets the values for this base action.
 	 */
-	public MoveLeftAction(){
-		super("MoveLeft");
+	public TurnLeftAction(){
+		super("TurnLeft");
 		mNameTable.put(Locale.FRENCH, "Tourner à gauche");
 		mNameTable.put(Locale.ENGLISH, "Turn left");
-		mVocalCommandTable.put(Locale.FRENCH, "virage à gauche");
+		mVocalCommandTable.put(Locale.FRENCH, "gauche");
 		mVocalCommandTable.put(Locale.ENGLISH, "turn left");
 		mDescriptionTable.put(Locale.FRENCH, "Fait tourner le drone à gauche.");
 		mDescriptionTable.put(Locale.ENGLISH, "Turns the drone left.");

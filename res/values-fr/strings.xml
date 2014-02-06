@@ -19,10 +19,10 @@
     
     <!-- Home activity -->
     <string name="title_activity_home">Accueil</string>
-    <string name="home_menu_fly">Piloter</string>
+    <string name="home_menu_fly">Pilotage</string>
     <string name="home_menu_medias">Gallerie</string>
-    <string name="home_menu_commands">Commandes</string>
-    <string name="home_menu_about">A propos</string>
+    <string name="home_menu_commands">Actions</string>
+    <string name="home_menu_about">À propos</string>
     
     <!-- Network wizard activity -->
     <string name="title_activity_network_wizard">Connexion au drone</string>
