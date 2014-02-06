@@ -37,7 +37,7 @@ import android.widget.SimpleAdapter;
 /**
  * TODO
  * @author Nicolas Schurando
- * @version 2014-02-05
+ * @version 2014-02-06
  */
 public class NetworkWizardActivity extends ConnectedActivity implements OnWifiScanResultsUpdatedListener, DroneStatusChangedListener{
 
@@ -580,7 +580,7 @@ public class NetworkWizardActivity extends ConnectedActivity implements OnWifiSc
 				retryCounter = 0;
 				while(true){
 					try{
-						mService.pushDroneApConfiguration("192.168.1.1");
+						mService.pushDroneApConfiguration();
 						break;
 					}catch(Exception e2){
 						Log.w(mTag, "Unable to push configuration to drone.", e2);
