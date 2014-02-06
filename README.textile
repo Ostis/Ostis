@@ -8,4 +8,18 @@ The developpement of this project was scheduled for the month of january 2014. G
 
 h2. Installation
 
+Needed : 
+- Android Smartphone with a least the 4.0 version
+- AR.Drone
+
+Begin by downloading the app on the Google Play Store
+Install it on your Android Smartphone
+
+The OSTIS App will ask you to connect your Smartphone to the AR.Drone.
+The app will show you pre-recorded commands you can ask OSTIS.
+
+Once the connection is done, you can speak to your Smartphone by the micro device and the drone will execute the task.
+
 Detailed installation instructions are yet to come in the wiki.
+
+
