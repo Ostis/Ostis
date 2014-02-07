@@ -138,7 +138,7 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 	 * TODO
 	 */
 	protected final float yawTrackingP = 1f;
-	protected final float pitchTrackingP = -0.082f;
+	protected final float pitchTrackingP = -0.15f;//82f;
 	protected long time = -1;
 	
 	
@@ -160,7 +160,7 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 						mDrone.move(0, 0, 0, 0);
 						// TODO Add mDrone.hover ?
 					}catch(IOException e){}
-				}else if(System.currentTimeMillis() - time > 200){
+				}else if(System.currentTimeMillis() - time > 300){
 					time = -1;
 					try{
 						mDrone.hover();
@@ -195,7 +195,7 @@ public class FollowMeAction extends BaseAction implements DroneFrameReceivedList
 			Log.d(mTag, "Tag detected !! Position: " + tagPosition.toString());
 			yawMove = yawTrackingP * tagPosition.x;
 			
-			if (tagPosition.y > -0.3f)
+			//if (tagPosition.y > -0.3f)
 				pitchMove = pitchTrackingP;
 			
 			try {
