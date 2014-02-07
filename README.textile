@@ -6,19 +6,12 @@ h2. Introduction
 
 The developpement of this project was scheduled for the month of january 2014. Given the short timeframe, project goals and details have been established before. The end-result will be an android application, able to perform speech recognition to identify orders that will be passed as basic actions to the "AR.Drone":http://ardrone2.parrot.com/.
 
-h2. Installation
+h2. Using the project
 
-Needed :
-- AR.Drone
-- Android Smartphone (at least 4.0 version)
+Clone the project on your computer. Since we have moved from using the native Parrot API to using the "JavaDrone API":https://code.google.com/p/javadrone/ you can developp from any operating system. The suggested developping setup consists of "Eclipse Standard":https://www.eclipse.org/ with the "ADT plugin":http://developer.android.com/tools/ and the "EGit plugin":http://www.eclipse.org/egit/. You will then be able to make any modifications you want to the project, and deploy a customized apk to your Android device.
 
-First, download the OSTIS App on the Google Play Store and install it on your Smartphone.
+h2. Trying the application
 
-Then, the app will ask you to connect the smartphone to the drone by Wifi.
-Once the connection is done, the app will show you all the commands pre-recorded you can use.
+You will need a Parrot AR.Drone (version 1 has been proved to work, but version 2 might have some video-related issues according to JavaDrone current developpement) and an An android smartphone (at least 4.0 version). You can either retrieve the latest stable apk from our "releases page":https://github.com/Ostis/Ostis/releases, or from the Google Play store (yet to come).
 
-OSTIS is ready, you can now use this app to control your AR.Drone.
-
-Detailed installation instructions are yet to come in the wiki.
-
-![alt tag](http://image.noelshack.com/fichiers/2014/06/1391707428-device-2014-02-05-224911.png)
+Once launched, the application will try to connect to your drone and the speech recognition servers. Please note that for the high priority method to work, you have yo have the type "hipri" set in your default internet apn.
