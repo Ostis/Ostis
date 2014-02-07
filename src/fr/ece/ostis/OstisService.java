@@ -40,7 +40,7 @@ import android.util.Log;
 /**
  * The android service that is the heart of the project. It connects to the drone, and instantiates the various managers.
  * @author Nicolas Schurando
- * @version 2014-02-06
+ * @version 2014-02-07
  */
 public class OstisService extends Service implements SpeechRecognitionResultsListener, NavDataListener, DroneVideoListener{
 	
@@ -115,7 +115,8 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	
 	
 	/** Drone-is-flying notification id. */
-	protected static final int mNotificationId = 123456;
+	protected static final int mNotificationIsRunningId = 123455;
+	protected static final int mNotificationIsFlyingId = 123456;
 	
 	
 	/** The name of the access point that will be created in the ap method. */
@@ -215,7 +216,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
         notification.setLatestEventInfo(this, getText(R.string.notification_title), tickerText, contentIntent);
 
         // Send the notification.
-        mNotificationManager.notify(mNotificationId, notification);
+        mNotificationManager.notify(mNotificationIsFlyingId, notification);
         
         // Set flag
         mNotificationShown = true;
@@ -229,7 +230,7 @@ public class OstisService extends Service implements SpeechRecognitionResultsLis
 	protected void hideNotification(){
 		
 		// Dismiss notification
-        mNotificationManager.cancel(mNotificationId);
+        mNotificationManager.cancel(mNotificationIsFlyingId);
         
         // Set flag
         mNotificationShown = false;

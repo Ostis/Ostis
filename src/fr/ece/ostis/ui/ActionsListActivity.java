@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import fr.ece.ostis.R;
 import fr.ece.ostis.actions.Action;
 import fr.ece.ostis.actions.ActionManager;
+import fr.ece.ostis.actions.BaseAction;
+import fr.ece.ostis.actions.ComposedAction;
 import fr.ece.ostis.lang.LanguageManager;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +22,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 
 
@@ -53,8 +57,17 @@ public class ActionsListActivity extends ConnectedActivity{
 		mActionListView.setOnItemClickListener(new OnItemClickListener(){
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-				// TODO Auto-generated method stub
-				
+				if(mActionManager.getActions().get(position) instanceof ComposedAction){
+					Intent intent = new Intent(ActionsListActivity.this, ActionActivity.class);
+					Bundle bundle = new Bundle();
+					bundle.putString("What", "Edit");
+					bundle.putString("ActionId", mActionManager.getActions().get(position).getId());
+					startActivity(intent);
+					overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+				}else{
+					Toast toast = Toast.makeText(ActionsListActivity.this, getText(R.string.toast_not_composed_action), Toast.LENGTH_SHORT);
+					toast.show();
+				}
 			}
 		});
 		
@@ -80,14 +93,14 @@ public class ActionsListActivity extends ConnectedActivity{
 	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()){
 			case android.R.id.home:
-				// This ID represents the Home or Up button. In the case of this
-				// activity, the Up button is shown. Use NavUtils to allow users
-				// to navigate up one level in the application structure. For
-				// more details, see the Navigation pattern on Android Design:
-				//
-				// http://developer.android.com/design/patterns/navigation.html#up-vs-back
-				//
 				NavUtils.navigateUpFromSameTask(this);
+				return true;
+			case R.id.menu_action_add:
+				Intent intent = new Intent(ActionsListActivity.this, ActionActivity.class);
+				Bundle bundle = new Bundle();
+				bundle.putString("What", "New");
+				startActivity(intent);
+				overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
 				return true;
 		}
 		return super.onOptionsItemSelected(item);

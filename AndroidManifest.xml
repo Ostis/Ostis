@@ -43,6 +43,7 @@
             android:windowSoftInputMode="stateAlwaysHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -64,8 +65,8 @@
         <activity
             android:name="fr.ece.ostis.ui.FlyActivity"
             android:label="@string/title_activity_fly"
-            android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -79,6 +80,14 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="fr.ece.ostis.ui.HomeActivity" />
+        </activity>
+        <activity
+            android:name="fr.ece.ostis.ui.ActionActivity"
+            android:label="@string/title_activity_action"
+            android:parentActivityName="fr.ece.ostis.ui.ActionsListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="fr.ece.ostis.ui.ActionsListActivity" />
         </activity>
     </application>
 

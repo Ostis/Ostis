@@ -23,7 +23,7 @@
     <string name="home_menu_medias">Gallery</string>
     <string name="home_menu_commands">Actions</string>
     <string name="home_menu_about">About</string>
-    
+
     <!-- Network wizard activity -->
     <string name="title_activity_network_wizard">Connect to drone</string>
     <string name="button_prev">Previous</string>
@@ -37,8 +37,11 @@
 
     <!-- Actions list activity -->
     <string name="title_activity_actions_list">Actions</string>
+    <string name="toast_not_composed_action">The action you are trying to edit is not a composed action. Only composed actions can be edited.</string>
     
     <!-- Fly activity -->
     <string name="title_activity_fly">In flight</string>
+    <string name="title_activity_action">ActionActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

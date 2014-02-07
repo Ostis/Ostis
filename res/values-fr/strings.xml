@@ -37,6 +37,7 @@
     
     <!-- Actions list activity -->
     <string name="title_activity_actions_list">Actions</string>
+    <string name="toast_not_composed_action">L\'action que vous essayez d\'éditer n\'est pas une action composée. Seules les actions composées peuvent être éditées.</string>
     
     <!-- Fly activity -->
     <string name="title_activity_fly">En vol</string>
